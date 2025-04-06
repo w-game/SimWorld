@@ -1,45 +1,239 @@
 using System;
 using System.Collections.Generic;
+using GameItem;
 using Map;
 using UnityEngine;
+using UnityEngine.Tilemaps;
+
+public enum MapLayer
+{
+    Ground,
+    Building,
+}
+
+public enum BuildingType
+{
+    None,
+    House,
+    Farm,
+}
 
 public class MapManager : MonoSingleton<MapManager>
 {
     public Transform player;          // 玩家对象
+    public CartonMap CartonMap { get; private set; } // 地图对象
+    public int seed = 123120;             // 随机种子
+    public Tilemap tilemap;
+
+    public Tilemap layer1;
+    public TileBase tile;
+    public List<TileBase> farmTiles;
+    private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
+    private Dictionary<Vector2Int, GameItemBase> _gameItems = new Dictionary<Vector2Int, GameItemBase>();
+
+    private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
     private void Start()
     {
+        CartonMap = new CartonMap();
+        CartonMap.Init(seed);
+        for (int i = 0; i < 16; i++)
+        {
+            for (int j = 0; j < 16; j++)
+            {
+                var chunk = CartonMap.GetChunk(new Vector2Int(i, j), 0);
+                chunk.CalcBlocks();
+                VisualChunk(chunk);
+                _chunkActive.Add(new Vector2Int(i, j), chunk);
+            }
+        }
 
+        var city = CartonMap.FindNearestCity(new Vector2Int(0, 0));
+        player.transform.position = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
     }
 
     void Update()
     {
-
+        UpdateChunk();
     }
 
-
-    public BlockType CheckClickOnMap(out Vector3 mouseWorldPos)
+    private void UpdateChunk()
     {
-        mouseWorldPos = default;
-        // 将鼠标屏幕坐标转换为世界坐标
-        // mouseWorldPos = UIManager.I.mainCamera.ScreenToWorldPoint(Input.mousePosition);
-        // mouseWorldPos.z = 0;
+        var playerChunkPos = new Vector2Int(
+            Mathf.FloorToInt(player.position.x / CartonMap.NORMAL_CHUNK_SIZE),
+            Mathf.FloorToInt(player.position.y / CartonMap.NORMAL_CHUNK_SIZE)
+        );
 
-        // // 发射射线，注意方向为 Vector2.zero 表示点检测
-        // RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero);
-        // if (hit.collider != null)
-        // {
-        //     Chunk chunk = hit.collider.GetComponent<Chunk>();
-        //     if (chunk != null)
-        //     {
-        //         Vector3Int tilePos = chunk.tilemap.WorldToCell(mouseWorldPos);
-        //         Debug.Log("点击的 Tile 坐标: " + tilePos);
-        //         return chunk.Blocks[new Vector2Int(tilePos.x, tilePos.y)];
-        //     }
-        //     Debug.Log("点击到的对象没有 Tilemap 组件");
-        // }
+        for (int x = 0; x < 6; x++)
+        {
+            for (int y = 0; y < 6; y++)
+            {
+                var pos = playerChunkPos + new Vector2Int(x - 3, y - 3);
+                if (_chunkActive.ContainsKey(pos))
+                {
+                    continue;
+                }
 
-        // return BlockType.Ocean;
-        return BlockType.Ocean;
+                var chunk = CartonMap.GetChunk(pos, 0);
+                if (chunk != null)
+                {
+                    chunk.CalcBlocks();
+                    VisualChunk(chunk);
+                    if (!_chunkActive.ContainsKey(pos))
+                    {
+                        _chunkActive.Add(pos, chunk);
+                    }
+                }
+            }
+        }
+
+        foreach (var chunk in new Dictionary<Vector2Int, Chunk>(_chunkActive))
+        {
+            if (chunk.Value != null)
+            {
+                if (Vector2Int.Distance(chunk.Value.Pos, playerChunkPos) > 8)
+                {
+                    _chunkActive.Remove(chunk.Key);
+                    UnVisualChunk(chunk.Value);
+                }
+            }
+        }
+    }
+
+    private void VisualChunk(Chunk chunk)
+    {
+        for (int i = 0; i < chunk.Size; i++)
+        {
+            for (int j = 0; j < chunk.Size; j++)
+            {
+                var pos = new Vector2Int(i, j);
+                var blockWorldPos = pos + chunk.WorldPos;
+                SetBlockType(blockWorldPos, chunk.Blocks[i, j]);
+            }
+        }
+    }
+
+    private void UnVisualChunk(Chunk chunk)
+    {
+        for (int i = 0; i < chunk.Size; i++)
+        {
+            for (int j = 0; j < chunk.Size; j++)
+            {
+                var pos = new Vector2Int(i, j);
+                var blockWorldPos = pos + chunk.WorldPos;
+                tilemap.SetTile(new Vector3Int(blockWorldPos.x, blockWorldPos.y, 0), null);
+            }
+        }
+    }
+
+    public BlockType CheckBlockType(Vector3 pos)
+    {
+        var blockType = CartonMap.GetBlockType(pos);
+        Debug.Log($"点击的 Tile 坐标: {pos}, 类型: {blockType}");
+
+        return blockType;
+    }
+
+    public BuildingType CheckBuildingType(Vector3 pos)
+    {
+        var cellPos = WorldPosToCellPos(pos);
+        if (_buildings.ContainsKey(cellPos))
+        {
+            return _buildings[cellPos];
+        }
+
+        return BuildingType.None;
+    }
+
+    private void SetBlockType(Vector2Int pos, BlockType type)
+    {
+        tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tile);
+
+        Color plainColor = new Color(0.6f, 1f, 0.6f);
+        Color oceanColor = new Color(0.4f, 0.6f, 1f);
+        Color roomColor = new Color(1f, 0.6f, 0.6f);
+        Color roadColor = new Color(1f, 1f, 0.5f);
+        Color defaultColor = new Color(0.8f, 0.8f, 0.8f);
+
+        switch (type)
+        {
+            case BlockType.Plain:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), plainColor);
+                break;
+            case BlockType.Ocean:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), oceanColor);
+                break;
+            case BlockType.Room:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), roomColor);
+                break;
+            case BlockType.Road:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), roadColor);
+                break;
+            default:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), defaultColor);
+                break;
+        }
+    }
+
+    private TileBase RandomTile(List<TileBase> tile)
+    {
+        var index = UnityEngine.Random.Range(0, tile.Count);
+        return tile[index];
+    }
+
+    public Vector2Int WorldPosToCellPos(Vector3 pos)
+    {
+        return new Vector2Int(Mathf.FloorToInt(pos.x), Mathf.FloorToInt(pos.y));
+    }
+
+    internal void SetMapTile(Vector3 mousePos, BlockType type, MapLayer layer, List<TileBase> tiles = null)
+    {
+        var cellPos = WorldPosToCellPos(mousePos);
+
+        switch (layer)
+        {
+            case MapLayer.Ground:
+                var chunkPos = CartonMap.WorldPosToChunkPos(mousePos);
+                var chunk = CartonMap.GetChunk(chunkPos, 0);
+                chunk.Blocks[chunk.WorldPos.x, chunk.WorldPos.y] = type;
+                SetBlockType(cellPos, type);
+                break;
+            case MapLayer.Building:
+                if (tile != null)
+                {
+                    layer1.SetTile(new Vector3Int(cellPos.x, cellPos.y, 0), RandomTile(tiles));
+                    _buildings.Add(cellPos, BuildingType.Farm);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    internal void RegisterGameItem(Vector2Int pos, GameItemBase gameItem)
+    {
+        _gameItems.Add(pos, gameItem);
+    }
+
+    internal void RemoveGameItem(Vector2Int pos, GameItemBase gameItem)
+    {
+        if (_gameItems.ContainsKey(pos) && _gameItems[pos] == gameItem)
+        {
+            _gameItems.Remove(pos);
+            Destroy(gameItem.gameObject);
+        }
+    }
+
+    internal List<GameItemBase> GetItemsAtPos(Vector3 pos)
+    {
+        var cellPos = WorldPosToCellPos(pos);
+        List<GameItemBase> items = new List<GameItemBase>();
+
+        if (_gameItems.ContainsKey(cellPos))
+        {
+            items.Add(_gameItems[cellPos]);
+        }
+
+        return items;
     }
 }

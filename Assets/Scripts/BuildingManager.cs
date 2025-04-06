@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Map;
 using UnityEngine;
 
 public class BuildingManager : MonoBehaviour
@@ -14,11 +15,24 @@ public class BuildingManager : MonoBehaviour
     private Vector2Int _originPos; // 起始格子坐标
 
     // 检查是否满足建造条件（这里仅作示例，实际可加入判断逻辑）
-    private bool CheckCanBuild()
+    private bool CheckCanBuild(BlockType blockType)
     {
-        return true;
+        // 这里可以添加更多的条件判断
+        if (blockType == BlockType.Plain)
+        {
+            return true;
+        }
+        else if (blockType == BlockType.Ocean)
+        {
+            return false;
+        }
+        else
+        {
+            // 其他类型的判断...
+            return true;
+        }
     }
-    
+
     void Update()
     {
         if (!_isStartBuild)
@@ -27,10 +41,11 @@ public class BuildingManager : MonoBehaviour
         // 鼠标左键按下时，确定起始点并开始建造
         if (Input.GetMouseButtonDown(0))
         {
-            var blockType = MapManager.I.CheckClickOnMap(out var mouseWorldPos);
-            if (CheckCanBuild())
+            var mousePos = UIManager.I.MousePosToWorldPos();
+            var blockType = MapManager.I.CheckBlockType(mousePos);
+            if (CheckCanBuild(blockType))
             {
-                _originPos = mouseWorldPos.ToVector2Int();
+                _originPos = new Vector2Int(Mathf.FloorToInt(mousePos.x), Mathf.FloorToInt(mousePos.y));
                 _isBuilding = true;
             }
         }
@@ -41,7 +56,7 @@ public class BuildingManager : MonoBehaviour
             // 获取当前鼠标在世界中的位置，并转换为格子坐标
             Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorld.z = 0;
-            Vector2Int currentGrid = mouseWorld.ToVector2Int();
+            Vector2Int currentGrid = new Vector2Int(Mathf.FloorToInt(mouseWorld.x), Mathf.FloorToInt(mouseWorld.y));
 
             // 锁定移动方向：比较水平和垂直差值，取较大的方向
             int deltaX = currentGrid.x - _originPos.x;

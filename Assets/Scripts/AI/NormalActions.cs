@@ -103,7 +103,7 @@ namespace AI
     public class CheckMoveToTarget : ActionBase
     {
         public Vector3 TargetPos { get; private set; }
-        public override string ActionName => "移动到目标点";
+        public override string ActionName => "Move to here";
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; } = -1;
         private bool _isMoving = false;

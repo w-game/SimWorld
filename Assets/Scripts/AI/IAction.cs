@@ -11,6 +11,7 @@ namespace AI
         float ProgressSpeed { get; }
         bool Done { get; set; }
         event Action<IAction> OnCompleted;
+
         float CalculateUtility(AgentState state);
         void Execute(AgentState state);
         void OnRegister(AgentState agentState);

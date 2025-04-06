@@ -84,6 +84,12 @@ namespace Citizens
             _aiController.Update();
         }
 
+        public void RegisterAction(ActionBase action)
+        {
+            // 添加动作到行为树
+            _aiController.RegisterAction(action, true);
+        }
+
         // 设置目标点并开始移动
         public void MoveToTarget(Vector2 pos)
         {

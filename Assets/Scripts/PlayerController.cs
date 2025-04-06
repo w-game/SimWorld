@@ -35,19 +35,6 @@ public class PlayerController : MonoBehaviour
         float moveY = Input.GetAxis("Vertical");
         Vector2 movement = new Vector2(moveX, moveY) * _agent.MoveSpeed * Time.deltaTime;
         rb.MovePosition(rb.position + movement);
-
-        if (Input.GetMouseButtonDown(0))
-        {
-            var blockType = MapManager.I.CheckClickOnMap(out var mouseWorldPos);
-            switch (blockType)
-            {
-                case BlockType.Ocean:
-                    break;
-                case BlockType.Plain:
-                    _agent.MoveToTarget(mouseWorldPos);
-                    break;
-            }
-        }
     }
 
     private void OnActionProgress(float curProgress)
