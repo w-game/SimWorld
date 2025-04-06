@@ -8,3 +8,56 @@
 /Temp
 /ProjectSettings
 /UserSettings
+/Library/Logs
+/Library/Preferences
+/Library/Application Support
+/Library/Caches
+/Library/Containers
+/.gradle
+/.gradle/
+*.iml
+*.hprof
+*.log
+*.orig
+*.swp
+*.swo
+*.DS_Store
+
+# Uncomment this line if you wish to ignore the entire project directory.
+# /project_directory/
+
+# Uncomment this line if you wish to ignore the entire project directory.
+# /project_directory/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar
+*.keystore
+*.jks
+*.jks.properties
+*.properties
+*.keystore.properties
+*.p12
+*.pfx
+*.pem
+*.crt
+*.cer
+*.der
+*.p7b
+*.p7c
+
+# Uncomment this line if you wish to ignore the entire project directory.
+# /project_directory/
+*.unitypackage
+*.unityproj
+*.sln
+*.csproj
+*.userprefs
+*.pidb
+*.pidb.meta
+*.suo
+*.user
+*.userprefs.meta
+*.sln.ideconfig

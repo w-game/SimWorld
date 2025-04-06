@@ -17,13 +17,13 @@ namespace Map
     public class House
     {
         public List<Vector2Int> Blocks { get; private set; } // 房屋的所有块
-        public Vector2Int Size { get; private set; }            // 房屋大小，影响房屋半径
-        public City City { get; private set; }            // 房屋所在的城市
+        public Vector2Int Size { get; private set; } // 房屋大小，影响房屋半径
+        public City City { get; private set; } // 房屋所在的城市
         public bool IsAvailable { get; set; } // 房屋是否可用
 
         public House(List<Vector2Int> blocks, Vector2Int size, City city)
         {
-            Blocks = blocks;      // 转换为全局坐标
+            Blocks = blocks; // 转换为全局坐标
             Size = size;
             City = city;
         }
@@ -37,6 +37,7 @@ namespace Map
                     Blocks.Add(block);
                 }
             }
+
             // Recalculate Size as the bounding box of all blocks
             int minX = int.MaxValue, minY = int.MaxValue;
             int maxX = int.MinValue, maxY = int.MinValue;
@@ -47,6 +48,7 @@ namespace Map
                 if (pos.x > maxX) maxX = pos.x;
                 if (pos.y > maxY) maxY = pos.y;
             }
+
             Size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
         }
     }
@@ -54,8 +56,8 @@ namespace Map
     public class City
     {
         public Vector2Int GlobalPos { get; private set; } // 城市在世界中的绝对位置
-        public int Size { get; private set; }            // 城市大小，影响城市半径
-        public Chunk OriginChunk { get; private set; }   // 城市起源的Chunk
+        public int Size { get; private set; } // 城市大小，影响城市半径
+        public Chunk OriginChunk { get; private set; } // 城市起源的Chunk
 
         public List<List<Vector2Int>> Roads { get; } = new List<List<Vector2Int>>(); // 存储城市的道路
         public List<House> Houses { get; } = new List<House>(); // 存储城市的房屋
@@ -72,6 +74,7 @@ namespace Map
                     }
                 }
             }
+
             return false;
         }
 
@@ -79,11 +82,12 @@ namespace Map
 
         public City(Vector2Int pos, int size, Chunk originChunk)
         {
-            GlobalPos = pos + originChunk.WorldPos;      // 转换为全局坐标
+            GlobalPos = pos + originChunk.WorldPos; // 转换为全局坐标
             Size = size;
             OriginChunk = originChunk;
 
-            _cityRand = new System.Random(originChunk.Map.seed + originChunk.Pos.x * 500 + originChunk.Pos.y + Size * 100);
+            _cityRand = new System.Random(originChunk.Map.seed + originChunk.Pos.x * 500 + originChunk.Pos.y +
+                                          Size * 100);
 
             Debug.Log($"City {GlobalPos} Size {Size} OriginChunk {OriginChunk.Pos}");
             // 创建城市
@@ -125,6 +129,7 @@ namespace Map
                 // verticalMainRoad.Add(roadPosRight);
                 // verticalMainRoad.Add(roadPosLeft);
             }
+
             Roads.Add(horizonalMainRoad);
             Roads.Add(verticalMainRoad);
 
@@ -144,7 +149,9 @@ namespace Map
                 do
                 {
                     offset = _cityRand.Next(0, Size);
-                } while (usedHorizontalOffsets.Contains(offset) || Mathf.Abs(GlobalPos.y - OriginChunk.WorldPos.y - offset) < 7); // 避免与主干道重叠
+                } while (usedHorizontalOffsets.Contains(offset) ||
+                         Mathf.Abs(GlobalPos.y - OriginChunk.WorldPos.y - offset) < 7); // 避免与主干道重叠
+
                 usedHorizontalOffsets.Add(offset);
 
 
@@ -155,7 +162,7 @@ namespace Map
                     minX = _cityRand.Next(0, localPos.x);
                     maxX = _cityRand.Next(localPos.x, Size - 1);
                 } while (maxX - minX < 8); // 确保道路长度大于3
-                
+
 
                 List<Vector2Int> road = new List<Vector2Int>();
                 for (int x = minX; x < maxX; x++)
@@ -163,6 +170,7 @@ namespace Map
                     road.Add(new Vector2Int(x + OriginChunk.WorldPos.x, roadY));
                     // road.Add(new Vector2Int(x + OriginChunk.WorldPos.x, roadY + 1));
                 }
+
                 Roads.Add(road);
             }
 
@@ -174,7 +182,9 @@ namespace Map
                 do
                 {
                     offset = _cityRand.Next(0, Size);
-                } while (usedVerticalOffsets.Contains(offset) || Mathf.Abs(GlobalPos.x - OriginChunk.WorldPos.x - offset) < 7); // 避免与主干道重叠
+                } while (usedVerticalOffsets.Contains(offset) ||
+                         Mathf.Abs(GlobalPos.x - OriginChunk.WorldPos.x - offset) < 7); // 避免与主干道重叠
+
                 usedVerticalOffsets.Add(offset);
 
                 int roadX = OriginChunk.WorldPos.x + offset;
@@ -184,7 +194,7 @@ namespace Map
                     minY = _cityRand.Next(0, localPos.y);
                     maxY = _cityRand.Next(localPos.y, Size - 1);
                 } while (maxY - minY < 8); // 确保道路长度大于3
-                
+
 
                 List<Vector2Int> road = new List<Vector2Int>();
                 for (int y = minY; y < maxY; y++)
@@ -192,6 +202,7 @@ namespace Map
                     road.Add(new Vector2Int(roadX, y + OriginChunk.WorldPos.y));
                     // road.Add(new Vector2Int(roadX + 1, y + OriginChunk.WorldPos.y));
                 }
+
                 Roads.Add(road);
             }
 
@@ -202,50 +213,76 @@ namespace Map
         {
             foreach (var road in Roads)
             {
+                // Randomize road points for more varied placement
                 List<Vector2Int> roadPoints = new List<Vector2Int>(road);
-
                 roadPoints = roadPoints.OrderBy(x => _cityRand.Next()).ToList();
 
-                List<House> houses = new List<House>();
+                // Try placing a limited number of houses per road to avoid clutter
+                int housesPlaced = 0;
+                int maxHousesPerRoad = 20;
 
-                for (int i = 0; i < 8 || houses.Count == 0; i++)
+                foreach (var roadPoint in roadPoints)
                 {
-                    foreach (var roadPoint in roadPoints)
+                    // Try all four directions from the current road point
+                    for (int dir = 0; dir < 4; dir++)
                     {
-                        var house = PlaceBuilding(roadPoint);
+                        // If we've placed enough houses on this road, stop
+                        if (housesPlaced >= maxHousesPerRoad)
+                            break;
+
+                        var house = PlaceBuilding(roadPoint, dir);
                         if (house != null)
                         {
-                            houses.Add(house);
                             Houses.Add(house);
-                            Debug.Log($"Placed building at {roadPoint} in city {GlobalPos}");
+                            housesPlaced++;
                         }
                     }
 
-                    if (i >= 16)
-                    {
+                    // If we've placed enough houses on this road, move to the next
+                    if (housesPlaced >= maxHousesPerRoad)
                         break;
-                    }
                 }
             }
         }
 
-        private House PlaceBuilding(Vector2Int roadPoint)
+        private House PlaceBuilding(Vector2Int roadPoint, int direction = -1)
         {
+            if (direction == -1)
+            {
+                direction = _cityRand.Next(0, 4);
+            }
+
             // 随机选择建筑大小
-            int buildingWidth = _cityRand.Next(3, 8);
-            int buildingHeight = _cityRand.Next(3, 8);
+            // var roomSize = _cityRand.Next(1, 4);
+            // 随机选择建筑大小
+            var roomSize = _cityRand.Next(1, 4);
+            int buildingWidth, buildingHeight;
+            if (roomSize == 1)
+            {
+                buildingWidth = _cityRand.Next(3, 5);
+                buildingHeight = _cityRand.Next(3, 5);
+            }
+            else if (roomSize == 2)
+            {
+                buildingWidth = _cityRand.Next(6, 9);
+                buildingHeight = _cityRand.Next(6, 9);
+            }
+            else
+            {
+                buildingWidth = _cityRand.Next(10, 15);
+                buildingHeight = _cityRand.Next(10, 15);
+            }
 
             // 随机选择建筑方向
-            int direction = _cityRand.Next(0, 4);
 
             var buildingBlocks = new List<Vector2Int>();
             Vector2Int minPos = new Vector2Int(int.MaxValue, int.MaxValue);
             Vector2Int maxPos = new Vector2Int(int.MinValue, int.MinValue);
 
             // 先合并计算所有块的坐标，并同步更新边界
-            for (int i = 0; i <= buildingWidth + 1; i++)
+            for (int i = 1; i <= buildingWidth; i++)
             {
-                for (int j = 0; j <= buildingHeight + 1; j++)
+                for (int j = 1; j <= buildingHeight; j++)
                 {
                     Vector2Int pos = roadPoint;
                     switch (direction)
@@ -263,14 +300,11 @@ namespace Map
                             pos += new Vector2Int(j, -i);
                             break;
                     }
+
                     minPos = new Vector2Int(Mathf.Min(minPos.x, pos.x), Mathf.Min(minPos.y, pos.y));
                     maxPos = new Vector2Int(Mathf.Max(maxPos.x, pos.x), Mathf.Max(maxPos.y, pos.y));
 
-                    // 只在主建筑区间内记录
-                    if (i > 0 && i <= buildingWidth && j > 0 && j <= buildingHeight)
-                    {
-                        buildingBlocks.Add(pos);
-                    }
+                    buildingBlocks.Add(pos);
                 }
             }
 
@@ -298,6 +332,7 @@ namespace Map
                         return null;
                     }
                 }
+
                 // 检查是否与道路重叠
                 foreach (var road in Roads)
                 {
@@ -346,16 +381,16 @@ namespace Map
         private Chunk GetNearestChunk(Vector2Int worldPos, bool self, int layer)
         {
             var neighbors = new List<Vector2Int>()
-            {
-                new Vector2Int(0, 1),
-                new Vector2Int(1, 0),
-                new Vector2Int(0, -1),
-                new Vector2Int(-1, 0),
-                new Vector2Int(1, 1),
-                new Vector2Int(1, -1),
-                new Vector2Int(-1, 1),
-                new Vector2Int(-1, -1)
-            };
+                {
+                    new Vector2Int(0, 1),
+                    new Vector2Int(1, 0),
+                    new Vector2Int(0, -1),
+                    new Vector2Int(-1, 0),
+                    new Vector2Int(1, 1),
+                    new Vector2Int(1, -1),
+                    new Vector2Int(-1, 1),
+                    new Vector2Int(-1, -1)
+                };
 
             if (self)
             {
@@ -488,6 +523,7 @@ namespace Map
                 {
                     Type = BlackType.Plain;
                 }
+
                 return;
             }
 
@@ -525,6 +561,7 @@ namespace Map
             }
         }
     }
+
     public class CartonMap : MonoBehaviour
     {
         public const int LAYER_NUM = 5;
@@ -532,11 +569,14 @@ namespace Map
         public int seed = 12412;
         public Tilemap tilemap;
         public TileBase tile;
-        public Dictionary<int, Dictionary<Vector2Int, Chunk>> chunks = new Dictionary<int, Dictionary<Vector2Int, Chunk>>();
+
+        public Dictionary<int, Dictionary<Vector2Int, Chunk>> chunks =
+            new Dictionary<int, Dictionary<Vector2Int, Chunk>>();
 
         public Transform player;
 
         private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
+
         private void Awake()
         {
             for (int i = 0; i < LAYER_NUM; i++)
@@ -568,16 +608,16 @@ namespace Map
         private City FindNearestCity(Vector2Int pos)
         {
             var neighbor = new List<Vector2Int>()
-            {
-                new Vector2Int(0, 1),
-                new Vector2Int(1, 0),
-                new Vector2Int(0, -1),
-                new Vector2Int(-1, 0),
-                new Vector2Int(1, 1),
-                new Vector2Int(1, -1),
-                new Vector2Int(-1, 1),
-                new Vector2Int(-1, -1)
-            };
+                {
+                    new Vector2Int(0, 1),
+                    new Vector2Int(1, 0),
+                    new Vector2Int(0, -1),
+                    new Vector2Int(-1, 0),
+                    new Vector2Int(1, 1),
+                    new Vector2Int(1, -1),
+                    new Vector2Int(-1, 1),
+                    new Vector2Int(-1, -1)
+                };
 
             var chunk = GetChunk(pos, Chunk.CityLayer);
             if (chunk.City != null)
@@ -592,7 +632,8 @@ namespace Map
 
         void Update()
         {
-            var playerChunkPos = new Vector2Int((int)player.position.x / NORMAL_CHUNK_SIZE, (int)player.position.y / NORMAL_CHUNK_SIZE);
+            var playerChunkPos = new Vector2Int((int)player.position.x / NORMAL_CHUNK_SIZE,
+                (int)player.position.y / NORMAL_CHUNK_SIZE);
             for (int x = 0; x < 6; x++)
             {
                 for (int y = 0; y < 6; y++)
