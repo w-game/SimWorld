@@ -1,6 +1,7 @@
 using System;
 using AI;
 using Citizens;
+using Map;
 using UnityEngine;
 using UnityEngine.UI;
 
