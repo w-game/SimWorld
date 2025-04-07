@@ -7,7 +7,7 @@ public class GameItemActions
     public static List<ActionBase> GetActionByItem(GameItemBase item)
     {
         var actions = new List<ActionBase>();
-        if (item.ItemId.Contains("PLANT"))
+        if (item.PropItem.Config.id.Contains("PLANT"))
         {
             var plantItem = item as PlantItem;
             switch (plantItem.GrowthStage)
@@ -20,9 +20,18 @@ public class GameItemActions
                     break;
             }
         }
-        else if (item.ItemId.Contains("PROP"))
+        else if (item.PropItem.Config.id.Contains("PROP"))
         {
+            if (item is FoodItem foodItem)
+            {
+                actions.Add(new EatAction(foodItem));
+            }
+            // else if (item is ToolItem toolItem)
+            // {
+            //     actions.Add(new UseToolAction(toolItem));
+            // }
 
+            actions.Add(new PutIntoBag(item));
         }
 
         return actions;

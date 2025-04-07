@@ -65,7 +65,7 @@ namespace AI
             var cellPos = MapManager.I.WorldPosToCellPos(_targetPos);
             var plantObj = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f, 0));
             var plant = plantObj.GetComponent<PlantItem>();
-            MapManager.I.RegisterGameItem(cellPos, plant);
+            MapManager.I.RegisterGameItem(_targetPos, plant);
         }
     }
 
@@ -74,12 +74,10 @@ namespace AI
         public override float ProgressSpeed { get; protected set; } = 50;
         public override int ProgressTimes { get; protected set; } = 1;
 
-        private Vector3 _targetPos;
         private PlantItem _plantItem;
 
         public RemovePlantAction(PlantItem plantItem)
         {
-            _targetPos = plantItem.transform.position;
             ActionName = "Remove the plant";
             _plantItem = plantItem;
         }
@@ -91,12 +89,12 @@ namespace AI
 
         public override void OnRegister(AgentState state)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
+            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.transform.position));
         }
 
         protected override void DoExecute(AgentState state)
         {
-            MapManager.I.RemoveGameItem(MapManager.I.WorldPosToCellPos(_targetPos), _plantItem);
+            MapManager.I.RemoveGameItem(_plantItem);
         }
     }
 

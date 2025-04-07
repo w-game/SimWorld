@@ -30,16 +30,15 @@ namespace Map
             return false;
         }
 
-        private System.Random _cityRand;
+        private System.Random _chunkRand;
 
-        public City(Vector2Int pos, int size, Chunk originChunk)
+        public City(Vector2Int pos, int size, Chunk originChunk, System.Random chunkRand)
         {
             GlobalPos = pos + originChunk.WorldPos; // 转换为全局坐标
             Size = size;
             OriginChunk = originChunk;
 
-            _cityRand = new System.Random(originChunk.Map.seed + originChunk.Pos.x * 500 + originChunk.Pos.y +
-                                          Size * 100);
+            _chunkRand = chunkRand;
 
             Debug.Log($"City {GlobalPos} Size {Size} OriginChunk {OriginChunk.Pos}");
             // 创建城市
@@ -86,7 +85,7 @@ namespace Map
             Roads.Add(verticalMainRoad);
 
             // 每个方向尝试添加1-2条次要道路
-            int roadCount = _cityRand.Next(1, 3);
+            int roadCount = _chunkRand.Next(1, 3);
 
             // 记录已使用的偏移量，防止道路重叠
             HashSet<int> usedHorizontalOffsets = new HashSet<int>();
@@ -100,7 +99,7 @@ namespace Map
                 int offset;
                 do
                 {
-                    offset = _cityRand.Next(0, Size);
+                    offset = _chunkRand.Next(0, Size);
                 } while (usedHorizontalOffsets.Contains(offset) ||
                          Mathf.Abs(GlobalPos.y - OriginChunk.WorldPos.y - offset) < 7); // 避免与主干道重叠
 
@@ -111,8 +110,8 @@ namespace Map
                 int minX, maxX;
                 do
                 {
-                    minX = _cityRand.Next(0, localPos.x);
-                    maxX = _cityRand.Next(localPos.x, Size - 1);
+                    minX = _chunkRand.Next(0, localPos.x);
+                    maxX = _chunkRand.Next(localPos.x, Size - 1);
                 } while (maxX - minX < 8); // 确保道路长度大于3
 
 
@@ -126,14 +125,14 @@ namespace Map
                 Roads.Add(road);
             }
 
-            roadCount = _cityRand.Next(1, 3);
+            roadCount = _chunkRand.Next(1, 3);
             for (int i = 0; i < roadCount; i++)
             {
                 // 纵向次要道路 - 确保不重叠
                 int offset;
                 do
                 {
-                    offset = _cityRand.Next(0, Size);
+                    offset = _chunkRand.Next(0, Size);
                 } while (usedVerticalOffsets.Contains(offset) ||
                          Mathf.Abs(GlobalPos.x - OriginChunk.WorldPos.x - offset) < 7); // 避免与主干道重叠
 
@@ -143,8 +142,8 @@ namespace Map
                 int minY, maxY;
                 do
                 {
-                    minY = _cityRand.Next(0, localPos.y);
-                    maxY = _cityRand.Next(localPos.y, Size - 1);
+                    minY = _chunkRand.Next(0, localPos.y);
+                    maxY = _chunkRand.Next(localPos.y, Size - 1);
                 } while (maxY - minY < 8); // 确保道路长度大于3
 
 
@@ -167,7 +166,7 @@ namespace Map
             {
                 // Randomize road points for more varied placement
                 List<Vector2Int> roadPoints = new List<Vector2Int>(road);
-                roadPoints = roadPoints.OrderBy(x => _cityRand.Next()).ToList();
+                roadPoints = roadPoints.OrderBy(x => _chunkRand.Next()).ToList();
 
                 // Try placing a limited number of houses per road to avoid clutter
                 int housesPlaced = 0;
@@ -201,28 +200,28 @@ namespace Map
         {
             if (direction == -1)
             {
-                direction = _cityRand.Next(0, 4);
+                direction = _chunkRand.Next(0, 4);
             }
 
             // 随机选择建筑大小
-            // var roomSize = _cityRand.Next(1, 4);
+            // var roomSize = _chunkRand.Next(1, 4);
             // 随机选择建筑大小
-            var roomSize = _cityRand.Next(1, 4);
+            var roomSize = _chunkRand.Next(1, 4);
             int buildingWidth, buildingHeight;
             if (roomSize == 1)
             {
-                buildingWidth = _cityRand.Next(3, 5);
-                buildingHeight = _cityRand.Next(3, 5);
+                buildingWidth = _chunkRand.Next(3, 5);
+                buildingHeight = _chunkRand.Next(3, 5);
             }
             else if (roomSize == 2)
             {
-                buildingWidth = _cityRand.Next(6, 9);
-                buildingHeight = _cityRand.Next(6, 9);
+                buildingWidth = _chunkRand.Next(6, 9);
+                buildingHeight = _chunkRand.Next(6, 9);
             }
             else
             {
-                buildingWidth = _cityRand.Next(10, 15);
-                buildingHeight = _cityRand.Next(10, 15);
+                buildingWidth = _chunkRand.Next(10, 15);
+                buildingHeight = _chunkRand.Next(10, 15);
             }
 
             // 随机选择建筑方向

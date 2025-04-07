@@ -18,7 +18,6 @@ namespace GameItem
 
             // 设置植物的初始状态
             // SetState(GameItemState.Planted);
-            ItemId = "PLANT_" + gameObject.GetInstanceID();
         }
 
         public void Init(int growthTime, int maxGrowthStage, int growthRate)

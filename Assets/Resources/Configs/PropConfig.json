@@ -1,0 +1,13 @@
+{
+    "items": [
+        {
+            "id": "PROP_FOOD_APPLE",
+            "name": "Apple",
+            "description": "A delicious red apple.",
+            "type": "Wall",
+            "icon": "wall_icon.png",
+            "prefab": "Prefab/Wall",
+            "maxStackSize": 1
+        }
+    ]
+}

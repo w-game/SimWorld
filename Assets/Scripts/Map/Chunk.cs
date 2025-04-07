@@ -23,6 +23,8 @@ namespace Map
 
         public BlockType Type { get; private set; }
 
+        private System.Random _chunkRand;
+
         public Chunk(Vector2Int pos, int layer, CartonMap map)
         {
             Pos = pos;
@@ -31,8 +33,9 @@ namespace Map
             Size = (int)Mathf.Pow(2, layer) * CartonMap.NORMAL_CHUNK_SIZE;
             Blocks = new BlockType[Size, Size];
 
-            var centerRandom = new System.Random(Map.seed + layer * 1000 + pos.x * 100 + pos.y);
-            CenterPos = new Vector2Int(centerRandom.Next(0, Size), centerRandom.Next(0, Size));
+            _chunkRand = new System.Random(Map.seed + layer * 1000 + pos.x * 100 + pos.y);
+
+            CenterPos = new Vector2Int(_chunkRand.Next(0, Size), _chunkRand.Next(0, Size));
         }
 
         private Chunk GetNearestChunk(Vector2Int worldPos, bool self, int layer)
@@ -169,8 +172,7 @@ namespace Map
         {
             if (Layer == CartonMap.LAYER_NUM - 1)
             {
-                System.Random rand = new System.Random(Map.seed + Layer * 1000 + Pos.x * 100 + Pos.y);
-                var pro = rand.Next(0, 100);
+                var pro = _chunkRand.Next(0, 100);
 
                 if (pro < 50)
                 {
@@ -191,6 +193,27 @@ namespace Map
             if (nearestChunk != null)
             {
                 Type = nearestChunk.Type;
+                if (Layer == CartonMap.LAYER_NUM - 2 && Type == BlockType.Plain)
+                {
+                    var pro = _chunkRand.Next(0, 100);
+
+                    if (pro < 10)
+                    {
+                        Type = BlockType.Forest;
+                    }
+                    else if (pro < 30)
+                    {
+                        Type = BlockType.Mountain;
+                    }
+                    else if (pro < 50)
+                    {
+                        Type = BlockType.Desert;
+                    }
+                    else
+                    {
+                        Type = BlockType.Plain;
+                    }
+                }
             }
             else
             {
@@ -208,11 +231,10 @@ namespace Map
             Debug.Log($"CheckCreateCity {Pos} Layer {Layer} Type {Type}");
             if (Type == BlockType.Plain)
             {
-                System.Random rand = new System.Random(Map.seed + Layer * 1000 + Pos.x * 100 + Pos.y);
 
-                if (rand.Next(0, 100) < 20)
+                if (_chunkRand.Next(0, 100) < 20)
                 {
-                    City = new City(CenterPos, Size, this);
+                    City = new City(CenterPos, Size, this, _chunkRand);
                     Debug.Log($"Create City at {CenterPos} in Chunk {Pos} Layer {Layer}");
                 }
             }

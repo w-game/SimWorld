@@ -53,6 +53,7 @@ namespace Citizens
         private AIController _aiController;
         public AgentState State { get; private set; }
         [SerializeField] private Transform handItem;
+        public Inventory Bag { get; private set; }
 
         private void Start()
         {
@@ -60,6 +61,8 @@ namespace Citizens
             targetPosition = _rb.position;
             State = new AgentState(this);
             _aiController = new AIController(this);
+
+            Bag = new Inventory(16);
         }
 
         private void FixedUpdate()

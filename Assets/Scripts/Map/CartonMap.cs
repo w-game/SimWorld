@@ -13,7 +13,10 @@ namespace Map
         Ocean,
         Room,
         Road,
-        Farm
+        Farm,
+        Forest,
+        Mountain,
+        Desert
     }
 
     public class House
@@ -57,7 +60,7 @@ namespace Map
 
     public class CartonMap
     {
-        public const int LAYER_NUM = 5;
+        public const int LAYER_NUM = 6;
         public const int NORMAL_CHUNK_SIZE = 8;
         public int seed { get; private set; } // 随机种子
 

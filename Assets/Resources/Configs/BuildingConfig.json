@@ -1,0 +1,16 @@
+{
+    "items": [
+        {
+            "id": "BUILDING_WALL",
+            "name": "Wall",
+            "description": "A basic wall structure.",
+            "type": "Wall",
+            "icon": "Textures/Room,Wall",
+            "requiredResources": {
+                "wood": 5,
+                "stone": 2
+            },
+            "buildSpeed": 10
+        }
+    ]
+}

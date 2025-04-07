@@ -22,6 +22,7 @@ public class MapManager : MonoSingleton<MapManager>
 {
     public Transform player;          // 玩家对象
     public CartonMap CartonMap { get; private set; } // 地图对象
+
     public int seed = 123120;             // 随机种子
     public Tilemap tilemap;
 
@@ -29,7 +30,7 @@ public class MapManager : MonoSingleton<MapManager>
     public TileBase tile;
     public List<TileBase> farmTiles;
     private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
-    private Dictionary<Vector2Int, GameItemBase> _gameItems = new Dictionary<Vector2Int, GameItemBase>();
+    private Dictionary<Vector2Int, List<GameItemBase>> _gameItems = new Dictionary<Vector2Int, List<GameItemBase>>();
 
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
@@ -50,6 +51,11 @@ public class MapManager : MonoSingleton<MapManager>
 
         var city = CartonMap.FindNearestCity(new Vector2Int(0, 0));
         player.transform.position = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
+
+        var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", player.position);
+        var foodItem = foodGo.GetComponent<FoodItem>();
+        foodItem.Init(new PropItem(new PropConfig("PROP_FOOD_APPLE", "Food", 1)));
+        RegisterGameItem(foodItem.transform.position, foodItem);
     }
 
     void Update()
@@ -169,6 +175,15 @@ public class MapManager : MonoSingleton<MapManager>
             case BlockType.Road:
                 tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), roadColor);
                 break;
+            case BlockType.Forest:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(0.4f, 1f, 0.4f));
+                break;
+            case BlockType.Mountain:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(0.6f, 0.4f, 0.4f));
+                break;
+            case BlockType.Desert:
+                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(1f, 1f, 0.4f));
+                break;
             default:
                 tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), defaultColor);
                 break;
@@ -210,17 +225,35 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RegisterGameItem(Vector2Int pos, GameItemBase gameItem)
+    internal void RegisterGameItem(Vector3 pos, GameItemBase gameItem)
     {
-        _gameItems.Add(pos, gameItem);
+        var cellPos = WorldPosToCellPos(pos);
+        if (!_gameItems.ContainsKey(cellPos))
+        {
+            _gameItems.Add(cellPos, new List<GameItemBase>() { gameItem });
+        }
+        else
+        {
+            _gameItems[cellPos].Add(gameItem);
+        }
     }
 
-    internal void RemoveGameItem(Vector2Int pos, GameItemBase gameItem)
+    internal void RemoveGameItem(GameItemBase gameItem)
     {
-        if (_gameItems.ContainsKey(pos) && _gameItems[pos] == gameItem)
+        var cellPos = WorldPosToCellPos(gameItem.transform.position);
+        if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
         {
-            _gameItems.Remove(pos);
+            _gameItems[cellPos].Remove(gameItem);
             Destroy(gameItem.gameObject);
+        }
+    }
+
+    internal void RemoveGameItemOnMap(GameItemBase gameItem)
+    {
+        var cellPos = WorldPosToCellPos(gameItem.transform.position);
+        if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
+        {
+            _gameItems[cellPos].Remove(gameItem);
         }
     }
 
@@ -231,7 +264,7 @@ public class MapManager : MonoSingleton<MapManager>
 
         if (_gameItems.ContainsKey(cellPos))
         {
-            items.Add(_gameItems[cellPos]);
+            items.AddRange(_gameItems[cellPos]);
         }
 
         return items;

@@ -3,6 +3,7 @@ using UnityEngine;
 /// <summary>
 /// A generic MonoBehaviour singleton that persists across scene loads.
 /// </summary>
+/// 
 public class MonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
 {
     private static T _instance;

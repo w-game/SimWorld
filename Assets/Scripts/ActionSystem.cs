@@ -18,6 +18,9 @@ public class ActionSystem
 
     internal void Update()
     {
+        if (BuildingManager.I.CraftMode)
+            return;
+            
         if (Input.GetMouseButtonDown(0))
         {
             if (EventSystem.current.IsPointerOverGameObject())
@@ -52,6 +55,7 @@ public class ActionSystem
                     case BlockType.Plain:
                         actions.Add(new CheckMoveToTarget(mousePos));
                         actions.Add(new HoeAction(mousePos));
+                        actions.Add(new StartBuildingCraftAction());
 
                         OnMouseClick?.Invoke(actions, Input.mousePosition);
                         break;

@@ -46,7 +46,7 @@ namespace AI
             // 构建候选行为列表（可以根据需求增加更多行为）
             List<IAction> candidateActions = new List<IAction>
             {
-                new EatAction(),
+                // new EatAction(),
                 new ToiletAction(),
                 new SleepAction(),
                 new SocialAction()

@@ -7,6 +7,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager I { get; private set; }
+    public ConfigReader ConfigReader { get; private set; }
     public ActionSystem ActionSystem { get; private set; }
 
     public Agent CurrentAgent { get; private set; }
@@ -16,6 +17,8 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         I = this;
+        ConfigReader = new ConfigReader();
+        ConfigReader.LoadConfigs();
         ActionSystem = new ActionSystem();
         ActionSystem.Init();
 

@@ -1,18 +1,21 @@
+using System;
 using System.Collections.Generic;
 using Map;
 using UnityEngine;
 
-public class BuildingManager : MonoBehaviour
+public class BuildingManager : MonoSingleton<BuildingManager>
 {
+    [SerializeField] private GameObject blueprintPrefab;
     public Camera mainCamera; // 主摄像机
-    public GameObject buildingSignPrefab;
+    public bool CraftMode { get; set; }
+    private BuildingConfig _currentBuildingConfig; // 当前建筑配置
 
-    private bool _isStartBuild = true; // 是否处于建造模式，可根据需要控制开关
+
     private bool _isBuilding = false;  // 标记是否正在进行拖动建造
-
-    private List<GameObject> _signs = new List<GameObject>();
+    private Dictionary<Vector2Int, GameObject> _blueprints = new Dictionary<Vector2Int, GameObject>(); // 存储预览的 sign
 
     private Vector2Int _originPos; // 起始格子坐标
+
 
     // 检查是否满足建造条件（这里仅作示例，实际可加入判断逻辑）
     private bool CheckCanBuild(BlockType blockType)
@@ -35,7 +38,7 @@ public class BuildingManager : MonoBehaviour
 
     void Update()
     {
-        if (!_isStartBuild)
+        if (!CraftMode)
             return;
 
         // 鼠标左键按下时，确定起始点并开始建造
@@ -72,13 +75,6 @@ public class BuildingManager : MonoBehaviour
                 currentGrid.x = _originPos.x;
             }
 
-            // 清除之前生成的 sign（预览线）
-            foreach (var sign in _signs)
-            {
-                Destroy(sign);
-            }
-            _signs.Clear();
-
             // 根据起始点与当前格子位置，生成两点之间的连续 sign
             if (_originPos.x == currentGrid.x)
             {
@@ -87,9 +83,28 @@ public class BuildingManager : MonoBehaviour
                 int endY = Mathf.Max(_originPos.y, currentGrid.y);
                 for (int y = startY; y <= endY; y++)
                 {
+                    if (_blueprints.ContainsKey(new Vector2Int(_originPos.x, y)))
+                    {
+                        // 如果已经存在该位置的 sign，则跳过
+                        continue;
+                    }
                     Vector2 pos = new Vector2(_originPos.x + 0.5f, y + 0.5f);
-                    var sign = Instantiate(buildingSignPrefab, pos, Quaternion.identity);
-                    _signs.Add(sign);
+                    var blueprintGo = Instantiate(blueprintPrefab, pos, Quaternion.identity);
+                    var blueprint = blueprintGo.GetComponent<Blueprint>();
+
+                    var paths = _currentBuildingConfig.icon.Split(',');
+                    var icons = Resources.LoadAll<Sprite>(paths[0]);
+
+                    foreach (var icon in icons)
+                    {
+                        if (icon.name == paths[1])
+                        {
+                            blueprint.Place(new Vector2Int(_originPos.x, y), icon);
+                            break;
+                        }
+                    }
+
+                    _blueprints.Add(new Vector2Int(_originPos.x, y), blueprintGo);
                 }
             }
             else if (_originPos.y == currentGrid.y)
@@ -99,9 +114,25 @@ public class BuildingManager : MonoBehaviour
                 int endX = Mathf.Max(_originPos.x, currentGrid.x);
                 for (int x = startX; x <= endX; x++)
                 {
+                    if (_blueprints.ContainsKey(new Vector2Int(x, _originPos.y)))
+                    {
+                        // 如果已经存在该位置的 sign，则跳过
+                        continue;
+                    }
                     Vector2 pos = new Vector2(x + 0.5f, _originPos.y + 0.5f);
-                    var sign = Instantiate(buildingSignPrefab, pos, Quaternion.identity);
-                    _signs.Add(sign);
+                    var blueprintGo = Instantiate(blueprintPrefab, pos, Quaternion.identity);
+                    var blueprint = blueprintGo.GetComponent<Blueprint>();
+                    var paths = _currentBuildingConfig.icon.Split(',');
+                    var icons = Resources.LoadAll<Sprite>(paths[0]);
+                    foreach (var icon in icons)
+                    {
+                        if (icon.name == paths[1])
+                        {
+                            blueprint.Place(new Vector2Int(x, _originPos.y), icon);
+                            break;
+                        }
+                    }
+                    _blueprints.Add(new Vector2Int(x, _originPos.y), blueprintGo);
                 }
             }
         }
@@ -113,5 +144,11 @@ public class BuildingManager : MonoBehaviour
             // 此时 _signs 中保存的就是最终预览的所有 sign，
             // 你可以根据需要将其转为正式建筑或进一步处理。
         }
+    }
+
+    internal void CraftBuilding(BuildingConfig config)
+    {
+        _currentBuildingConfig = config;
+        Log.LogInfo("BuildingManager", $"Crafting {config.name}");
     }
 }

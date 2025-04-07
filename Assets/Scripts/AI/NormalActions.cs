@@ -68,7 +68,7 @@ namespace AI
                         float previousProgress = CurProgress;
                         CurProgress += Time.deltaTime * ProgressSpeed;
                         OnProgress?.Invoke(CurProgress);
-                        
+
                         // Debug.Log($"{ActionName} - {CurProgress}, {ProgressTimes}, {ProgressSpeed}");
 
                         int previousThreshold = (int)(previousProgress / (100f / ProgressTimes));
@@ -88,6 +88,7 @@ namespace AI
                 else
                 {
                     DoExecute(state);
+                    Done = true;
                 }
             }
         }
@@ -210,6 +211,7 @@ namespace AI
         {
             Debug.Log("执行捡取物品动作");
             state.Agent.TakeItemInHand(_item);
+            MapManager.I.RemoveGameItemOnMap(_item);
             // 模拟捡取物品的逻辑
             Done = true;
         }
@@ -218,11 +220,16 @@ namespace AI
     // 示例行为：吃东西，根据饥饿值决定效用
     public class EatAction : ActionBase
     {
-        public override string ActionName => "吃东西";
         public override float ProgressSpeed { get; protected set; } = 5f;
         public override int ProgressTimes { get; protected set; }
 
         private FoodItem _foodItem;
+
+        public EatAction(FoodItem foodItem)
+        {
+            _foodItem = foodItem;
+            ActionName = "Eat";
+        }
 
         public override float CalculateUtility(AgentState state)
         {
@@ -231,39 +238,28 @@ namespace AI
 
         public override void OnRegister(AgentState state)
         {
-            // 检查代理的背包中是否已有食物（TODO: 替换为实际逻辑）
-            // 这里假设 GetFoodItem() 方法返回当前持有的食物，如果没有则返回 null
-            _foodItem = state.Agent.GetFoodItem();
-
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
             GameItemBase tableItem = state.Agent.FindNearestTableItem();
 
-            if (_foodItem != null)
-            {
-                var takeItem = new TakeItemInHand(state.Agent, _foodItem);
-                takeItem.OnRegister(state);
-                PrecedingActions.Add(takeItem);
-                
-                if (tableItem != null)
-                {
-                    var putItemToTarget = new PutItemToTarget(_foodItem, tableItem);
-                    PrecedingActions.Add(putItemToTarget);
-                }
+            var takeItem = new TakeItemInHand(state.Agent, _foodItem);
+            takeItem.OnRegister(state);
+            PrecedingActions.Add(takeItem);
 
-                ProgressTimes = _foodItem.FoodTimes;
-            }
-            else
+            if (tableItem != null)
             {
-                // 若未持有食物
-                
+                var putItemToTarget = new PutItemToTarget(_foodItem, tableItem);
+                PrecedingActions.Add(putItemToTarget);
             }
+
+            ProgressTimes = _foodItem.MaxFoodTimes;
         }
 
         protected override void DoExecute(AgentState state)
         {
             // 每个阈值增加的饱食度：使用 FoodValue * ProgressSpeed / 100 的计算公式
-            float increment = _foodItem.FoodValue / _foodItem.FoodTimes;
+            float increment = _foodItem.FoodValue / _foodItem.MaxFoodTimes;
             state.Hunger = Mathf.Min(state.Hunger + increment, 100);
+            _foodItem.DecreaseFoodTimes();
             Debug.Log($"饱食度增加了 {increment}，当前饱食度: {state.Hunger}");
         }
     }

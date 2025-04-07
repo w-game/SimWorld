@@ -1,0 +1,78 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ConfigReader
+{
+    public Dictionary<string, List<ConfigBase>> Configs { get; private set; }
+
+    internal void LoadConfigs()
+    {
+        Configs = new Dictionary<string, List<ConfigBase>>();
+        LoadConfig<BuildingConfig>("Configs/BuildingConfig");
+        LoadConfig<PropConfig>("Configs/PropConfig");
+    }
+
+    private void LoadConfig<T>(string path) where T : ConfigBase
+    {
+        var configListText = Resources.Load<TextAsset>(path);
+        if (configListText == null)
+        {
+            throw new Exception($"Config file not found: {path}");
+        }
+        var json = configListText.text;
+        var configList = JsonUtility.FromJson<ConfigList<T>>(json);
+        
+        Configs.Add(path, new List<ConfigBase>());
+        foreach (var config in configList.items)
+        {
+            Configs[path].Add(config);
+        }
+    }
+
+    public T GetConfig<T>(string id) where T : ConfigBase
+    {
+        switch (typeof(T).Name)
+        {
+            case nameof(BuildingConfig):
+                Configs.TryGetValue("Configs/BuildingConfig", out var buildingConfigs);
+                if (buildingConfigs == null)
+                {
+                    throw new Exception($"BuildingConfig not found");
+                }
+                return buildingConfigs.Find(config => config.id == id) as T;
+            case nameof(PropConfig):
+                Configs.TryGetValue("Configs/PropConfig", out var propConfigs);
+                if (propConfigs == null)
+                {
+                    throw new Exception($"PropConfig not found");
+                }
+                return propConfigs.Find(config => config.id == id) as T;
+            default:
+                throw new Exception($"Unsupported config type: {typeof(T).Name}");
+        }
+    }
+    
+    public List<T> GetAllConfigs<T>() where T : ConfigBase
+    {
+        switch (typeof(T).Name)
+        {
+            case nameof(BuildingConfig):
+                Configs.TryGetValue("Configs/BuildingConfig", out var buildingConfigs);
+                if (buildingConfigs == null)
+                {
+                    throw new Exception($"BuildingConfig not found");
+                }
+                return buildingConfigs.ConvertAll(config => (T)config);
+            case nameof(PropConfig):
+                Configs.TryGetValue("Configs/PropConfig", out var propConfigs);
+                if (propConfigs == null)
+                {
+                    throw new Exception($"PropConfig not found");
+                }
+                return propConfigs.ConvertAll(config => (T)config);
+            default:
+                throw new Exception($"Unsupported config type: {typeof(T).Name}");
+        }
+    }
+}
