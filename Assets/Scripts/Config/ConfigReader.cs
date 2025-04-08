@@ -12,6 +12,7 @@ public class ConfigReader
         LoadConfig<BuildingConfig>("Configs/BuildingConfig");
         LoadConfig<PropConfig>("Configs/PropConfig");
         LoadConfig<ResourceConfig>("Configs/ResourceConfig");
+        LoadConfig<GameItemToActions>("Configs/GameItemToActions");
     }
 
     private void LoadConfig<T>(string path) where T : ConfigBase
@@ -56,6 +57,13 @@ public class ConfigReader
                     throw new Exception($"ResourceConfig not found");
                 }
                 return resourceConfigs.Find(config => config.id == id) as T;
+            case nameof(GameItemToActions):
+                Configs.TryGetValue("Configs/GameItemToActions", out var gameItemToActions);
+                if (gameItemToActions == null)
+                {
+                    throw new Exception($"GameItemToActions not found");
+                }
+                return gameItemToActions.Find(config => config.id == id) as T;
             default:
                 throw new Exception($"Unsupported config type: {typeof(T).Name}");
         }

@@ -4,28 +4,27 @@ namespace GameItem
 {
     public interface IGameItem
     {
-        string ItemName { get; }
     }
 
-    public abstract class MonoGameItem : MonoBehaviour, IGameItem
-    {
-        public abstract string ItemName { get; }
-    }
-
-    public abstract class GameItemBase<T> : MonoGameItem where T : ConfigBase
+    public abstract class GameItemBase : MonoBehaviour, IGameItem
     {
         protected SpriteRenderer _sr;
-        public T Config { get; protected set; }
+        public ConfigBase Config { get; protected set; }
 
         void Awake()
         {
             _sr = GetComponent<SpriteRenderer>();
         }
 
-        public virtual void Init(T config)
+        public virtual void Init(ConfigBase config)
         {
             Config = config;
             _sr.sprite = Resources.Load<Sprite>(config.icon);
+        }
+
+        public T ConvtertConfig<T>() where T : ConfigBase
+        {
+            return Config as T;
         }
     }
 }

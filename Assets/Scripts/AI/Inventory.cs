@@ -26,7 +26,7 @@ public class Inventory
     {
         if (Items.Count < MaxSize)
         {
-            PropItem propItem = new PropItem(item.Config, item.Count);
+            PropItem propItem = new PropItem(item.ConvtertConfig<PropConfig>(), item.Count);
             Items.Add(propItem);
             return true;
         }

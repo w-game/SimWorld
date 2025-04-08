@@ -79,6 +79,7 @@
     <Compile Include="Assets/TIles/DirtTile.cs" />
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionMenu.cs" />
+    <Compile Include="Assets/Scripts/GameItem/CropItem.cs" />
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />

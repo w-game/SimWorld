@@ -64,7 +64,7 @@ namespace AI
         {
             var cellPos = MapManager.I.WorldPosToCellPos(_targetPos);
             var plantObj = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f, 0));
-            var plant = plantObj.GetComponent<PlantItem<ResourceConfig>>();
+            var plant = plantObj.GetComponent<PlantItem>();
             MapManager.I.RegisterGameItem(plant);
         }
     }
@@ -74,9 +74,9 @@ namespace AI
         public override float ProgressSpeed { get; protected set; } = 50;
         public override int ProgressTimes { get; protected set; } = 1;
 
-        private MonoGameItem _plantItem;
+        private PlantItem _plantItem;
 
-        public RemovePlantAction(PlantItem<ResourceConfig> plantItem)
+        public RemovePlantAction(PlantItem plantItem)
         {
             if (plantItem is TreeItem)
             {
@@ -105,7 +105,7 @@ namespace AI
             Log.LogInfo("PlantActions", "PrecedingActions count: " + PrecedingActions.Count);
             if (_plantItem is TreeItem treeItem)
             {
-                foreach (var dropItem in treeItem.Config.dropItems)
+                foreach (var dropItem in treeItem.ConvtertConfig<ResourceConfig>().dropItems)
                 {
                     var propGo = GameManager.I.InstantiateObject("Prefabs/GameItems/PropItem", _plantItem.transform.position);
                     var propItem = propGo.AddComponent<PropGameItem>();

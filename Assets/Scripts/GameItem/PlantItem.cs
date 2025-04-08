@@ -1,23 +1,20 @@
+using UnityEngine;
+
 namespace GameItem
 {
-    public class PlantItem<T> : GameItemBase<T> where T : ConfigBase
+    public class PlantItem : GameItemBase
     {
-        public override string ItemName => "PlantItem";
         public int GrowthTime { get; set; } // 成长时间
         public int GrowthStage { get; set; } // 成长阶段
-        public int MaxGrowthStage { get; set; } // 最大成长阶段
         public int GrowthRate { get; set; } // 成长速度
 
-        void Start()
+        public override void Init(ConfigBase config)
         {
-            // 初始化植物的属性
-            GrowthTime = 10;
-            GrowthStage = 0;
-            MaxGrowthStage = 5;
-            GrowthRate = 1;
+            base.Init(config);
 
-            // 设置植物的初始状态
-            // SetState(GameItemState.Planted);
+            var resourceConfig = ConvtertConfig<ResourceConfig>();
+            GrowthStage = Random.Range(0, resourceConfig.stages.Length);
+            _sr.sprite = Resources.Load<Sprite>(resourceConfig.stages[GrowthStage]);
         }
     }
 }

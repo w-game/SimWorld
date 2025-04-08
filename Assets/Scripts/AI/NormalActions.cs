@@ -143,7 +143,7 @@ namespace AI
     // 将物品放到指定位置（例如将食物放到嘴边或桌上）
     public class PutItemToTarget : ActionBase
     {
-        public PutItemToTarget(PropGameItem item, MonoGameItem targetItem)
+        public PutItemToTarget(PropGameItem item, GameItemBase targetItem)
         {
             throw new System.NotImplementedException();
         }

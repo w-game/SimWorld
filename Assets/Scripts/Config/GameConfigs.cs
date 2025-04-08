@@ -58,3 +58,9 @@ public class DropItem
     public string id;
     public int count;
 }
+
+[Serializable]
+public class GameItemToActions : ConfigBase
+{
+    public string[] actions;
+}

@@ -12,8 +12,8 @@ public class GameManager : MonoBehaviour
 
     public Agent CurrentAgent { get; private set; }
     [SerializeField] private Agent player;
+    public GameObject selectSign;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
         I = this;
@@ -31,7 +31,7 @@ public class GameManager : MonoBehaviour
         ActionSystem.Update();
     }
 
-    internal GameObject InstantiateObject(string prefabPath, Vector3 pos, Transform parent = null)
+    internal GameObject InstantiateObject(string prefabPath, Vector2 pos, Transform parent = null)
     {
         var prefab = Resources.Load<GameObject>(prefabPath);
         var obj = Instantiate(prefab, pos, Quaternion.identity);

@@ -4,10 +4,10 @@ using GameItem;
 
 public class GameItemActions
 {
-    public static List<ActionBase> GetActionByItem(MonoGameItem item)
+    public static List<ActionBase> GetActionByItem(GameItemBase item)
     {
         var actions = new List<ActionBase>();
-        if (item is PlantItem<ResourceConfig> plantItem)
+        if (item is PlantItem plantItem)
         {
             switch (plantItem.GrowthStage)
             {

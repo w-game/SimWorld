@@ -20,21 +20,28 @@ public class ActionSystem
     {
         if (BuildingManager.I.CraftMode)
             return;
-            
+
         if (Input.GetMouseButtonDown(0))
         {
             if (EventSystem.current.IsPointerOverGameObject())
                 return;
 
+
             var mousePos = UIManager.I.MousePosToWorldPos();
 
-            Log.LogInfo("ActionSystem", "MousePos: " + MapManager.I.WorldPosToCellPos(mousePos));
+            var cellPos = MapManager.I.WorldPosToCellPos(mousePos);
+
+            Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
+            GameManager.I.selectSign.SetActive(true);
+            GameManager.I.selectSign.transform.position = new Vector3(cellPos.x, cellPos.y, 0) + new Vector3(0.5f, 0.5f, 0);
+
             var items = MapManager.I.GetItemsAtPos(mousePos);
 
             if (items.Count > 0)
             {
                 Log.LogInfo("ActionSystem", "Click on item");
                 var actions = ItemsToActions(items);
+                GameManager.I.selectSign.transform.position = items[0].transform.position;
                 // TODO: 叠加手上道具行为
 
                 if (actions.Count > 0)
@@ -69,14 +76,55 @@ public class ActionSystem
         }
     }
 
-    private List<ActionBase> ItemsToActions(List<MonoGameItem> items)
+    private List<ActionBase> ItemsToActions(List<GameItemBase> items)
     {
         List<ActionBase> actions = new List<ActionBase>();
         foreach (var item in items)
         {
-            actions.AddRange(GameItemActions.GetActionByItem(item));
+            switch (item)
+            {
+                case PropGameItem propGameItem:
+                    if (propGameItem is FoodItem foodItem)
+                    {
+                        actions.Add(new EatAction(foodItem));
+                    }
+
+                    actions.Add(new PutIntoBag(propGameItem));
+                    actions.Add(new CheckMoveToTarget(propGameItem.transform.position));
+                    break;
+                case PlantItem plantItem:
+                    if (plantItem is TreeItem treeItem)
+                    {
+                    }
+                    else
+                    {
+                        actions.Add(new CheckMoveToTarget(plantItem.transform.position));
+                    }
+                    actions.Add(new RemovePlantAction(plantItem));
+                    break;
+                default:
+                    break;
+            }
+
+            var config = GameManager.I.ConfigReader.GetConfig<GameItemToActions>(item.Config.id);
+            if (config == null)
+            {
+                continue;
+            }
+            foreach (var action in config.actions)
+            {
+                var actionType = Type.GetType($"AI.{action}Action");
+                if (actionType != null)
+                {
+                    var actionInstance = Activator.CreateInstance(actionType, new object[] { item }) as ActionBase;
+                    if (actionInstance != null)
+                    {
+                        actions.Add(actionInstance);
+                    }
+                }
+            }
         }
-        
+
         return actions;
     }
 

@@ -4,10 +4,8 @@ using UnityEngine;
 
 namespace GameItem
 {
-    public class TableItem : GameItemBase<BuildingConfig>
+    public class TableItem : GameItemBase
     {
-        public override string ItemName => "木桌";
-
         public List<ChairItem> Chairs { get; } = new List<ChairItem>();
 
         private void Start()

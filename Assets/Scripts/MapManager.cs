@@ -30,7 +30,7 @@ public class MapManager : MonoSingleton<MapManager>
     public TileBase tile;
     public List<TileBase> farmTiles;
     private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
-    private Dictionary<Vector2Int, List<MonoGameItem>> _gameItems = new Dictionary<Vector2Int, List<MonoGameItem>>();
+    private Dictionary<Vector2Int, List<GameItemBase>> _gameItems = new Dictionary<Vector2Int, List<GameItemBase>>();
 
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
@@ -51,7 +51,7 @@ public class MapManager : MonoSingleton<MapManager>
 
         var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", player.position);
         var foodItem = foodGo.GetComponent<FoodItem>();
-        foodItem.Init(new PropConfig("PROP_FOOD_APPLE", "Food", 1));
+        foodItem.Init(new PropConfig("PROP_FOOD_APPLE", "Food", 1), 1);
         RegisterGameItem(foodItem);
     }
 
@@ -132,13 +132,18 @@ public class MapManager : MonoSingleton<MapManager>
                 switch (type)
                 {
                     case MapItemType.Tree:
-                        var treeGo = GameManager.I.InstantiateObject("Prefabs/GameItems/TreeItem", new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                        var treeGo = GameManager.I.InstantiateObject("Prefabs/GameItems/TreeItem", blockWorldPos + Vector2.one * UnityEngine.Random.Range(0f, 1f));
                         var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE");
                         var treeItem = treeGo.AddComponent<TreeItem>();
                         treeItem.Init(config);
                         RegisterGameItem(treeItem);
                         break;
                     case MapItemType.Grass:
+                        var grassGo = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", blockWorldPos + Vector2.one * UnityEngine.Random.Range(0f, 1f));
+                        var grassConfig = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS");
+                        var grassItem = grassGo.AddComponent<PlantItem>();
+                        grassItem.Init(grassConfig);
+                        RegisterGameItem(grassItem);
                         break;
                     case MapItemType.Rock:
 
@@ -255,12 +260,12 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RegisterGameItem(MonoGameItem gameItem)
+    internal void RegisterGameItem(GameItemBase gameItem)
     {
         var cellPos = WorldPosToCellPos(gameItem.transform.position);
         if (!_gameItems.ContainsKey(cellPos))
         {
-            _gameItems.Add(cellPos, new List<MonoGameItem>() { gameItem });
+            _gameItems.Add(cellPos, new List<GameItemBase>() { gameItem });
         }
         else
         {
@@ -268,7 +273,7 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RemoveGameItem(MonoGameItem gameItem)
+    internal void RemoveGameItem(GameItemBase gameItem)
     {
         var cellPos = WorldPosToCellPos(gameItem.transform.position);
         if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
@@ -278,7 +283,7 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RemoveGameItemOnMap(MonoGameItem gameItem)
+    internal void RemoveGameItemOnMap(GameItemBase gameItem)
     {
         var cellPos = WorldPosToCellPos(gameItem.transform.position);
         if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
@@ -287,10 +292,10 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal List<MonoGameItem> GetItemsAtPos(Vector3 pos)
+    internal List<GameItemBase> GetItemsAtPos(Vector3 pos)
     {
         var cellPos = WorldPosToCellPos(pos);
-        List<MonoGameItem> items = new List<MonoGameItem>();
+        List<GameItemBase> items = new List<GameItemBase>();
 
         if (_gameItems.ContainsKey(cellPos))
         {
