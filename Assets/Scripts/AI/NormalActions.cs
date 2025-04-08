@@ -31,7 +31,7 @@ namespace AI
                 }
             }
         }
-        
+
         public static event Action<float> OnProgress;
         public event Action<IAction> OnCompleted;
 
@@ -88,7 +88,6 @@ namespace AI
                 else
                 {
                     DoExecute(state);
-                    Done = true;
                 }
             }
         }
@@ -113,7 +112,7 @@ namespace AI
         {
             TargetPos = targetPos;
         }
-        
+
         public override float CalculateUtility(AgentState state)
         {
             // 此动作仅作为前置动作使用，不参与决策
@@ -144,11 +143,11 @@ namespace AI
     // 将物品放到指定位置（例如将食物放到嘴边或桌上）
     public class PutItemToTarget : ActionBase
     {
-        public PutItemToTarget(GameItemBase item, GameItemBase targetItem)
+        public PutItemToTarget(PropGameItem item, MonoGameItem targetItem)
         {
             throw new System.NotImplementedException();
         }
-        
+
         public override string ActionName => "将物品放置到目标点";
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
@@ -179,9 +178,9 @@ namespace AI
         public override float ProgressSpeed { get; protected set; } = 50;
         public override int ProgressTimes { get; protected set; } = 1;
         private Agent _agent;
-        private GameItemBase _item;
+        private PropGameItem _item;
 
-        public TakeItemInHand(Agent agent, GameItemBase item)
+        public TakeItemInHand(Agent agent, PropGameItem item)
         {
             _agent = agent;
             _item = item;
@@ -239,7 +238,7 @@ namespace AI
         public override void OnRegister(AgentState state)
         {
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
-            GameItemBase tableItem = state.Agent.FindNearestTableItem();
+            TableItem tableItem = state.Agent.FindNearestTableItem();
 
             var takeItem = new TakeItemInHand(state.Agent, _foodItem);
             takeItem.OnRegister(state);

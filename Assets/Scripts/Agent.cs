@@ -130,18 +130,18 @@ namespace Citizens
             // throw new NotImplementedException();
         }
         
-        public GameItemBase FindNearestWC()
+        public MonoGameItem FindNearestWC()
         {
             throw new NotImplementedException();
         }
         
         // 根据兴趣爱好寻找最近可交互的娱乐物品
-        public GameItemBase FindByHobby()
+        public MonoGameItem FindByHobby()
         {
             throw new NotImplementedException();
         }
 
-        public void TakeItemInHand(GameItemBase item)
+        public void TakeItemInHand(MonoGameItem item)
         {
             item.transform.SetParent(handItem);
             item.transform.localPosition = Vector3.zero;

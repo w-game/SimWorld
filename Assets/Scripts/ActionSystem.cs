@@ -27,6 +27,8 @@ public class ActionSystem
                 return;
 
             var mousePos = UIManager.I.MousePosToWorldPos();
+
+            Log.LogInfo("ActionSystem", "MousePos: " + MapManager.I.WorldPosToCellPos(mousePos));
             var items = MapManager.I.GetItemsAtPos(mousePos);
 
             if (items.Count > 0)
@@ -67,7 +69,7 @@ public class ActionSystem
         }
     }
 
-    private List<ActionBase> ItemsToActions(List<GameItemBase> items)
+    private List<ActionBase> ItemsToActions(List<MonoGameItem> items)
     {
         List<ActionBase> actions = new List<ActionBase>();
         foreach (var item in items)

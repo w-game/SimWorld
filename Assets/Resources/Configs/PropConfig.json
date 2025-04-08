@@ -8,6 +8,23 @@
             "icon": "wall_icon.png",
             "prefab": "Prefab/Wall",
             "maxStackSize": 1
+        },
+        {
+            "id": "PROP_RESOURCE_WOOD",
+            "name": "Wood",
+            "description": "A piece of wood.",
+            "type": "Resource",
+            "icon": "Textures/Wood",
+            "maxStackSize": 5
+        },
+        {
+            "id": "PROP_FOOD_CARROT",
+            "name": "Carrot",
+            "description": "A fresh carrot.",
+            "type": "Wall",
+            "icon": "wall_icon.png",
+            "prefab": "Prefab/Wall",
+            "maxStackSize": 1
         }
     ]
 }

@@ -30,7 +30,7 @@ public class MapManager : MonoSingleton<MapManager>
     public TileBase tile;
     public List<TileBase> farmTiles;
     private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
-    private Dictionary<Vector2Int, List<GameItemBase>> _gameItems = new Dictionary<Vector2Int, List<GameItemBase>>();
+    private Dictionary<Vector2Int, List<MonoGameItem>> _gameItems = new Dictionary<Vector2Int, List<MonoGameItem>>();
 
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
@@ -42,10 +42,7 @@ public class MapManager : MonoSingleton<MapManager>
         {
             for (int j = 0; j < 16; j++)
             {
-                var chunk = CartonMap.GetChunk(new Vector2Int(i, j), 0);
-                chunk.CalcBlocks();
-                VisualChunk(chunk);
-                _chunkActive.Add(new Vector2Int(i, j), chunk);
+                GenerateChunk(new Vector2Int(i, j));
             }
         }
 
@@ -54,14 +51,30 @@ public class MapManager : MonoSingleton<MapManager>
 
         var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", player.position);
         var foodItem = foodGo.GetComponent<FoodItem>();
-        foodItem.Init(new PropItem(new PropConfig("PROP_FOOD_APPLE", "Food", 1)));
-        RegisterGameItem(foodItem.transform.position, foodItem);
+        foodItem.Init(new PropConfig("PROP_FOOD_APPLE", "Food", 1));
+        RegisterGameItem(foodItem);
     }
 
     void Update()
     {
         UpdateChunk();
     }
+
+    private void GenerateChunk(Vector2Int pos)
+    {
+        var chunk = CartonMap.GetChunk(pos, 0);
+        if (chunk != null)
+        {
+            chunk.CalcBlocks();
+            chunk.CalcMapItems();
+            VisualChunk(chunk);
+            if (!_chunkActive.ContainsKey(pos))
+            {
+                _chunkActive.Add(pos, chunk);
+            }
+        }
+    }
+
 
     private void UpdateChunk()
     {
@@ -80,16 +93,7 @@ public class MapManager : MonoSingleton<MapManager>
                     continue;
                 }
 
-                var chunk = CartonMap.GetChunk(pos, 0);
-                if (chunk != null)
-                {
-                    chunk.CalcBlocks();
-                    VisualChunk(chunk);
-                    if (!_chunkActive.ContainsKey(pos))
-                    {
-                        _chunkActive.Add(pos, chunk);
-                    }
-                }
+                GenerateChunk(pos);
             }
         }
 
@@ -115,6 +119,32 @@ public class MapManager : MonoSingleton<MapManager>
                 var pos = new Vector2Int(i, j);
                 var blockWorldPos = pos + chunk.WorldPos;
                 SetBlockType(blockWorldPos, chunk.Blocks[i, j]);
+            }
+        }
+
+        for (int i = 0; i < chunk.Size; i++)
+        {
+            for (int j = 0; j < chunk.Size; j++)
+            {
+                var pos = new Vector2Int(i, j);
+                var blockWorldPos = pos + chunk.WorldPos;
+                var type = chunk.MapItems[i, j];
+                switch (type)
+                {
+                    case MapItemType.Tree:
+                        var treeGo = GameManager.I.InstantiateObject("Prefabs/GameItems/TreeItem", new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                        var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE");
+                        var treeItem = treeGo.AddComponent<TreeItem>();
+                        treeItem.Init(config);
+                        RegisterGameItem(treeItem);
+                        break;
+                    case MapItemType.Grass:
+                        break;
+                    case MapItemType.Rock:
+
+                    default:
+                        break;
+                }
             }
         }
     }
@@ -225,12 +255,12 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RegisterGameItem(Vector3 pos, GameItemBase gameItem)
+    internal void RegisterGameItem(MonoGameItem gameItem)
     {
-        var cellPos = WorldPosToCellPos(pos);
+        var cellPos = WorldPosToCellPos(gameItem.transform.position);
         if (!_gameItems.ContainsKey(cellPos))
         {
-            _gameItems.Add(cellPos, new List<GameItemBase>() { gameItem });
+            _gameItems.Add(cellPos, new List<MonoGameItem>() { gameItem });
         }
         else
         {
@@ -238,7 +268,7 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RemoveGameItem(GameItemBase gameItem)
+    internal void RemoveGameItem(MonoGameItem gameItem)
     {
         var cellPos = WorldPosToCellPos(gameItem.transform.position);
         if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
@@ -248,7 +278,7 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal void RemoveGameItemOnMap(GameItemBase gameItem)
+    internal void RemoveGameItemOnMap(MonoGameItem gameItem)
     {
         var cellPos = WorldPosToCellPos(gameItem.transform.position);
         if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
@@ -257,10 +287,10 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    internal List<GameItemBase> GetItemsAtPos(Vector3 pos)
+    internal List<MonoGameItem> GetItemsAtPos(Vector3 pos)
     {
         var cellPos = WorldPosToCellPos(pos);
-        List<GameItemBase> items = new List<GameItemBase>();
+        List<MonoGameItem> items = new List<MonoGameItem>();
 
         if (_gameItems.ContainsKey(cellPos))
         {

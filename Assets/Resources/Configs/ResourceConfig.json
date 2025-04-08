@@ -1,0 +1,41 @@
+{
+    "items": [
+        {
+            "id": "PLANT_TREE",
+            "name": "Tree",
+            "description": "A tall tree.",
+            "type": "Plant",
+            "icon": "Textures/Tree",
+            "prefab": "Prefabs/PlantItem",
+            "stages": [
+                "Textures/Tree"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_RESOURCE_WOOD",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "PLANT_GRASS",
+            "name": "Tree",
+            "description": "A tall tree.",
+            "type": "Plant",
+            "icon": "Textures/Grass_0",
+            "prefab": "Prefabs/PlantItem",
+            "stages": [
+                "Textures/Grass_0",
+                "Textures/Grass_1",
+                "Textures/Grass_2",
+                "Textures/Grass_3"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_RESOURCE_GRASS",
+                    "count": 1
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "item": [
+        {
+            "id": 1,
+            "name": "PLANT_TREE",
+            "actions": [
+                "Fell"
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Shield",
+            "actions": [
+                {
+                    "action": "Block",
+                    "damage": 2
+                }
+            ]
+        }
+    ]
+}

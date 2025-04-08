@@ -1,6 +1,6 @@
 namespace GameItem
 {
-    public class PlantItem : GameItemBase
+    public class PlantItem<T> : GameItemBase<T> where T : ConfigBase
     {
         public override string ItemName => "PlantItem";
         public int GrowthTime { get; set; } // 成长时间
@@ -18,13 +18,6 @@ namespace GameItem
 
             // 设置植物的初始状态
             // SetState(GameItemState.Planted);
-        }
-
-        public void Init(int growthTime, int maxGrowthStage, int growthRate)
-        {
-            GrowthTime = growthTime;
-            MaxGrowthStage = maxGrowthStage;
-            GrowthRate = growthRate;
         }
     }
 }

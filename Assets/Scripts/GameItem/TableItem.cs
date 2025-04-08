@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GameItem
 {
-    public class TableItem : GameItemBase
+    public class TableItem : GameItemBase<BuildingConfig>
     {
         public override string ItemName => "木桌";
 

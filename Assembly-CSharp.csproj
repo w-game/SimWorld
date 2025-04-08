@@ -80,6 +80,7 @@
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionMenu.cs" />
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
+    <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
     <Compile Include="Assets/Scripts/UI/Views/MainView.cs" />
     <Compile Include="Assets/Scripts/Util.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Assets/Scripts/GameItem/GameItem.cs" />
     <Compile Include="Assets/TIles/BuildingTile.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />
+    <Compile Include="Assets/Scripts/GameItem/TreeItem.cs" />
     <Compile Include="Assets/Scripts/AI/IAction.cs" />
     <Compile Include="Assets/Scripts/UI/MainView.cs" />
     <Compile Include="Assets/Scripts/Map/Chunk.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Assets/Scripts/GameManager.cs" />
     <Compile Include="Assets/Scripts/MapManager.cs" />
     <Compile Include="Assets/Scripts/Family.cs" />
+    <Compile Include="Assets/Scripts/Util/Singleton.cs" />
     <Compile Include="Assets/Scripts/GameItem/FoodItem.cs" />
     <Compile Include="Assets/Scripts/Util/Log.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/BuildingElement.cs" />

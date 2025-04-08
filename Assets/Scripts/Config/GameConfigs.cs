@@ -44,3 +44,17 @@ public class PropConfig : ConfigBase
         this.prefab = $"Prefabs/Props/{id}";
     }
 }
+
+[Serializable]
+public class ResourceConfig : ConfigBase
+{
+    public string[] stages;
+    public DropItem[] dropItems;
+}
+
+[Serializable]
+public class DropItem
+{
+    public string id;
+    public int count;
+}

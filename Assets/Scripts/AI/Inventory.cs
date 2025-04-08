@@ -5,10 +5,10 @@ public class PropItem
     public PropConfig Config { get; private set; }
     public int Quantity { get; private set; }
 
-    public PropItem(PropConfig config)
+    public PropItem(PropConfig config, int quantity = 1)
     {
         Config = config;
-        Quantity = 1; // Default quantity is 1 when created
+        Quantity = quantity;
     }
 }
 
@@ -22,11 +22,12 @@ public class Inventory
         MaxSize = maxSize;
     }
 
-    public bool AddItem(PropItem item)
+    public bool AddItem(PropGameItem item)
     {
         if (Items.Count < MaxSize)
         {
-            Items.Add(item);
+            PropItem propItem = new PropItem(item.Config, item.Count);
+            Items.Add(propItem);
             return true;
         }
 

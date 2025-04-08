@@ -1,9 +1,17 @@
-
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Map
 {
+    public enum MapItemType
+    {
+        None,
+        Tree,
+        Stone,
+        Iron,
+        Grass,
+        Rock
+    }
     public class Chunk
     {
         public const int CityLayer = 3;
@@ -16,12 +24,8 @@ namespace Map
         public City City { get; private set; }
         public int Size { get; private set; }
         public int Layer { get; private set; }
-        public Chunk Left => Map.GetChunk(new Vector2Int(Pos.x - 1, Pos.y), Layer);
-        public Chunk Right => Map.GetChunk(new Vector2Int(Pos.x + 1, Pos.y), Layer);
-        public Chunk Up => Map.GetChunk(new Vector2Int(Pos.x, Pos.y + 1), Layer);
-        public Chunk Down => Map.GetChunk(new Vector2Int(Pos.x, Pos.y - 1), Layer);
-
         public BlockType Type { get; private set; }
+        public MapItemType[,] MapItems { get; private set; }
 
         private System.Random _chunkRand;
 
@@ -32,6 +36,7 @@ namespace Map
             Map = map;
             Size = (int)Mathf.Pow(2, layer) * CartonMap.NORMAL_CHUNK_SIZE;
             Blocks = new BlockType[Size, Size];
+            MapItems = new MapItemType[Size, Size];
 
             _chunkRand = new System.Random(Map.seed + layer * 1000 + pos.x * 100 + pos.y);
 
@@ -239,6 +244,83 @@ namespace Map
                 }
             }
         }
-    }
 
+        public void CalcMapItems()
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    var pos = new Vector2Int(i, j);
+                    var blockWorldPos = pos + WorldPos;
+
+                    float scale = 0.9f;
+                    float frequency = 20f;
+                    float noiseValue = frequency * Mathf.PerlinNoise(blockWorldPos.x * scale, blockWorldPos.y * scale);
+
+                    if (Blocks[i, j] == BlockType.Plain)
+                    {
+                        if (noiseValue > 0.9f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Tree;
+                        }
+                        else if (noiseValue > 0.8f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Stone;
+                        }
+                        else if (noiseValue > 0.6f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Grass;
+                        }
+                        else if (noiseValue > 0.4f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Rock;
+                        }
+                        else
+                        {
+                            MapItems[i, j] = MapItemType.None;
+                        }
+                    }
+                    else if (Blocks[i, j] == BlockType.Forest)
+                    {
+                        if (noiseValue > 0.7f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Tree;
+                        }
+                        else if (noiseValue > 0.3f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Stone;
+                        }
+                        else if (noiseValue > 0.1f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Grass;
+                        }
+                        else
+                        {
+                            MapItems[i, j] = MapItemType.None;
+                        }
+                    }
+                    else if (Blocks[i, j] == BlockType.Mountain)
+                    {
+                        if (noiseValue > 0.9f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Iron;
+                        }
+                        else if (noiseValue > 0.5f * frequency)
+                        {
+                            MapItems[i, j] = MapItemType.Stone;
+                        }
+                        else
+                        {
+                            MapItems[i, j] = MapItemType.None;
+                        }
+                    }
+                    else
+                    {
+                        MapItems[i, j] = MapItemType.None;
+                    }
+                }
+            }
+        }
+    }
 }

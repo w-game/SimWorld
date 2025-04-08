@@ -4,12 +4,11 @@ using GameItem;
 
 public class GameItemActions
 {
-    public static List<ActionBase> GetActionByItem(GameItemBase item)
+    public static List<ActionBase> GetActionByItem(MonoGameItem item)
     {
         var actions = new List<ActionBase>();
-        if (item.PropItem.Config.id.Contains("PLANT"))
+        if (item is PlantItem<ResourceConfig> plantItem)
         {
-            var plantItem = item as PlantItem;
             switch (plantItem.GrowthStage)
             {
                 case 0:
@@ -20,18 +19,14 @@ public class GameItemActions
                     break;
             }
         }
-        else if (item.PropItem.Config.id.Contains("PROP"))
+        else if (item is PropGameItem propItem)
         {
             if (item is FoodItem foodItem)
             {
                 actions.Add(new EatAction(foodItem));
             }
-            // else if (item is ToolItem toolItem)
-            // {
-            //     actions.Add(new UseToolAction(toolItem));
-            // }
 
-            actions.Add(new PutIntoBag(item));
+            actions.Add(new PutIntoBag(propItem));
         }
 
         return actions;
