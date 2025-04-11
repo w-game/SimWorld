@@ -50,7 +50,7 @@ namespace Citizens
         private bool isMoving = false;
         public float MoveSpeed { get; private set; } = 10f;
 
-        private AIController _aiController;
+        public FamilyMember Ciziten { get; private set; }
         public AgentState State { get; private set; }
         [SerializeField] private Transform handItem;
         public Inventory Bag { get; private set; }
@@ -59,10 +59,6 @@ namespace Citizens
         {
             _rb = GetComponent<Rigidbody2D>();
             targetPosition = _rb.position;
-            State = new AgentState(this);
-            _aiController = new AIController(this);
-
-            Bag = new Inventory(16);
         }
 
         private void FixedUpdate()
@@ -84,13 +80,13 @@ namespace Citizens
         private void Update()
         {
             State.UpdateState(Time.deltaTime);
-            _aiController.Update();
         }
 
-        public void RegisterAction(ActionBase action)
+        public void Init(FamilyMember ciziten)
         {
-            // 添加动作到行为树
-            _aiController.RegisterAction(action, true);
+            Ciziten = ciziten;
+            State = new AgentState(this);
+            Bag = new Inventory(16);
         }
 
         // 设置目标点并开始移动

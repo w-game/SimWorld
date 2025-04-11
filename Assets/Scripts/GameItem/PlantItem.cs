@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GameItem
 {
@@ -8,6 +9,8 @@ namespace GameItem
         public int GrowthStage { get; set; } // 成长阶段
         public int GrowthRate { get; set; } // 成长速度
 
+        public event UnityAction<PlantItem> OnEventInvoked;
+
         public override void Init(ConfigBase config)
         {
             base.Init(config);
@@ -15,6 +18,11 @@ namespace GameItem
             var resourceConfig = ConvtertConfig<ResourceConfig>();
             GrowthStage = Random.Range(0, resourceConfig.stages.Length);
             _sr.sprite = Resources.Load<Sprite>(resourceConfig.stages[GrowthStage]);
+        }
+
+        void Update()
+        {
+            
         }
     }
 }

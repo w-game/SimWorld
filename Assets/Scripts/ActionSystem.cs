@@ -1,153 +1,164 @@
 
 using System;
 using System.Collections.Generic;
-using AI;
+using Citizens;
 using GameItem;
 using Map;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ActionSystem
+namespace AI
 {
-    public event Action<List<ActionBase>, Vector3> OnMouseClick;
-
-    internal void Init()
+    public interface IActionDetector
     {
-
+        List<IAction> DetectActions();
     }
 
-    internal void Update()
+    public class ActionSystem
     {
-        if (BuildingManager.I.CraftMode)
-            return;
+        public event Action<List<ActionBase>, Vector3> OnMouseClick;
 
-        if (Input.GetMouseButtonDown(0))
+        internal void Init()
         {
-            if (EventSystem.current.IsPointerOverGameObject())
+
+        }
+
+        public AIController CreateAIController(FamilyMember member)
+        {
+            return new AIController();
+        }
+
+        internal void Update()
+        {
+            if (BuildingManager.I.CraftMode)
                 return;
 
-
             var mousePos = UIManager.I.MousePosToWorldPos();
-
             var cellPos = MapManager.I.WorldPosToCellPos(mousePos);
-
-            Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
-            GameManager.I.selectSign.SetActive(true);
             GameManager.I.selectSign.transform.position = new Vector3(cellPos.x, cellPos.y, 0) + new Vector3(0.5f, 0.5f, 0);
 
-            var items = MapManager.I.GetItemsAtPos(mousePos);
-
-            if (items.Count > 0)
+            if (Input.GetMouseButtonDown(0))
             {
-                Log.LogInfo("ActionSystem", "Click on item");
-                var actions = ItemsToActions(items);
-                GameManager.I.selectSign.transform.position = items[0].transform.position;
-                // TODO: 叠加手上道具行为
+                if (EventSystem.current.IsPointerOverGameObject())
+                    return;
 
-                if (actions.Count > 0)
+
+                Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
+                GameManager.I.selectSign.SetActive(true);
+
+                var items = MapManager.I.GetItemsAtPos(mousePos);
+
+                if (items.Count > 0)
                 {
-                    OnMouseClick?.Invoke(actions, Input.mousePosition);
-                    Debug.Log("Mouse Clicked");
-                }
-            }
-            else
-            {
-                Log.LogInfo("ActionSystem", "Click on map");
-                var blockType = MapManager.I.CheckBlockType(mousePos);
-                var buildingType = MapManager.I.CheckBuildingType(mousePos);
+                    Log.LogInfo("ActionSystem", "Click on item");
+                    var actions = ItemsToActions(items);
+                    // TODO: 叠加手上道具行为
 
-                var actions = BuildingToActions(mousePos, buildingType);
-                // TODO: 叠加手上道具行为
-
-                switch (blockType)
-                {
-                    case BlockType.Plain:
-                        actions.Add(new CheckMoveToTarget(mousePos));
-                        actions.Add(new HoeAction(mousePos));
-                        actions.Add(new StartBuildingCraftAction());
-
+                    if (actions.Count > 0)
+                    {
                         OnMouseClick?.Invoke(actions, Input.mousePosition);
-                        break;
-                    case BlockType.Ocean:
-                        break;
+                        Debug.Log("Mouse Clicked");
+                    }
                 }
-
-            }
-        }
-    }
-
-    private List<ActionBase> ItemsToActions(List<GameItemBase> items)
-    {
-        List<ActionBase> actions = new List<ActionBase>();
-        foreach (var item in items)
-        {
-            switch (item)
-            {
-                case PropGameItem propGameItem:
-                    if (propGameItem is FoodItem foodItem)
-                    {
-                        actions.Add(new EatAction(foodItem));
-                    }
-
-                    actions.Add(new PutIntoBag(propGameItem));
-                    actions.Add(new CheckMoveToTarget(propGameItem.transform.position));
-                    break;
-                case PlantItem plantItem:
-                    if (plantItem is TreeItem treeItem)
-                    {
-                    }
-                    else
-                    {
-                        actions.Add(new CheckMoveToTarget(plantItem.transform.position));
-                    }
-                    actions.Add(new RemovePlantAction(plantItem));
-                    break;
-                default:
-                    break;
-            }
-
-            var config = GameManager.I.ConfigReader.GetConfig<GameItemToActions>(item.Config.id);
-            if (config == null)
-            {
-                continue;
-            }
-            foreach (var action in config.actions)
-            {
-                var actionType = Type.GetType($"AI.{action}Action");
-                if (actionType != null)
+                else
                 {
-                    var actionInstance = Activator.CreateInstance(actionType, new object[] { item }) as ActionBase;
-                    if (actionInstance != null)
+                    Log.LogInfo("ActionSystem", "Click on map");
+                    var blockType = MapManager.I.CheckBlockType(mousePos);
+                    var buildingType = MapManager.I.CheckBuildingType(mousePos);
+
+                    var actions = BuildingToActions(mousePos, buildingType);
+                    // TODO: 叠加手上道具行为
+
+                    switch (blockType)
                     {
-                        actions.Add(actionInstance);
+                        case BlockType.Plain:
+                            actions.Add(new CheckMoveToTarget(mousePos));
+                            actions.Add(new HoeAction(mousePos));
+                            actions.Add(new StartBuildingCraftAction());
+
+                            OnMouseClick?.Invoke(actions, Input.mousePosition);
+                            break;
+                        case BlockType.Ocean:
+                            break;
                     }
+
                 }
             }
         }
 
-        return actions;
-    }
-
-    private List<ActionBase> BuildingToActions(Vector3 pos, BuildingType buildingType)
-    {
-        List<ActionBase> actions = new List<ActionBase>();
-        switch (buildingType)
+        private List<ActionBase> ItemsToActions(List<GameItemBase> items)
         {
-            case BuildingType.House:
-                actions.Add(new CheckMoveToTarget(Vector3.zero));
-                break;
-            case BuildingType.Farm:
-                actions.Add(new PlantAction(pos, 0));
-                break;
-            case BuildingType.None:
-                break;
+            List<ActionBase> actions = new List<ActionBase>();
+            foreach (var item in items)
+            {
+                switch (item)
+                {
+                    case PropGameItem propGameItem:
+                        if (propGameItem is FoodItem foodItem)
+                        {
+                            actions.Add(new EatAction(foodItem));
+                        }
+
+                        actions.Add(new PutIntoBag(propGameItem));
+                        actions.Add(new CheckMoveToTarget(propGameItem.transform.position));
+                        break;
+                    case PlantItem plantItem:
+                        if (plantItem is TreeItem treeItem)
+                        {
+                        }
+                        else
+                        {
+                            actions.Add(new CheckMoveToTarget(plantItem.transform.position));
+                        }
+                        actions.Add(new RemovePlantAction(plantItem));
+                        break;
+                    default:
+                        break;
+                }
+
+                var config = GameManager.I.ConfigReader.GetConfig<GameItemToActions>(item.Config.id);
+                if (config == null)
+                {
+                    continue;
+                }
+                foreach (var action in config.actions)
+                {
+                    var actionType = Type.GetType($"AI.{action}Action");
+                    if (actionType != null)
+                    {
+                        var actionInstance = Activator.CreateInstance(actionType, new object[] { item }) as ActionBase;
+                        if (actionInstance != null)
+                        {
+                            actions.Add(actionInstance);
+                        }
+                    }
+                }
+            }
+
+            return actions;
         }
 
-        return actions;
-    }
+        private List<ActionBase> BuildingToActions(Vector3 pos, BuildingType buildingType)
+        {
+            List<ActionBase> actions = new List<ActionBase>();
+            switch (buildingType)
+            {
+                case BuildingType.House:
+                    actions.Add(new CheckMoveToTarget(Vector3.zero));
+                    break;
+                case BuildingType.Farm:
+                    actions.Add(new PlantAction(pos, "PROP_SEED_"));
+                    break;
+                case BuildingType.None:
+                    break;
+            }
 
-    internal void RegisterAction(ActionBase action)
-    {
-        GameManager.I.CurrentAgent.RegisterAction(action);
+            return actions;
+        }
+
+        internal void RegisterAction(ActionBase action)
+        {
+            GameManager.I.CurrentAgent.Ciziten.Brain.RegisterAction(action, true);
+        }
     }
 }

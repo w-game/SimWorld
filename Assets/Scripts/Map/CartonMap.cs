@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 namespace Map
 {
@@ -17,45 +15,6 @@ namespace Map
         Forest,
         Mountain,
         Desert
-    }
-
-    public class House
-    {
-        public List<Vector2Int> Blocks { get; private set; } // 房屋的所有块
-        public Vector2Int Size { get; private set; } // 房屋大小，影响房屋半径
-        public City City { get; private set; } // 房屋所在的城市
-        public bool IsAvailable { get; set; } // 房屋是否可用
-
-        public House(List<Vector2Int> blocks, Vector2Int size, City city)
-        {
-            Blocks = blocks; // 转换为全局坐标
-            Size = size;
-            City = city;
-        }
-
-        public void MergeWithBlocks(List<Vector2Int> newBlocks)
-        {
-            foreach (var block in newBlocks)
-            {
-                if (!Blocks.Contains(block))
-                {
-                    Blocks.Add(block);
-                }
-            }
-
-            // Recalculate Size as the bounding box of all blocks
-            int minX = int.MaxValue, minY = int.MaxValue;
-            int maxX = int.MinValue, maxY = int.MinValue;
-            foreach (var pos in Blocks)
-            {
-                if (pos.x < minX) minX = pos.x;
-                if (pos.y < minY) minY = pos.y;
-                if (pos.x > maxX) maxX = pos.x;
-                if (pos.y > maxY) maxY = pos.y;
-            }
-
-            Size = new Vector2Int(maxX - minX + 1, maxY - minY + 1);
-        }
     }
 
     public class CartonMap
@@ -133,6 +92,10 @@ namespace Map
             chunk.CalcChunk();
 
             chunks[layer].Add(pos, chunk);
+            if (layer == Chunk.CityLayer && chunk.City != null)
+            {
+                GameManager.I.CitizenManager.GenerateNPCs(chunk.City);
+            }
 
             return chunk;
         }

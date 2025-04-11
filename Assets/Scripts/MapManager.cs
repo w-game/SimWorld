@@ -20,7 +20,6 @@ public enum BuildingType
 
 public class MapManager : MonoSingleton<MapManager>
 {
-    public Transform player;          // 玩家对象
     public CartonMap CartonMap { get; private set; } // 地图对象
 
     public int seed = 123120;             // 随机种子
@@ -33,6 +32,8 @@ public class MapManager : MonoSingleton<MapManager>
     private Dictionary<Vector2Int, List<GameItemBase>> _gameItems = new Dictionary<Vector2Int, List<GameItemBase>>();
 
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
+
+    private Transform _player;
 
     private void Start()
     {
@@ -47,9 +48,10 @@ public class MapManager : MonoSingleton<MapManager>
         }
 
         var city = CartonMap.FindNearestCity(new Vector2Int(0, 0));
-        player.transform.position = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
+        _player = GameManager.I.CurrentAgent.transform;
+        _player.position = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
 
-        var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", player.position);
+        var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", _player.position);
         var foodItem = foodGo.GetComponent<FoodItem>();
         foodItem.Init(new PropConfig("PROP_FOOD_APPLE", "Food", 1), 1);
         RegisterGameItem(foodItem);
@@ -75,12 +77,11 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-
     private void UpdateChunk()
     {
         var playerChunkPos = new Vector2Int(
-            Mathf.FloorToInt(player.position.x / CartonMap.NORMAL_CHUNK_SIZE),
-            Mathf.FloorToInt(player.position.y / CartonMap.NORMAL_CHUNK_SIZE)
+            Mathf.FloorToInt(_player.position.x / CartonMap.NORMAL_CHUNK_SIZE),
+            Mathf.FloorToInt(_player.position.y / CartonMap.NORMAL_CHUNK_SIZE)
         );
 
         for (int x = 0; x < 6; x++)
@@ -132,14 +133,14 @@ public class MapManager : MonoSingleton<MapManager>
                 switch (type)
                 {
                     case MapItemType.Tree:
-                        var treeGo = GameManager.I.InstantiateObject("Prefabs/GameItems/TreeItem", blockWorldPos + Vector2.one * UnityEngine.Random.Range(0f, 1f));
+                        var treeGo = GameManager.I.InstantiateObject("Prefabs/GameItems/TreeItem", new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE");
                         var treeItem = treeGo.AddComponent<TreeItem>();
                         treeItem.Init(config);
                         RegisterGameItem(treeItem);
                         break;
                     case MapItemType.Grass:
-                        var grassGo = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", blockWorldPos + Vector2.one * UnityEngine.Random.Range(0f, 1f));
+                        var grassGo = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         var grassConfig = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS");
                         var grassItem = grassGo.AddComponent<PlantItem>();
                         grassItem.Init(grassConfig);

@@ -1,0 +1,114 @@
+using System.Collections.Generic;
+using AI;
+using Map;
+
+namespace Citizens
+{
+    public class Family
+    {
+        public List<FamilyMember> Members { get; } = new List<FamilyMember>();
+
+        public void AddMember(FamilyMember member)
+        {
+            Members.Add(member);
+        }
+
+        public void RemoveMember(FamilyMember member)
+        {
+            Members.Remove(member);
+        }
+    }
+
+    public class FamilyMember
+    {
+        public bool Sex { get; private set; } // 性别
+        public int Age { get; private set; } // 年龄
+        public List<FamilyMember> Parent { get; } = new List<FamilyMember>(); // 父母
+        public List<FamilyMember> Grandparents { get; } = new List<FamilyMember>(); // 祖父母
+        public List<FamilyMember> Grandchildren { get; } = new List<FamilyMember>(); // 孙子女
+        public FamilyMember Spouse { get; private set; } // 配偶
+        public List<FamilyMember> Children { get; } = new List<FamilyMember>(); // 子女
+        public List<FamilyMember> Siblings { get; } = new List<FamilyMember>(); // 兄弟姐妹
+        public List<FamilyMember> Relatives { get; } = new List<FamilyMember>(); // 亲戚
+        public List<FamilyMember> Friends { get; } = new List<FamilyMember>(); // 朋友
+        public List<FamilyMember> Enemies { get; } = new List<FamilyMember>(); // 敌人
+        public List<FamilyMember> Colleagues { get; } = new List<FamilyMember>(); // 同事
+
+        public List<House> Houses { get; } = new List<House>(); // 房屋
+
+        public bool IsAdult
+        {
+            get
+            {
+                return Age >= 18;
+            }
+        }
+
+        public Agent Agent { get; }
+        public Job Job { get; set; } // 职业
+        public AIController Brain { get; private set; } // 大脑
+
+        public FamilyMember(bool sex, int age)
+        {
+            Sex = sex;
+            Age = age;
+        }
+
+        private void SetParent(FamilyMember parent)
+        {
+            Parent.Add(parent);
+        }
+
+        public void SetSpouse(FamilyMember spouse)
+        {
+            Spouse = spouse;
+            spouse.Spouse = this;
+        }
+
+        public void AddChild(FamilyMember child)
+        {
+            Children.Add(child);
+            child.SetParent(this);
+        }
+
+        public void AddGrandchild(FamilyMember grandchild)
+        {
+            Grandchildren.Add(grandchild);
+            grandchild.Grandparents.Add(this);
+        }
+
+        public void AddSibling(FamilyMember sibling)
+        {
+            Siblings.Add(sibling);
+            sibling.Siblings.Add(this);
+        }
+
+        public void AddRelative(FamilyMember relative)
+        {
+            Relatives.Add(relative);
+            relative.Relatives.Add(this);
+        }
+
+        public void AddFriend(FamilyMember friend)
+        {
+            Friends.Add(friend);
+            friend.Friends.Add(this);
+        }
+
+        public void AddEnemy(FamilyMember enemy)
+        {
+            Enemies.Add(enemy);
+            enemy.Enemies.Add(this);
+        }
+
+        public void SetJob(Job job)
+        {
+            Brain.AddDetector(new WorkActionDetector(job));
+        }
+
+        internal void SetBrain(AIController brain)
+        {
+            Brain = brain;
+        }
+    }
+}

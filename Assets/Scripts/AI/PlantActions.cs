@@ -41,9 +41,9 @@ namespace AI
         public override int ProgressTimes { get; protected set; } = 1;
 
         private Vector3 _targetPos;
-        private int _seedId;
+        private string _seedId;
 
-        public PlantAction(Vector3 targetPos, int seedId)
+        public PlantAction(Vector3 targetPos, string seedId)
         {
             _targetPos = targetPos;
             ActionName = "Plant the seed";

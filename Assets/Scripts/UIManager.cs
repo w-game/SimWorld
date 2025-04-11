@@ -1,9 +1,11 @@
 using System;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class UIManager : MonoSingleton<UIManager>
 {
     public Camera mainCamera;
+    public CinemachineCamera cinemachineCamera;
 
     internal Vector3 MousePosToWorldPos()
     {

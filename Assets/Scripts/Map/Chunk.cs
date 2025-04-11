@@ -164,10 +164,6 @@ namespace Map
                             Debug.Log($"Set room at {housePos}");
                         }
                     }
-                    else
-                    {
-                        house.IsAvailable = false; // 房屋不可用
-                    }
                 }
             }
         }

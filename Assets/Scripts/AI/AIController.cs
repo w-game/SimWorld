@@ -8,7 +8,10 @@ namespace AI
     public class AIController
     {
         private Agent _agent;
-        private Queue<IAction> _activeActions;
+        private Queue<IAction> _activeActionsFirst;
+        private Queue<IAction> _activeActionsSecond;
+        private Queue<IAction> _activeActionsThird;
+
         private IAction _curAction;
 
         // 每隔多少秒检测一次基础状态
@@ -16,23 +19,32 @@ namespace AI
         private float _timeSinceLastEvaluation = 0f;
         public static event Action<IAction> OnActionRegister;
 
-        public AIController(Agent agent)
+        public AIController()
+        {
+            _activeActionsFirst = new Queue<IAction>();
+        }
+
+        public void SetAgent(Agent agent)
         {
             _agent = agent;
-            _activeActions = new Queue<IAction>();
+        }
+
+        internal void AddDetector(IActionDetector actionDetector)
+        {
+
         }
 
         public void RegisterAction(IAction action, bool force)
         {
-            if (force && _activeActions.Count == 6)
+            if (force && _activeActionsFirst.Count == 6)
             {
-                List<IAction> tempList = new List<IAction>(_activeActions);
+                List<IAction> tempList = new List<IAction>(_activeActionsFirst);
                 tempList.RemoveAt(tempList.Count - 1);
-                _activeActions = new Queue<IAction>(tempList);
+                _activeActionsFirst = new Queue<IAction>(tempList);
             }
 
             action.OnRegister(_agent.State);
-            _activeActions.Enqueue(action);
+            _activeActionsFirst.Enqueue(action);
             OnActionRegister?.Invoke(action);
         }
 
@@ -86,9 +98,9 @@ namespace AI
                 Log.LogInfo("AIController", "当前行为: " + _curAction.ActionName);
                 _curAction.Execute(_agent.State);
             }
-            else if (_activeActions.Count != 0)
+            else if (_activeActionsFirst.Count != 0)
             {
-                _curAction = _activeActions.Dequeue();
+                _curAction = _activeActionsFirst.Dequeue();
                 _curAction.OnCompleted += OnActionCompleted;
             }
         }
