@@ -64,6 +64,16 @@ namespace Map
             return FindNearestCity(pos + neighbor[index]);
         }
 
+        public Chunk GetChunk(Vector3 pos, int layer)
+        {
+            var floatSize = (float)((int)Mathf.Pow(2, layer) * NORMAL_CHUNK_SIZE);
+            var chunkPos = new Vector2Int(
+                Mathf.FloorToInt(pos.x / floatSize),
+                Mathf.FloorToInt(pos.y / floatSize)
+            );
+            return GetChunk(chunkPos, layer);
+        }
+
         public Chunk GetChunk(Vector2Int pos, int layer)
         {
             if (layer < 0 || layer >= LAYER_NUM)

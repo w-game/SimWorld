@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AI;
 using Map;
@@ -21,10 +22,11 @@ namespace Citizens
 
             foreach (var house in city.Houses)
             {
-                if (house.IsAvailable && house.Type == HouseType.House)
+                if (house.Type == HouseType.House)
                 {
                     Family family = new Family();
                     var familyType = city.ChunkRand.Next(0, 100);
+                    family.AddHouse(house);
 
                     if (familyType < 15)
                     {
@@ -158,11 +160,11 @@ namespace Citizens
             if (!companies.TryGetValue(family, out var company))
             {
                 company = new Company();
+                companies.Add(family, company);
             }
 
             company.AddProperty(property);
             company.SetOwner(family);
-            companies.Add(family, company);
         }
 
         private void AssignMembersJobs(City city, Family family)
@@ -175,6 +177,11 @@ namespace Citizens
             var player = new FamilyMember(true, 18);
             player.SetBrain(GameManager.I.ActionSystem.CreateAIController(player));
             return player;
+        }
+
+        internal List<Family> GetCitizens(City city)
+        {
+            return Families.TryGetValue(city, out var families) ? families : new List<Family>();
         }
     }
 }

@@ -61,11 +61,17 @@ namespace Citizens
     
     public class Company
     {
+        public string CompanyName { get; private set; }
         public List<House> Properties { get; } = new List<House>();
 
         public Family Owner { get; private set; }
 
         public List<Employee> Employees { get; } = new List<Employee>();
+
+        public Company(string companyName = "Company")
+        {
+            CompanyName = companyName + UnityEngine.Random.Range(0, 1000);
+        }
 
         public void AddEmployee(Employee employee)
         {

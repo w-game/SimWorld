@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AI;
 using Map;
@@ -6,6 +7,8 @@ namespace Citizens
 {
     public class Family
     {
+        public List<House> Houses { get; } = new List<House>(); // 房屋
+
         public List<FamilyMember> Members { get; } = new List<FamilyMember>();
 
         public void AddMember(FamilyMember member)
@@ -16,6 +19,11 @@ namespace Citizens
         public void RemoveMember(FamilyMember member)
         {
             Members.Remove(member);
+        }
+
+        internal void AddHouse(House house)
+        {
+            Houses.Add(house);
         }
     }
 
@@ -34,7 +42,6 @@ namespace Citizens
         public List<FamilyMember> Enemies { get; } = new List<FamilyMember>(); // 敌人
         public List<FamilyMember> Colleagues { get; } = new List<FamilyMember>(); // 同事
 
-        public List<House> Houses { get; } = new List<House>(); // 房屋
 
         public bool IsAdult
         {
@@ -44,7 +51,7 @@ namespace Citizens
             }
         }
 
-        public Agent Agent { get; }
+        public Agent Agent { get; private set; } // 代理人
         public Job Job { get; set; } // 职业
         public AIController Brain { get; private set; } // 大脑
 
@@ -52,6 +59,11 @@ namespace Citizens
         {
             Sex = sex;
             Age = age;
+        }
+
+        public void SetAgent(Agent agent)
+        {
+            Agent = agent;
         }
 
         private void SetParent(FamilyMember parent)
@@ -109,6 +121,7 @@ namespace Citizens
         internal void SetBrain(AIController brain)
         {
             Brain = brain;
+            Brain.SetAgent(Agent);
         }
     }
 }

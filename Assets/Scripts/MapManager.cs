@@ -39,17 +39,29 @@ public class MapManager : MonoSingleton<MapManager>
     {
         CartonMap = new CartonMap();
         CartonMap.Init(seed);
-        for (int i = 0; i < 16; i++)
-        {
-            for (int j = 0; j < 16; j++)
-            {
-                GenerateChunk(new Vector2Int(i, j));
-            }
-        }
 
         var city = CartonMap.FindNearestCity(new Vector2Int(0, 0));
         _player = GameManager.I.CurrentAgent.transform;
         _player.position = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
+
+        var playerChunkPos = new Vector2Int(
+            Mathf.FloorToInt(_player.position.x / CartonMap.NORMAL_CHUNK_SIZE),
+            Mathf.FloorToInt(_player.position.y / CartonMap.NORMAL_CHUNK_SIZE)
+        );
+
+        for (int x = 0; x < 6; x++)
+        {
+            for (int y = 0; y < 6; y++)
+            {
+                var pos = playerChunkPos + new Vector2Int(x - 3, y - 3);
+                if (_chunkActive.ContainsKey(pos))
+                {
+                    continue;
+                }
+
+                GenerateChunk(pos);
+            }
+        }
 
         var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", _player.position);
         var foodItem = foodGo.GetComponent<FoodItem>();
@@ -120,15 +132,7 @@ public class MapManager : MonoSingleton<MapManager>
                 var pos = new Vector2Int(i, j);
                 var blockWorldPos = pos + chunk.WorldPos;
                 SetBlockType(blockWorldPos, chunk.Blocks[i, j]);
-            }
-        }
 
-        for (int i = 0; i < chunk.Size; i++)
-        {
-            for (int j = 0; j < chunk.Size; j++)
-            {
-                var pos = new Vector2Int(i, j);
-                var blockWorldPos = pos + chunk.WorldPos;
                 var type = chunk.MapItems[i, j];
                 switch (type)
                 {
@@ -150,6 +154,26 @@ public class MapManager : MonoSingleton<MapManager>
 
                     default:
                         break;
+                }
+            }
+        }
+
+        var cityChunk = CartonMap.GetChunk(new Vector3(chunk.WorldPos.x, chunk.WorldPos.y), Chunk.CityLayer);
+        if (cityChunk.City != null)
+        {
+            var families = GameManager.I.CitizenManager.GetCitizens(cityChunk.City);
+            foreach (var family in families)
+            {
+                var house = family.Houses[0];
+                if (house != null)
+                {
+                    var housePos = house.Blocks[house.Blocks.Count / 2];
+                    var localPos = housePos - chunk.WorldPos;
+                    if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
+                    {
+                        continue;
+                    }
+                    var ciziten = GameManager.I.InstantiateObject("Prefabs/NPC", housePos + new Vector2(0.5f, 0.5f));
                 }
             }
         }

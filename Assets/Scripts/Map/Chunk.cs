@@ -135,7 +135,7 @@ namespace Map
             {
                 foreach (var house in chunk.City.Houses)
                 {
-                    bool isAvilable = true;
+                    List<Vector2Int> housePosInChunk = new List<Vector2Int>();
                     foreach (var housePos in house.Blocks)
                     {
                         // 检查房屋点是否在当前Chunk内
@@ -144,25 +144,16 @@ namespace Map
                         {
                             if (Blocks[localPos.x, localPos.y] == BlockType.Ocean)
                             {
-                                isAvilable = false; // 如果是海洋，则不设置
                                 break;
                             }
-                        }
-                        else
-                        {
-                            isAvilable = false; // 如果超出范围，则不设置
-                            break;
+                            housePosInChunk.Add(localPos);
                         }
                     }
 
-                    if (isAvilable)
+                    foreach (var housePos in housePosInChunk)
                     {
-                        foreach (var housePos in house.Blocks)
-                        {
-                            Vector2Int localPos = housePos - WorldPos;
-                            Blocks[localPos.x, localPos.y] = BlockType.Room;
-                            Debug.Log($"Set room at {housePos}");
-                        }
+                        Blocks[housePos.x, housePos.y] = BlockType.Room;
+                        Debug.Log($"Set room at {housePos}");
                     }
                 }
             }

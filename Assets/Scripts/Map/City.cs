@@ -14,22 +14,6 @@ namespace Map
         public List<List<Vector2Int>> Roads { get; } = new List<List<Vector2Int>>(); // 存储城市的道路
         public List<House> Houses { get; } = new List<House>(); // 存储城市的房屋
 
-        private bool AreAdjacent(List<Vector2Int> blocks1, List<Vector2Int> blocks2)
-        {
-            foreach (var b1 in blocks1)
-            {
-                foreach (var b2 in blocks2)
-                {
-                    if (Mathf.Abs(b1.x - b2.x) <= 1 && Mathf.Abs(b1.y - b2.y) <= 1)
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
         public System.Random ChunkRand { get; private set; } // 随机数生成器
 
         public City(Vector2Int pos, int size, Chunk originChunk, System.Random chunkRand)
@@ -208,8 +192,6 @@ namespace Map
                 direction = ChunkRand.Next(0, 4);
             }
 
-            // 随机选择建筑大小
-            // var roomSize = ChunkRand.Next(1, 4);
             // 随机选择建筑大小
             var roomSize = ChunkRand.Next(1, 4);
             int buildingWidth, buildingHeight;

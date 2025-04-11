@@ -101,6 +101,7 @@
     <Compile Include="Assets/Scripts/UI/Views/AgentStateElement.cs" />
     <Compile Include="Assets/Scripts/AI/NormalActions.cs" />
     <Compile Include="Assets/Scripts/MonoSingleton.cs" />
+    <Compile Include="Assets/Scripts/UI/Views/TestPanel.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItem.cs" />
     <Compile Include="Assets/TIles/BuildingTile.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />

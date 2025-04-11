@@ -21,7 +21,6 @@ namespace Map
         public List<Vector2Int> Blocks { get; private set; } // 房屋的所有块
         public Vector2Int Size { get; private set; } // 房屋大小，影响房屋半径
         public City City { get; private set; } // 房屋所在的城市
-        public bool IsAvailable { get; set; } // 房屋是否可用
         public HouseType Type { get; private set; } // 房屋类型
 
         private System.Random _chunkRand;

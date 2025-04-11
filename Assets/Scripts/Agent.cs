@@ -85,6 +85,7 @@ namespace Citizens
         public void Init(FamilyMember ciziten)
         {
             Ciziten = ciziten;
+            Ciziten.SetAgent(this);
             State = new AgentState(this);
             Bag = new Inventory(16);
         }
