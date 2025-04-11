@@ -43,7 +43,7 @@ namespace AI
                 _activeActionsFirst = new Queue<IAction>(tempList);
             }
 
-            action.OnRegister(_agent.State);
+            action.OnRegister(_agent);
             _activeActionsFirst.Enqueue(action);
             OnActionRegister?.Invoke(action);
         }
@@ -69,7 +69,7 @@ namespace AI
 
             foreach (IAction action in candidateActions)
             {
-                float utility = action.CalculateUtility(_agent.State);
+                float utility = action.CalculateUtility(_agent);
                 Debug.Log($"行为 {action.ActionName} 的综合效用: {utility}");
                 if (utility > bestUtility)
                 {
@@ -96,7 +96,7 @@ namespace AI
             if (_curAction != null)
             {
                 Log.LogInfo("AIController", "当前行为: " + _curAction.ActionName);
-                _curAction.Execute(_agent.State);
+                _curAction.Execute(_agent);
             }
             else if (_activeActionsFirst.Count != 0)
             {

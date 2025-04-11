@@ -19,7 +19,7 @@ public class TestPanel : MonoBehaviour
 
         testPanel.SetActive(true);
 
-        var pos = GameManager.I.CurrentAgent.transform.position;
+        var pos = GameManager.I.CurrentAgent.Pos;
         var chunk = MapManager.I.CartonMap.GetChunk(pos, Chunk.CityLayer);
 
         if (chunk != null)

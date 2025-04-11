@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     public ConfigReader ConfigReader { get; private set; }
     public ActionSystem ActionSystem { get; private set; }
     public CitizenManager CitizenManager { get; private set; }
+    public GameItemManager GameItemManager { get; private set; }
 
     public Agent CurrentAgent { get; private set; }
     public GameObject selectSign;
@@ -22,6 +23,7 @@ public class GameManager : MonoBehaviour
         ActionSystem = new ActionSystem();
         ActionSystem.Init();
         CitizenManager = new CitizenManager();
+        GameItemManager = new GameItemManager();
 
         GameTime = new GameTime();
 
@@ -33,16 +35,15 @@ public class GameManager : MonoBehaviour
     {
         ActionSystem.Update();
         GameTime.Update();
+        GameItemManager.Update();
     }
 
     private void CreatePlayer()
     {
-        var player = InstantiateObject("Prefabs/Player", Vector2.zero);
-        player.name = "Player";
-        var ciziten = CitizenManager.CreatePlayer();
-        CurrentAgent = player.GetComponent<Agent>();
-        CurrentAgent.Init(ciziten);
-        UIManager.I.cinemachineCamera.Follow = player.transform;
+        CurrentAgent = new Agent(null, ActionSystem.CreateAIController(), Vector2.zero);
+        CurrentAgent.Init(CitizenManager.CreatePlayer());
+        CurrentAgent.ShowUI();
+        UIManager.I.cinemachineCamera.Follow = CurrentAgent.UI.transform;
     }
 
     internal GameObject InstantiateObject(string prefabPath, Vector2 pos, Transform parent = null)

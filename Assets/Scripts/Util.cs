@@ -6,4 +6,9 @@ public static class Util
     {
         return new Vector2Int((int)from.x, (int)from.y);
     }
+
+    public static Vector3 ToVector3(this Vector2Int from)
+    {
+        return new Vector3(from.x, from.y, 0);
+    }
 }

@@ -16,8 +16,6 @@ namespace Citizens
         public float Hygiene = 100;
         public Agent Agent { get; private set; }
 
-        public Vector3 Pos => Agent.transform.position;
-        
         public static event Action<AgentState> OnAgentStateChangedEvent;
 
         public AgentState(Agent agent)
@@ -30,44 +28,59 @@ namespace Citizens
         {
             Hunger -= deltaTime * 2;    // 饥饿度随时间降低
             Toilet -= deltaTime * 2;    // 厕所度随时间降低
-            Sleep  -= deltaTime * 1.5f;  // 睡眠随时间降低
+            Sleep -= deltaTime * 1.5f;  // 睡眠随时间降低
             Hygiene -= deltaTime * 1;    // 清洁度随时间降低
 
             // 保证数值不低于0
             Hunger = Math.Max(0, Hunger);
             Toilet = Math.Max(0, Toilet);
-            Sleep  = Math.Max(0, Sleep);
+            Sleep = Math.Max(0, Sleep);
             Hygiene = Math.Max(0, Hygiene);
 
             OnAgentStateChangedEvent?.Invoke(this);
         }
     }
-    
-    public class Agent : MonoBehaviour
+
+    public class Agent : GameItemBase
     {
-        private Rigidbody2D _rb;
         private Vector2 targetPosition;
         private bool isMoving = false;
         public float MoveSpeed { get; private set; } = 10f;
 
         public FamilyMember Ciziten { get; private set; }
         public AgentState State { get; private set; }
-        [SerializeField] private Transform handItem;
-        public Inventory Bag { get; private set; }
+        public AIController Brain { get; private set; } // 大脑
 
-        private void Start()
+        public Agent(ConfigBase config, AIController brain, Vector3 pos = default) : base(config, pos)
         {
-            _rb = GetComponent<Rigidbody2D>();
-            targetPosition = _rb.position;
+            Brain = brain;
+            Brain.SetAgent(this);
         }
 
-        private void FixedUpdate()
+        public Inventory Bag { get; private set; }
+
+        public override void ShowUI()
         {
-            // 如果正在移动，则逐步向目标点移动
+            if (UI == null)
+            {
+                UI = GameManager.I.InstantiateObject("Prefabs/Player", Pos).GetComponent<GameItemUI>();
+                UI.Init(this);
+            }
+        }
+
+        public override void Update()
+        {
+            State.UpdateState(Time.deltaTime);
+
+            float moveX = Input.GetAxis("Horizontal");
+            float moveY = Input.GetAxis("Vertical");
+            Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
+            Pos += movement;
+
             if (isMoving)
             {
-                Vector2 newPosition = Vector2.MoveTowards(_rb.position, targetPosition, MoveSpeed * Time.deltaTime);
-                _rb.MovePosition(newPosition);
+                Vector2 newPosition = Vector2.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
+                Pos = newPosition;
 
                 // 当距离足够接近目标点时，停止移动
                 if (Vector2.Distance(newPosition, targetPosition) < 0.001f)
@@ -75,11 +88,8 @@ namespace Citizens
                     isMoving = false;
                 }
             }
-        }
 
-        private void Update()
-        {
-            State.UpdateState(Time.deltaTime);
+            Brain.Update();
         }
 
         public void Init(FamilyMember ciziten)
@@ -100,8 +110,7 @@ namespace Citizens
         public FoodItem GetFoodItem()
         {
             float searchRadius = 20f;
-            Vector2 currentPos = transform.position;
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(currentPos, searchRadius);
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(Pos, searchRadius);
             FoodItem nearestFood = null;
             float minDistance = Mathf.Infinity;
 
@@ -110,7 +119,7 @@ namespace Citizens
                 var foodItem = collider.GetComponent<FoodItem>();
                 if (foodItem != null)
                 {
-                    float distance = Vector2.Distance(currentPos, collider.transform.position);
+                    float distance = Vector2.Distance(Pos, collider.transform.position);
                     if (distance < minDistance)
                     {
                         minDistance = distance;
@@ -126,12 +135,12 @@ namespace Citizens
             return null;
             // throw new NotImplementedException();
         }
-        
+
         public GameItemBase FindNearestWC()
         {
             throw new NotImplementedException();
         }
-        
+
         // 根据兴趣爱好寻找最近可交互的娱乐物品
         public GameItemBase FindByHobby()
         {
@@ -140,8 +149,8 @@ namespace Citizens
 
         public void TakeItemInHand(GameItemBase item)
         {
-            item.transform.SetParent(handItem);
-            item.transform.localPosition = Vector3.zero;
+            // item.transform.SetParent(handItem);
+            // item.transform.localPosition = Vector3.zero;
         }
     }
 }

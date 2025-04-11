@@ -23,7 +23,7 @@ namespace AI
 
         }
 
-        public AIController CreateAIController(FamilyMember member)
+        public AIController CreateAIController()
         {
             return new AIController();
         }
@@ -100,7 +100,7 @@ namespace AI
                         }
 
                         actions.Add(new PutIntoBag(propGameItem));
-                        actions.Add(new CheckMoveToTarget(propGameItem.transform.position));
+                        actions.Add(new CheckMoveToTarget(propGameItem.Pos));
                         break;
                     case PlantItem plantItem:
                         if (plantItem is TreeItem treeItem)
@@ -108,7 +108,7 @@ namespace AI
                         }
                         else
                         {
-                            actions.Add(new CheckMoveToTarget(plantItem.transform.position));
+                            actions.Add(new CheckMoveToTarget(plantItem.Pos));
                         }
                         actions.Add(new RemovePlantAction(plantItem));
                         break;
@@ -158,7 +158,7 @@ namespace AI
 
         internal void RegisterAction(ActionBase action)
         {
-            GameManager.I.CurrentAgent.Ciziten.Brain.RegisterAction(action, true);
+            GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
         }
     }
 }

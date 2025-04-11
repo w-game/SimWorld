@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Citizens;
 using GameItem;
 using Map;
 using UnityEngine;
@@ -20,6 +21,7 @@ public enum BuildingType
 
 public class MapManager : MonoSingleton<MapManager>
 {
+    public const int SIGHT_RANGE = 8; // 视野范围
     public CartonMap CartonMap { get; private set; } // 地图对象
 
     public int seed = 123120;             // 随机种子
@@ -33,7 +35,7 @@ public class MapManager : MonoSingleton<MapManager>
 
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
-    private Transform _player;
+    private Agent _player;
 
     private void Start()
     {
@@ -41,17 +43,17 @@ public class MapManager : MonoSingleton<MapManager>
         CartonMap.Init(seed);
 
         var city = CartonMap.FindNearestCity(new Vector2Int(0, 0));
-        _player = GameManager.I.CurrentAgent.transform;
-        _player.position = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
+        _player = GameManager.I.CurrentAgent;
+        _player.Pos = new Vector3(city.GlobalPos.x, city.GlobalPos.y, 0);
 
         var playerChunkPos = new Vector2Int(
-            Mathf.FloorToInt(_player.position.x / CartonMap.NORMAL_CHUNK_SIZE),
-            Mathf.FloorToInt(_player.position.y / CartonMap.NORMAL_CHUNK_SIZE)
+            Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
+            Mathf.FloorToInt(_player.Pos.y / CartonMap.NORMAL_CHUNK_SIZE)
         );
 
-        for (int x = 0; x < 6; x++)
+        for (int x = 0; x < SIGHT_RANGE; x++)
         {
-            for (int y = 0; y < 6; y++)
+            for (int y = 0; y < SIGHT_RANGE; y++)
             {
                 var pos = playerChunkPos + new Vector2Int(x - 3, y - 3);
                 if (_chunkActive.ContainsKey(pos))
@@ -62,11 +64,6 @@ public class MapManager : MonoSingleton<MapManager>
                 GenerateChunk(pos);
             }
         }
-
-        var foodGo = GameManager.I.InstantiateObject("Prefabs/GameItems/FoodItem", _player.position);
-        var foodItem = foodGo.GetComponent<FoodItem>();
-        foodItem.Init(new PropConfig("PROP_FOOD_APPLE", "Food", 1), 1);
-        RegisterGameItem(foodItem);
     }
 
     void Update()
@@ -92,13 +89,13 @@ public class MapManager : MonoSingleton<MapManager>
     private void UpdateChunk()
     {
         var playerChunkPos = new Vector2Int(
-            Mathf.FloorToInt(_player.position.x / CartonMap.NORMAL_CHUNK_SIZE),
-            Mathf.FloorToInt(_player.position.y / CartonMap.NORMAL_CHUNK_SIZE)
+            Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
+            Mathf.FloorToInt(_player.Pos.y / CartonMap.NORMAL_CHUNK_SIZE)
         );
 
-        for (int x = 0; x < 6; x++)
+        for (int x = 0; x < SIGHT_RANGE; x++)
         {
-            for (int y = 0; y < 6; y++)
+            for (int y = 0; y < SIGHT_RANGE; y++)
             {
                 var pos = playerChunkPos + new Vector2Int(x - 3, y - 3);
                 if (_chunkActive.ContainsKey(pos))
@@ -114,7 +111,7 @@ public class MapManager : MonoSingleton<MapManager>
         {
             if (chunk.Value != null)
             {
-                if (Vector2Int.Distance(chunk.Value.Pos, playerChunkPos) > 8)
+                if (Vector2Int.Distance(chunk.Value.Pos, playerChunkPos) > SIGHT_RANGE + 2)
                 {
                     _chunkActive.Remove(chunk.Key);
                     UnVisualChunk(chunk.Value);
@@ -137,17 +134,15 @@ public class MapManager : MonoSingleton<MapManager>
                 switch (type)
                 {
                     case MapItemType.Tree:
-                        var treeGo = GameManager.I.InstantiateObject("Prefabs/GameItems/TreeItem", new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE");
-                        var treeItem = treeGo.AddComponent<TreeItem>();
-                        treeItem.Init(config);
+                        var treeItem = new TreeItem(config, new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                        treeItem.ShowUI();
                         RegisterGameItem(treeItem);
                         break;
                     case MapItemType.Grass:
-                        var grassGo = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         var grassConfig = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS");
-                        var grassItem = grassGo.AddComponent<PlantItem>();
-                        grassItem.Init(grassConfig);
+                        var grassItem = new PlantItem(grassConfig, new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                        grassItem.ShowUI();
                         RegisterGameItem(grassItem);
                         break;
                     case MapItemType.Rock:
@@ -287,7 +282,7 @@ public class MapManager : MonoSingleton<MapManager>
 
     internal void RegisterGameItem(GameItemBase gameItem)
     {
-        var cellPos = WorldPosToCellPos(gameItem.transform.position);
+        var cellPos = WorldPosToCellPos(gameItem.Pos);
         if (!_gameItems.ContainsKey(cellPos))
         {
             _gameItems.Add(cellPos, new List<GameItemBase>() { gameItem });
@@ -300,17 +295,17 @@ public class MapManager : MonoSingleton<MapManager>
 
     internal void RemoveGameItem(GameItemBase gameItem)
     {
-        var cellPos = WorldPosToCellPos(gameItem.transform.position);
+        var cellPos = WorldPosToCellPos(gameItem.Pos);
         if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
         {
             _gameItems[cellPos].Remove(gameItem);
-            Destroy(gameItem.gameObject);
+            gameItem.Destroy();
         }
     }
 
     internal void RemoveGameItemOnMap(GameItemBase gameItem)
     {
-        var cellPos = WorldPosToCellPos(gameItem.transform.position);
+        var cellPos = WorldPosToCellPos(gameItem.Pos);
         if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
         {
             _gameItems[cellPos].Remove(gameItem);

@@ -8,16 +8,8 @@ namespace GameItem
     {
         public List<ChairItem> Chairs { get; } = new List<ChairItem>();
 
-        private void Start()
+        public TableItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
-            foreach (Transform chair in transform)
-            {
-                var chairItem = chair.GetComponent<ChairItem>();
-                if (chairItem != null)
-                {
-                    Chairs.Add(chairItem);
-                }
-            }
         }
 
         public ChairItem GetChair()

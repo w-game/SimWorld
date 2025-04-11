@@ -119,13 +119,6 @@ namespace Citizens
                 }
             }
 
-            foreach (var family in families)
-            {
-                foreach (var member in family.Members)
-                {
-                    SetBrain(member);
-                }
-            }
 
             Companies.Add(city, new Dictionary<Family, Company>());
             if (families.Count == 0)
@@ -150,11 +143,6 @@ namespace Citizens
             Families.Add(city, families);
         }
 
-        private void SetBrain(FamilyMember member)
-        {
-            member.SetBrain(GameManager.I.ActionSystem.CreateAIController(member));
-        }
-
         private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, House property)
         {
             if (!companies.TryGetValue(family, out var company))
@@ -175,7 +163,6 @@ namespace Citizens
         public FamilyMember CreatePlayer()
         {
             var player = new FamilyMember(true, 18);
-            player.SetBrain(GameManager.I.ActionSystem.CreateAIController(player));
             return player;
         }
 

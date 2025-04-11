@@ -19,17 +19,17 @@ namespace AI
             ActionName = "Hoe the ground";
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             return 0.5f;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             MapManager.I.SetMapTile(_targetPos, BlockType.Farm, MapLayer.Building, MapManager.I.farmTiles);
         }
@@ -50,17 +50,17 @@ namespace AI
             _seedId = seedId;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             return 0.5f;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             var cellPos = MapManager.I.WorldPosToCellPos(_targetPos);
             var plantObj = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f, 0));
@@ -90,27 +90,26 @@ namespace AI
             _plantItem = plantItem;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             return 0.5f;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.transform.position));
+            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.Pos));
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Log.LogInfo("PlantActions", "PrecedingActions count: " + PrecedingActions.Count);
             if (_plantItem is TreeItem treeItem)
             {
                 foreach (var dropItem in treeItem.ConvtertConfig<ResourceConfig>().dropItems)
                 {
-                    var propGo = GameManager.I.InstantiateObject("Prefabs/GameItems/PropItem", _plantItem.transform.position);
-                    var propItem = propGo.AddComponent<PropGameItem>();
                     var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
-                    propItem.Init(confg, dropItem.count);
+                    var propItem = new PropGameItem(confg, dropItem.count);
+                    propItem.ShowUI();
                     MapManager.I.RegisterGameItem(propItem);
                 }
             }

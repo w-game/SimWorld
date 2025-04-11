@@ -6,7 +6,7 @@
             "description": "A tall tree.",
             "type": "Plant",
             "icon": "Textures/Tree",
-            "prefab": "Prefabs/PlantItem",
+            "prefab": "Prefabs/GameItems/PlantItem",
             "stages": [
                 "Textures/Tree"
             ],
@@ -23,7 +23,7 @@
             "description": "A tall tree.",
             "type": "Plant",
             "icon": "Textures/Grass_0",
-            "prefab": "Prefabs/PlantItem",
+            "prefab": "Prefabs/GameItems/PlantItem",
             "stages": [
                 "Textures/Grass_0",
                 "Textures/Grass_1",

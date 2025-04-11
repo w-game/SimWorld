@@ -53,7 +53,6 @@ namespace Citizens
 
         public Agent Agent { get; private set; } // 代理人
         public Job Job { get; set; } // 职业
-        public AIController Brain { get; private set; } // 大脑
 
         public FamilyMember(bool sex, int age)
         {
@@ -64,6 +63,7 @@ namespace Citizens
         public void SetAgent(Agent agent)
         {
             Agent = agent;
+            Agent.Brain.AddDetector(new WorkActionDetector(Job));
         }
 
         private void SetParent(FamilyMember parent)
@@ -115,13 +115,7 @@ namespace Citizens
 
         public void SetJob(Job job)
         {
-            Brain.AddDetector(new WorkActionDetector(job));
-        }
-
-        internal void SetBrain(AIController brain)
-        {
-            Brain = brain;
-            Brain.SetAgent(Agent);
+            Job = job;
         }
     }
 }

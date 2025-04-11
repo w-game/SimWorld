@@ -1,30 +1,61 @@
+using System;
 using UnityEngine;
 
 namespace GameItem
 {
     public interface IGameItem
     {
+        public GameItemUI UI { get; }
+        void DoUpdate();
     }
 
-    public abstract class GameItemBase : MonoBehaviour, IGameItem
+    public abstract class GameItemBase : IGameItem
     {
-        protected SpriteRenderer _sr;
+        public Vector3 Pos { get; set; }
+
         public ConfigBase Config { get; protected set; }
+        public GameItemUI UI { get; protected set; }
 
-        void Awake()
-        {
-            _sr = GetComponent<SpriteRenderer>();
-        }
-
-        public virtual void Init(ConfigBase config)
+        public GameItemBase(ConfigBase config, Vector3 pos = default)
         {
             Config = config;
-            _sr.sprite = Resources.Load<Sprite>(config.icon);
+            Pos = pos;
+            GameManager.I.GameItemManager.RegisterGameItem(this);
+        }
+
+        public virtual void ShowUI()
+        {
+            if (UI == null)
+            {
+                Debug.Log($"GameItemBase ShowUI {Config.prefab}");
+                UI = GameManager.I.InstantiateObject(Config.prefab, Pos).GetComponent<GameItemUI>();
+                UI.Init(this);
+            }
         }
 
         public T ConvtertConfig<T>() where T : ConfigBase
         {
             return Config as T;
+        }
+
+        public virtual void DoUpdate()
+        {
+            if (UI != null)
+            {
+                UI.transform.position = Pos;
+            }
+
+            Update();
+        }
+
+        public virtual void Update()
+        {
+
+        }
+
+        internal void Destroy()
+        {
+            GameManager.I.GameItemManager.UnregisterGameItem(this);
         }
     }
 }

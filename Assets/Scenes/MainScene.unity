@@ -805,7 +805,6 @@ GameObject:
   m_Component:
   - component: {fileID: 285105139}
   - component: {fileID: 285105140}
-  - component: {fileID: 285105141}
   m_Layer: 0
   m_Name: Chair (2)
   m_TagString: Untagged
@@ -883,18 +882,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &285105141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 285105138}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a55804f8af954e699af3d104a6bd3269, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &325651421
 GameObject:
   m_ObjectHideFlags: 0
@@ -4652,7 +4639,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1195722588}
   - component: {fileID: 1195722589}
-  - component: {fileID: 1195722590}
   m_Layer: 0
   m_Name: Chair
   m_TagString: Untagged
@@ -4730,18 +4716,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1195722590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1195722587}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a55804f8af954e699af3d104a6bd3269, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1203952218
 GameObject:
   m_ObjectHideFlags: 0
@@ -5298,7 +5272,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1367282206}
   - component: {fileID: 1367282205}
-  - component: {fileID: 1367282207}
   m_Layer: 0
   m_Name: Table
   m_TagString: Untagged
@@ -5380,18 +5353,6 @@ Transform:
   - {fileID: 1408465326}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1367282207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1367282204}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a6733ce5447e4a57a77d0ea64c707805, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1371148074
 GameObject:
   m_ObjectHideFlags: 0
@@ -5402,7 +5363,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1371148075}
   - component: {fileID: 1371148076}
-  - component: {fileID: 1371148077}
   m_Layer: 0
   m_Name: Chair (1)
   m_TagString: Untagged
@@ -5480,18 +5440,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1371148077
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1371148074}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a55804f8af954e699af3d104a6bd3269, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1375285860
 GameObject:
   m_ObjectHideFlags: 0
@@ -5715,7 +5663,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1408465326}
   - component: {fileID: 1408465327}
-  - component: {fileID: 1408465328}
   m_Layer: 0
   m_Name: Chair (3)
   m_TagString: Untagged
@@ -5793,18 +5740,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1408465328
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1408465325}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a55804f8af954e699af3d104a6bd3269, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1431909886
 GameObject:
   m_ObjectHideFlags: 0

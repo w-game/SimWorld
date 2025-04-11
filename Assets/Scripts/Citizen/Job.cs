@@ -34,12 +34,12 @@ namespace Citizens
             _job = job;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             throw new NotImplementedException();
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             // 判断工作时间
             if (GameManager.I.GameTime.CurrentTime > _job.WorkTime[0] && GameManager.I.GameTime.CurrentTime < _job.WorkTime[1])
@@ -53,7 +53,7 @@ namespace Citizens
             }
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             
         }

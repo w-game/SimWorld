@@ -12,8 +12,8 @@ namespace AI
         bool Done { get; set; }
         event Action<IAction> OnCompleted;
 
-        float CalculateUtility(AgentState state);
-        void Execute(AgentState state);
-        void OnRegister(AgentState agentState);
+        float CalculateUtility(Agent agent);
+        void Execute(Agent agent);
+        void OnRegister(Agent agent);
     }
 }

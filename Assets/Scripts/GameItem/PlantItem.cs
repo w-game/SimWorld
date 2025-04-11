@@ -11,18 +11,18 @@ namespace GameItem
 
         public event UnityAction<PlantItem> OnEventInvoked;
 
-        public override void Init(ConfigBase config)
+        public override void ShowUI()
         {
-            base.Init(config);
+            base.ShowUI();
 
             var resourceConfig = ConvtertConfig<ResourceConfig>();
-            GrowthStage = Random.Range(0, resourceConfig.stages.Length);
-            _sr.sprite = Resources.Load<Sprite>(resourceConfig.stages[GrowthStage]);
+            UI.SetRenderer(resourceConfig.stages[GrowthStage]);
         }
 
-        void Update()
+        public PlantItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
-            
+            var resourceConfig = ConvtertConfig<ResourceConfig>();
+            GrowthStage = Random.Range(0, resourceConfig.stages.Length);
         }
     }
 }

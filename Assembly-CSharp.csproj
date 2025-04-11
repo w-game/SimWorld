@@ -73,6 +73,7 @@
     <Compile Include="Assets/Scripts/GameItem/GameItemActions.cs" />
     <Compile Include="Assets/Scripts/Config/ConfigReader.cs" />
     <Compile Include="Assets/Scripts/AI/PlantActions.cs" />
+    <Compile Include="Assets/Scripts/GameItem/GameItemUI.cs" />
     <Compile Include="Assets/Scripts/Citizen/Job.cs" />
     <Compile Include="Assets/Scripts/Agent.cs" />
     <Compile Include="Assets/Scripts/GameItem/ChairItem.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="Assets/Scripts/ActionSystem.cs" />
     <Compile Include="Assets/Scripts/AI/Schedule.cs" />
     <Compile Include="Assets/Scripts/Map/AStar.cs" />
+    <Compile Include="Assets/Scripts/GameItemManager.cs" />
     <Compile Include="Assets/Scripts/AI/Inventory.cs" />
     <Compile Include="Assets/Scripts/UI/Views/ActionListElement.cs" />
     <Compile Include="Assets/Scripts/AI/BuildingCraftActions.cs" />

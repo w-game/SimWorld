@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1819687618784500421}
   - component: {fileID: 1884750113991155824}
-  - component: {fileID: 3868354833143663099}
   - component: {fileID: 856352542573319029}
+  - component: {fileID: 7434489991001093009}
   m_Layer: 0
   m_Name: FoodItem
   m_TagString: Untagged
@@ -89,18 +89,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &3868354833143663099
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3973680756994893637}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb3571fb33164a40837b054095259cf0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!58 &856352542573319029
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -137,3 +125,15 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.5
+--- !u!114 &7434489991001093009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3973680756994893637}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5665bd67ed044496cba014c92efec593, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

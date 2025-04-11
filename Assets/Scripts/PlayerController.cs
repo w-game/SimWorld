@@ -1,22 +1,17 @@
-using System;
 using AI;
-using Citizens;
-using Map;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : GameItemUI
 {
     [SerializeField] private Image actionProgress;
     
     private Rigidbody2D rb;
-    private Agent _agent;
 
     void Start()
     {
         // 获取 Rigidbody2D 组件
         rb = GetComponent<Rigidbody2D>();
-        _agent = GetComponent<Agent>();
     }
 
     private void OnEnable()
@@ -31,10 +26,10 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        float moveX = Input.GetAxis("Horizontal");
-        float moveY = Input.GetAxis("Vertical");
-        Vector2 movement = new Vector2(moveX, moveY) * _agent.MoveSpeed * Time.deltaTime;
-        rb.MovePosition(rb.position + movement);
+        // float moveX = Input.GetAxis("Horizontal");
+        // float moveY = Input.GetAxis("Vertical");
+        // Vector2 movement = new Vector2(moveX, moveY) * _agent.MoveSpeed * Time.deltaTime;
+        // rb.MovePosition(rb.position + movement);
     }
 
     private void OnActionProgress(float curProgress)

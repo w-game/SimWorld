@@ -1,6 +1,5 @@
 using AI;
 using Citizens;
-using GameItem;
 
 public class PutIntoBag : ActionBase
 {
@@ -9,7 +8,7 @@ public class PutIntoBag : ActionBase
 
     private PropGameItem _gameItem;
 
-    public override float CalculateUtility(AgentState state)
+    public override float CalculateUtility(Agent agent)
     {
         return 0f;
     }
@@ -20,14 +19,14 @@ public class PutIntoBag : ActionBase
         ActionName = "Put into Bag";
     }
 
-    public override void OnRegister(AgentState state)
+    public override void OnRegister(Agent agent)
     {
-        PrecedingActions.Add(new CheckMoveToTarget(_gameItem.transform.position));
+        PrecedingActions.Add(new CheckMoveToTarget(_gameItem.Pos));
     }
 
-    protected override void DoExecute(AgentState state)
+    protected override void DoExecute(Agent agent)
     {
-        state.Agent.Bag.AddItem(_gameItem);
+        agent.Bag.AddItem(_gameItem);
         MapManager.I.RemoveGameItem(_gameItem);
     }
 }

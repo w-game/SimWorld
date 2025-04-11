@@ -35,10 +35,10 @@ namespace AI
         public static event Action<float> OnProgress;
         public event Action<IAction> OnCompleted;
 
-        public abstract float CalculateUtility(AgentState state);
+        public abstract float CalculateUtility(Agent agent);
 
         // 先执行前置动作（如果有的话）
-        public void ExecutePrecedingActions(AgentState state)
+        public void ExecutePrecedingActions(Agent agent)
         {
             if (PrecedingActions.Count > 0)
             {
@@ -49,15 +49,15 @@ namespace AI
                 }
                 else
                 {
-                    action.Execute(state);
+                    action.Execute(agent);
                 }
             }
         }
 
         // 执行流程：先执行前置动作，前置动作完成后再执行本动作
-        public void Execute(AgentState state)
+        public void Execute(Agent agent)
         {
-            ExecutePrecedingActions(state);
+            ExecutePrecedingActions(agent);
 
             if (PrecedingActions.Count == 0 && !Done)
             {
@@ -77,7 +77,7 @@ namespace AI
 
                         if (thresholdsPassed > 0)
                         {
-                            DoExecute(state);
+                            DoExecute(agent);
                         }
                     }
                     else
@@ -87,16 +87,16 @@ namespace AI
                 }
                 else
                 {
-                    DoExecute(state);
+                    DoExecute(agent);
                 }
             }
         }
 
         // 具体动作逻辑，由子类实现
-        protected abstract void DoExecute(AgentState state);
+        protected abstract void DoExecute(Agent agent);
 
         // 注册时配置前置动作（例如移动、捡取物品等）
-        public abstract void OnRegister(AgentState state);
+        public abstract void OnRegister(Agent agent);
     }
 
     // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
@@ -113,24 +113,24 @@ namespace AI
             TargetPos = targetPos;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             // 此动作仅作为前置动作使用，不参与决策
             return 0f;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 不需要额外配置
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
-            if (Vector3.Distance(state.Pos, TargetPos) > 0.1f)
+            if (Vector3.Distance(agent.Pos, TargetPos) > 0.1f)
             {
                 if (_isMoving) return;
-                Debug.Log($"【移动系统】从 {state.Pos} 移动到 {TargetPos}");
-                state.Agent.MoveToTarget(TargetPos);
+                Debug.Log($"【移动系统】从 {agent.Pos} 移动到 {TargetPos}");
+                agent.MoveToTarget(TargetPos);
                 _isMoving = true;
             }
             else
@@ -152,18 +152,18 @@ namespace AI
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             // 此动作仅作为前置动作使用，不参与效用决策
             return 0f;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 可在此添加需要的前置动作（如检查是否已移动到目标）
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行将物品放置到目标点动作");
             // 模拟放置物品的逻辑
@@ -186,30 +186,30 @@ namespace AI
             _item = item;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
             // 此动作仅作为前置动作使用
             return 0f;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 此处可加入检查或移动动作
-            if (Vector3.Distance(_agent.transform.position, _item.transform.position) < 0.001f)
+            if (Vector3.Distance(_agent.Pos, _item.Pos) < 0.001f)
             {
                 // TODO Do Take
                 Done = true;
             }
             else
             {
-                PrecedingActions.Add(new CheckMoveToTarget(_item.transform.position));
+                PrecedingActions.Add(new CheckMoveToTarget(_item.Pos));
             }
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行捡取物品动作");
-            state.Agent.TakeItemInHand(_item);
+            agent.TakeItemInHand(_item);
             MapManager.I.RemoveGameItemOnMap(_item);
             // 模拟捡取物品的逻辑
             Done = true;
@@ -230,18 +230,18 @@ namespace AI
             ActionName = "Eat";
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
-            return 100 - state.Hunger;
+            return 100 - agent.State.Hunger;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
-            TableItem tableItem = state.Agent.FindNearestTableItem();
+            TableItem tableItem = agent.FindNearestTableItem();
 
-            var takeItem = new TakeItemInHand(state.Agent, _foodItem);
-            takeItem.OnRegister(state);
+            var takeItem = new TakeItemInHand(agent, _foodItem);
+            takeItem.OnRegister(agent);
             PrecedingActions.Add(takeItem);
 
             if (tableItem != null)
@@ -253,13 +253,13 @@ namespace AI
             ProgressTimes = _foodItem.MaxFoodTimes;
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             // 每个阈值增加的饱食度：使用 FoodValue * ProgressSpeed / 100 的计算公式
             float increment = _foodItem.FoodValue / _foodItem.MaxFoodTimes;
-            state.Hunger = Mathf.Min(state.Hunger + increment, 100);
+            agent.State.Hunger = Mathf.Min(agent.State.Hunger + increment, 100);
             _foodItem.DecreaseFoodTimes();
-            Debug.Log($"饱食度增加了 {increment}，当前饱食度: {state.Hunger}");
+            Debug.Log($"饱食度增加了 {increment}，当前饱食度: {agent.State.Hunger}");
         }
     }
 
@@ -272,21 +272,21 @@ namespace AI
 
         private Vector3 _targetPos;
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
-            return 100 - state.Toilet;
+            return 100 - agent.State.Toilet;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到厕所位置
             PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行上厕所动作，恢复厕所值");
-            state.Toilet = 100;
+            agent.State.Toilet = 100;
             Done = true;
         }
     }
@@ -298,20 +298,20 @@ namespace AI
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
-            return 100 - state.Social;
+            return 100 - agent.State.Social;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 无前置动作
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行社交动作，提升社交值");
-            state.Social = 100;
+            agent.State.Social = 100;
             Done = true;
         }
     }
@@ -330,21 +330,21 @@ namespace AI
             this.playPos = playPos;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
-            return 100 - state.Mood;
+            return 100 - agent.State.Mood;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到游玩区域
             PrecedingActions.Add(new CheckMoveToTarget(playPos));
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行游玩动作，提升心情");
-            state.Mood = 100;
+            agent.State.Mood = 100;
             Done = true;
         }
     }
@@ -363,21 +363,21 @@ namespace AI
             this.bathPos = bathPos;
         }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
-            return 100 - state.Hygiene;
+            return 100 - agent.State.Hygiene;
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到浴室
             PrecedingActions.Add(new CheckMoveToTarget(bathPos));
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行洗澡动作，恢复清洁度");
-            state.Hygiene = 100;
+            agent.State.Hygiene = 100;
             Done = true;
         }
     }
@@ -387,17 +387,17 @@ namespace AI
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        public override float CalculateUtility(AgentState state)
+        public override float CalculateUtility(Agent agent)
         {
-            return 100 - state.Sleep;
+            return 100 - agent.State.Sleep;
         }
 
-        protected override void DoExecute(AgentState state)
+        protected override void DoExecute(Agent agent)
         {
             throw new System.NotImplementedException();
         }
 
-        public override void OnRegister(AgentState state)
+        public override void OnRegister(Agent agent)
         {
             throw new System.NotImplementedException();
         }
