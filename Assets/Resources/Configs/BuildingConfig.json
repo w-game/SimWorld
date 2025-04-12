@@ -5,12 +5,101 @@
             "name": "Wall",
             "description": "A basic wall structure.",
             "type": "Wall",
-            "icon": "Textures/Room,Wall",
+            "icon": "Textures/Wall",
             "requiredResources": {
                 "wood": 5,
                 "stone": 2
             },
             "buildSpeed": 10
+        },
+        {
+            "id": "BUILDING_DOOR",
+            "name": "Door",
+            "description": "A door for entering and exiting rooms.",
+            "type": "Door",
+            "icon": "Textures/Door",
+            "requiredResources": {
+                "wood": 3,
+                "metal": 1
+            },
+            "buildSpeed": 5
+        },
+        {
+            "id": "BUILDING_WINDOW",
+            "name": "Window",
+            "description": "A window for light and visibility.",
+            "type": "Window",
+            "icon": "Textures/Window",
+            "requiredResources": {
+                "glass": 2,
+                "wood": 1
+            },
+            "buildSpeed": 7
+        },
+        {
+            "id": "BUILDING_TABLE",
+            "name": "Table",
+            "description": "A table for various activities.",
+            "type": "Furniture",
+            "icon": "Textures/Table",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "requiredResources": {
+                "wood": 3,
+                "metal": 1
+            },
+            "buildSpeed": 6
+        },
+        {
+            "id": "BUILDING_CHAIR",
+            "name": "Chair",
+            "description": "A chair for sitting.",
+            "type": "Furniture",
+            "icon": "Textures/Chair",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "requiredResources": {
+                "wood": 2,
+                "metal": 1
+            },
+            "buildSpeed": 4
+        },
+        {
+            "id": "BUILDING_BED",
+            "name": "Bed",
+            "description": "A bed for resting.",
+            "type": "Bed",
+            "icon": "Textures/Bed",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "requiredResources": {
+                "wood": 5,
+                "fabric": 2
+            },
+            "buildSpeed": 10
+        },
+        {
+            "id": "BUILDING_TOILET",
+            "name": "Toilet",
+            "description": "A toilet for sanitation.",
+            "type": "Furniture",
+            "icon": "Textures/Toilet",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "requiredResources": {
+                "ceramic": 3,
+                "metal": 2
+            },
+            "buildSpeed": 8
+        },
+        {
+            "id": "BUILDING_STOVE",
+            "name": "Stove",
+            "description": "A stove for cooking.",
+            "type": "Stove",
+            "icon": "Textures/Stove",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "requiredResources": {
+                "metal": 4,
+                "stone": 2
+            },
+            "buildSpeed": 9
         }
     ]
 }

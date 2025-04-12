@@ -22,7 +22,7 @@ namespace Citizens
 
             foreach (var house in city.Houses)
             {
-                if (house.Type == HouseType.House)
+                if (house.HouseType == HouseType.House)
                 {
                     Family family = new Family();
                     var familyType = city.ChunkRand.Next(0, 100);
@@ -109,11 +109,11 @@ namespace Citizens
 
                     families.Add(family);
                 }
-                else if (house.Type == HouseType.Farm)
+                else if (house.HouseType == HouseType.Farm)
                 {
                     cityProperties.Add(house);
                 }
-                else if (house.Type == HouseType.Shop)
+                else if (house.HouseType == HouseType.Shop)
                 {
                     cityProperties.Add(house);
                 }

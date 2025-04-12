@@ -5,7 +5,9 @@ namespace GameItem
 {
     public interface IGameItem
     {
-        public GameItemUI UI { get; }
+        Vector3 Pos { get; set; }
+        ConfigBase Config { get; }
+        GameItemUI UI { get; }
         void DoUpdate();
     }
 
@@ -33,6 +35,15 @@ namespace GameItem
             }
         }
 
+        public void HideUI()
+        {
+            if (UI != null)
+            {
+                UI.OnHide();
+                UnityEngine.Object.Destroy(UI.gameObject);
+            }
+        }
+
         public T ConvtertConfig<T>() where T : ConfigBase
         {
             return Config as T;
@@ -55,6 +66,7 @@ namespace GameItem
 
         internal void Destroy()
         {
+            HideUI();
             GameManager.I.GameItemManager.UnregisterGameItem(this);
         }
     }

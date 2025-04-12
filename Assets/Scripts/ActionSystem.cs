@@ -1,7 +1,6 @@
 
 using System;
 using System.Collections.Generic;
-using Citizens;
 using GameItem;
 using Map;
 using UnityEngine;
@@ -46,7 +45,7 @@ namespace AI
                 Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
                 GameManager.I.selectSign.SetActive(true);
 
-                var items = MapManager.I.GetItemsAtPos(mousePos);
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(mousePos);
 
                 if (items.Count > 0)
                 {
@@ -86,7 +85,7 @@ namespace AI
             }
         }
 
-        private List<ActionBase> ItemsToActions(List<GameItemBase> items)
+        private List<ActionBase> ItemsToActions(List<IGameItem> items)
         {
             List<ActionBase> actions = new List<ActionBase>();
             foreach (var item in items)
@@ -96,7 +95,7 @@ namespace AI
                     case PropGameItem propGameItem:
                         if (propGameItem is FoodItem foodItem)
                         {
-                            actions.Add(new EatAction(foodItem));
+                            actions.Add(new EatAction(foodItem, GameManager.I.CurrentAgent.State.Hunger));
                         }
 
                         actions.Add(new PutIntoBag(propGameItem));

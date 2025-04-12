@@ -5,21 +5,25 @@ using UnityEngine;
 
 namespace UI.Views
 {
-    public class ActionListElement : MonoBehaviour
+    public class ActionListElement : MonoSingleton<ActionListElement>
     {
+        [Header("Action List UI")]
+        [SerializeField] private GameObject actionListPanel;
+        [SerializeField] private GameObject actionItemPrefab;
+        [SerializeField] private Transform actionItemParent;
         [SerializeField] private List<TextMeshProUGUI> actionItems;
         
         // 新增：存储当前 Action 队列
         private List<IAction> actionQueue = new List<IAction>();
 
-        private void OnEnable()
+        public void Init()
         {
-            AIController.OnActionRegister += OnActionRegister;
+            GameManager.I.CurrentAgent.Brain.OnActionRegister += OnActionRegister;
         }
 
         private void OnDisable()
         {
-            AIController.OnActionRegister -= OnActionRegister;
+            GameManager.I.CurrentAgent.Brain.OnActionRegister -= OnActionRegister;
         }
 
         private void OnActionRegister(IAction action)

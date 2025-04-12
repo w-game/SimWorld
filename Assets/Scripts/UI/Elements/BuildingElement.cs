@@ -11,17 +11,7 @@ public class BuildingElement : MonoBehaviour
     public void Init(BuildingConfig config)
     {
         _config = config;
-        var paths = config.icon.Split(',');
-        var sprites = Resources.LoadAll<Sprite>(paths[0]);
-
-        foreach (var sprite in sprites)
-        {
-            if (sprite.name == paths[1])
-            {
-                icon.sprite = sprite;
-                break;
-            }
-        }
+        icon.sprite = Resources.Load<Sprite>(_config.icon);
     }
 
     void Start()

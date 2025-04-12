@@ -7,7 +7,7 @@ public class GameItemUI : MonoBehaviour
     [SerializeField] private SpriteRenderer sr;
     public GameItemBase GameItem { get; private set; }
 
-    public void Init(GameItemBase gameItem)
+    public virtual void Init(GameItemBase gameItem)
     {
         GameItem = gameItem;
     }
@@ -15,5 +15,10 @@ public class GameItemUI : MonoBehaviour
     internal void SetRenderer(string spritePath)
     {
         sr.sprite = Resources.Load<Sprite>(spritePath);
+    }
+
+    public virtual void OnHide()
+    {
+        
     }
 }

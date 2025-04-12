@@ -21,7 +21,7 @@ public enum BuildingType
 
 public class MapManager : MonoSingleton<MapManager>
 {
-    public const int SIGHT_RANGE = 8; // 视野范围
+    public const int SIGHT_RANGE = 10; // 视野范围
     public CartonMap CartonMap { get; private set; } // 地图对象
 
     public int seed = 123120;             // 随机种子
@@ -31,7 +31,6 @@ public class MapManager : MonoSingleton<MapManager>
     public TileBase tile;
     public List<TileBase> farmTiles;
     private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
-    private Dictionary<Vector2Int, List<GameItemBase>> _gameItems = new Dictionary<Vector2Int, List<GameItemBase>>();
 
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
@@ -97,7 +96,7 @@ public class MapManager : MonoSingleton<MapManager>
         {
             for (int y = 0; y < SIGHT_RANGE; y++)
             {
-                var pos = playerChunkPos + new Vector2Int(x - 3, y - 3);
+                var pos = playerChunkPos + new Vector2Int(x - SIGHT_RANGE / 2, y - SIGHT_RANGE / 2);
                 if (_chunkActive.ContainsKey(pos))
                 {
                     continue;
@@ -137,13 +136,11 @@ public class MapManager : MonoSingleton<MapManager>
                         var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE");
                         var treeItem = new TreeItem(config, new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         treeItem.ShowUI();
-                        RegisterGameItem(treeItem);
                         break;
                     case MapItemType.Grass:
                         var grassConfig = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS");
                         var grassItem = new PlantItem(grassConfig, new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         grassItem.ShowUI();
-                        RegisterGameItem(grassItem);
                         break;
                     case MapItemType.Rock:
 
@@ -168,7 +165,27 @@ public class MapManager : MonoSingleton<MapManager>
                     {
                         continue;
                     }
-                    var ciziten = GameManager.I.InstantiateObject("Prefabs/NPC", housePos + new Vector2(0.5f, 0.5f));
+                    GameManager.I.GameItemManager.CreateNPC(housePos);
+                }
+            }
+
+            foreach (var house in cityChunk.City.Houses)
+            {
+                if (house.HouseType == HouseType.House)
+                {
+                    if (house.Furnitures.Count > 0)
+                    {
+                        foreach (var furniture in house.Furnitures)
+                        {
+                            // var localPos = WorldPosToCellPos(furniture.Pos) - chunk.WorldPos;
+                            // if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
+                            // {
+                            //     continue;
+                            // }
+
+                            furniture.ShowUI();
+                        }
+                    }
                 }
             }
         }
@@ -278,50 +295,5 @@ public class MapManager : MonoSingleton<MapManager>
             default:
                 break;
         }
-    }
-
-    internal void RegisterGameItem(GameItemBase gameItem)
-    {
-        var cellPos = WorldPosToCellPos(gameItem.Pos);
-        if (!_gameItems.ContainsKey(cellPos))
-        {
-            _gameItems.Add(cellPos, new List<GameItemBase>() { gameItem });
-        }
-        else
-        {
-            _gameItems[cellPos].Add(gameItem);
-        }
-    }
-
-    internal void RemoveGameItem(GameItemBase gameItem)
-    {
-        var cellPos = WorldPosToCellPos(gameItem.Pos);
-        if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
-        {
-            _gameItems[cellPos].Remove(gameItem);
-            gameItem.Destroy();
-        }
-    }
-
-    internal void RemoveGameItemOnMap(GameItemBase gameItem)
-    {
-        var cellPos = WorldPosToCellPos(gameItem.Pos);
-        if (_gameItems.ContainsKey(cellPos) && _gameItems[cellPos].Contains(gameItem))
-        {
-            _gameItems[cellPos].Remove(gameItem);
-        }
-    }
-
-    internal List<GameItemBase> GetItemsAtPos(Vector3 pos)
-    {
-        var cellPos = WorldPosToCellPos(pos);
-        List<GameItemBase> items = new List<GameItemBase>();
-
-        if (_gameItems.ContainsKey(cellPos))
-        {
-            items.AddRange(_gameItems[cellPos]);
-        }
-
-        return items;
     }
 }

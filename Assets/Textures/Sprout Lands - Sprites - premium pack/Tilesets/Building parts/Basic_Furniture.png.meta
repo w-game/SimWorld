@@ -108,7 +108,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0
@@ -121,7 +121,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -135,7 +135,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -158,7 +158,7 @@ TextureImporter:
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: -1
+    textureFormat: 4
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -187,12 +187,12 @@ TextureImporter:
       name: Basic_Furniture_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 82
-        width: 17
-        height: 9
+        x: 1
+        y: 83
+        width: 15
+        height: 7
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -209,12 +209,12 @@ TextureImporter:
       name: Basic_Furniture_1
       rect:
         serializedVersion: 2
-        x: 18
-        y: 82
-        width: 13
-        height: 9
+        x: 19
+        y: 83
+        width: 11
+        height: 7
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -231,12 +231,12 @@ TextureImporter:
       name: Basic_Furniture_2
       rect:
         serializedVersion: 2
-        x: 34
-        y: 82
-        width: 14
-        height: 10
+        x: 35
+        y: 83
+        width: 12
+        height: 8
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -253,12 +253,12 @@ TextureImporter:
       name: Basic_Furniture_3
       rect:
         serializedVersion: 2
-        x: 50
-        y: 80
-        width: 13
-        height: 16
+        x: 51
+        y: 81
+        width: 11
+        height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -275,12 +275,12 @@ TextureImporter:
       name: Basic_Furniture_4
       rect:
         serializedVersion: 2
-        x: 67
-        y: 82
-        width: 10
-        height: 11
+        x: 68
+        y: 83
+        width: 8
+        height: 9
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -297,12 +297,12 @@ TextureImporter:
       name: Basic_Furniture_5
       rect:
         serializedVersion: 2
-        x: 83
-        y: 82
-        width: 9
-        height: 14
+        x: 84
+        y: 83
+        width: 7
+        height: 12
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -319,12 +319,12 @@ TextureImporter:
       name: Basic_Furniture_6
       rect:
         serializedVersion: 2
-        x: 0
-        y: 47
-        width: 16
-        height: 24
+        x: 1
+        y: 48
+        width: 14
+        height: 22
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -338,59 +338,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic_Furniture_7
-      rect:
-        serializedVersion: 2
-        x: 16
-        y: 47
-        width: 16
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: af16120c44b4063f0800000000000000
-      internalID: -909644366075567622
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Basic_Furniture_8
-      rect:
-        serializedVersion: 2
-        x: 32
-        y: 47
-        width: 16
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b4aa751949eb667e0800000000000000
-      internalID: -1772519858020832693
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: Basic_Furniture_9
       rect:
         serializedVersion: 2
-        x: 50
-        y: 68
-        width: 12
-        height: 13
+        x: 51
+        y: 69
+        width: 10
+        height: 11
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -407,12 +363,12 @@ TextureImporter:
       name: Basic_Furniture_10
       rect:
         serializedVersion: 2
-        x: 66
-        y: 68
-        width: 12
-        height: 13
+        x: 67
+        y: 69
+        width: 10
+        height: 11
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -429,12 +385,12 @@ TextureImporter:
       name: Basic_Furniture_11
       rect:
         serializedVersion: 2
-        x: 82
-        y: 68
-        width: 12
-        height: 13
+        x: 83
+        y: 69
+        width: 10
+        height: 11
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -448,37 +404,15 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Basic_Furniture_12
-      rect:
-        serializedVersion: 2
-        x: 48
-        y: 47
-        width: 16
-        height: 18
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: d7d56da3ebf024aa0800000000000000
-      internalID: -6178358429093569155
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
       name: Basic_Furniture_13
       rect:
         serializedVersion: 2
-        x: 66
-        y: 49
-        width: 12
-        height: 15
+        x: 67
+        y: 50
+        width: 10
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -495,12 +429,12 @@ TextureImporter:
       name: Basic_Furniture_14
       rect:
         serializedVersion: 2
-        x: 80
-        y: 32
-        width: 15
-        height: 17
+        x: 83
+        y: 50
+        width: 10
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -517,12 +451,12 @@ TextureImporter:
       name: Basic_Furniture_15
       rect:
         serializedVersion: 2
-        x: 82
-        y: 49
-        width: 12
-        height: 15
+        x: 99
+        y: 50
+        width: 10
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -539,12 +473,12 @@ TextureImporter:
       name: Basic_Furniture_16
       rect:
         serializedVersion: 2
-        x: 98
-        y: 49
-        width: 12
-        height: 15
+        x: 115
+        y: 50
+        width: 10
+        height: 10
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -561,12 +495,12 @@ TextureImporter:
       name: Basic_Furniture_17
       rect:
         serializedVersion: 2
-        x: 114
-        y: 49
-        width: 12
-        height: 12
+        x: 1
+        y: 16
+        width: 14
+        height: 22
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -583,12 +517,12 @@ TextureImporter:
       name: Basic_Furniture_18
       rect:
         serializedVersion: 2
-        x: 0
-        y: 15
-        width: 16
-        height: 24
+        x: 17
+        y: 16
+        width: 14
+        height: 22
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -605,12 +539,12 @@ TextureImporter:
       name: Basic_Furniture_19
       rect:
         serializedVersion: 2
-        x: 16
-        y: 15
-        width: 16
-        height: 24
+        x: 33
+        y: 16
+        width: 14
+        height: 22
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -627,12 +561,12 @@ TextureImporter:
       name: Basic_Furniture_20
       rect:
         serializedVersion: 2
-        x: 32
-        y: 15
-        width: 16
-        height: 24
+        x: 49
+        y: 33
+        width: 14
+        height: 14
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -649,12 +583,12 @@ TextureImporter:
       name: Basic_Furniture_21
       rect:
         serializedVersion: 2
-        x: 48
-        y: 32
-        width: 16
-        height: 16
+        x: 67
+        y: 36
+        width: 10
+        height: 9
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -671,12 +605,12 @@ TextureImporter:
       name: Basic_Furniture_22
       rect:
         serializedVersion: 2
-        x: 66
-        y: 35
-        width: 12
-        height: 11
+        x: 81
+        y: 33
+        width: 13
+        height: 15
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -693,12 +627,12 @@ TextureImporter:
       name: Basic_Furniture_23
       rect:
         serializedVersion: 2
-        x: 97
-        y: 32
-        width: 15
-        height: 15
+        x: 98
+        y: 33
+        width: 13
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -715,12 +649,12 @@ TextureImporter:
       name: Basic_Furniture_24
       rect:
         serializedVersion: 2
-        x: 115
-        y: 34
-        width: 11
-        height: 11
+        x: 116
+        y: 35
+        width: 9
+        height: 9
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -738,11 +672,11 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 49
-        height: 15
+        y: 1
+        width: 16
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -759,12 +693,12 @@ TextureImporter:
       name: Basic_Furniture_26
       rect:
         serializedVersion: 2
-        x: 51
-        y: 0
-        width: 26
-        height: 15
+        x: 52
+        y: 1
+        width: 24
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -781,12 +715,12 @@ TextureImporter:
       name: Basic_Furniture_27
       rect:
         serializedVersion: 2
-        x: 83
-        y: 0
-        width: 26
-        height: 15
+        x: 84
+        y: 1
+        width: 24
+        height: 13
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -800,23 +734,133 @@ TextureImporter:
       edges: []
       weights: []
     - serializedVersion: 2
+      name: Basic_Furniture_7
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 48
+        width: 14
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 66456bd5752514154a6a1a3aa60d3d60
+      internalID: -909644366075567622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Basic_Furniture_8
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 48
+        width: 14
+        height: 22
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35b96fdc20f8d4d8083ca625e9d729a8
+      internalID: -1772519858020832693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Basic_Furniture_12
+      rect:
+        serializedVersion: 2
+        x: 49
+        y: 48
+        width: 14
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 434a5bb5ed9bc4decbbbdd39edce6e24
+      internalID: -6178358429093569155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
       name: Basic_Furniture_28
       rect:
         serializedVersion: 2
-        x: 115
-        y: 0
-        width: 26
-        height: 15
+        x: 116
+        y: 1
+        width: 24
+        height: 13
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ffdf181157ac40c381573eda8d6855d
+      internalID: 2779122611121063561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Basic_Furniture_29
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 1
+        width: 16
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 98680275a4d619620800000000000000
-      internalID: 2779122611121063561
+      spriteID: a4285b91ac417450cb34913ed7dab592
+      internalID: 2018479801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Basic_Furniture_30
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 1
+        width: 16
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9253f1baca5e4beabb12e966899b946
+      internalID: -440701617
       vertices: []
       indices: 
       edges: []
@@ -825,7 +869,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 8d98e12894f4a485aaddda401b259fa3
     internalID: 0
     vertices: []
     indices: 
@@ -834,7 +878,38 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Basic_Furniture_0: 4816601885579624766
+      Basic_Furniture_1: -4468020966496558839
+      Basic_Furniture_10: -358496273364812296
+      Basic_Furniture_11: 7836687586425024582
+      Basic_Furniture_12: -6178358429093569155
+      Basic_Furniture_13: -2233119960623464545
+      Basic_Furniture_14: -8641358660050861904
+      Basic_Furniture_15: -1865263309553341333
+      Basic_Furniture_16: 6609832211905053478
+      Basic_Furniture_17: -3886059868903961173
+      Basic_Furniture_18: 5420504499394380449
+      Basic_Furniture_19: -6019653054814042591
+      Basic_Furniture_2: 8970863486524723379
+      Basic_Furniture_20: -450519480971497223
+      Basic_Furniture_21: -6376348432289402992
+      Basic_Furniture_22: 8699133597345416721
+      Basic_Furniture_23: 8530941504646180341
+      Basic_Furniture_24: 5937207809507436031
+      Basic_Furniture_25: -5427211908867942942
+      Basic_Furniture_26: -8402132690208145846
+      Basic_Furniture_27: -4815365765911829455
+      Basic_Furniture_28: 2779122611121063561
+      Basic_Furniture_29: 2018479801
+      Basic_Furniture_3: -4464683919757446399
+      Basic_Furniture_30: -440701617
+      Basic_Furniture_4: 7829936474952215996
+      Basic_Furniture_5: -7241263986709402041
+      Basic_Furniture_6: 2561671524415346828
+      Basic_Furniture_7: -909644366075567622
+      Basic_Furniture_8: -1772519858020832693
+      Basic_Furniture_9: -2729260742163401794
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

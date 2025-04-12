@@ -17,7 +17,6 @@ namespace GameItem
             FoodTimes--;
             if (FoodTimes <= 0)
             {
-                MapManager.I.RemoveGameItem(this);
                 Destroy();
             }
         }

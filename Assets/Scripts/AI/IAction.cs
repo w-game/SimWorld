@@ -10,9 +10,9 @@ namespace AI
         string ActionName { get; }
         float ProgressSpeed { get; }
         bool Done { get; set; }
+        bool CanBeInterrupted { get; }
         event Action<IAction> OnCompleted;
-
-        float CalculateUtility(Agent agent);
+        event Action<float> OnActionProgress;
         void Execute(Agent agent);
         void OnRegister(Agent agent);
     }

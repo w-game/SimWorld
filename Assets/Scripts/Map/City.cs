@@ -36,11 +36,6 @@ namespace Map
 
             // 在所有受影响的Chunk中放置建筑
             PutRoom();
-
-            foreach (var house in Houses)
-            {
-                house.CalcHouseType();
-            }
         }
 
         private void CreateRoad()
@@ -197,18 +192,18 @@ namespace Map
             int buildingWidth, buildingHeight;
             if (roomSize == 1)
             {
-                buildingWidth = ChunkRand.Next(3, 5);
-                buildingHeight = ChunkRand.Next(3, 5);
+                buildingWidth = ChunkRand.Next(5, 7);
+                buildingHeight = ChunkRand.Next(5, 7);
             }
             else if (roomSize == 2)
             {
-                buildingWidth = ChunkRand.Next(6, 9);
-                buildingHeight = ChunkRand.Next(6, 9);
+                buildingWidth = ChunkRand.Next(8, 11);
+                buildingHeight = ChunkRand.Next(8, 11);
             }
             else
             {
-                buildingWidth = ChunkRand.Next(10, 15);
-                buildingHeight = ChunkRand.Next(10, 15);
+                buildingWidth = ChunkRand.Next(12, 17);
+                buildingHeight = ChunkRand.Next(12, 17);
             }
 
             // 随机选择建筑方向
@@ -217,27 +212,37 @@ namespace Map
             Vector2Int minPos = new Vector2Int(int.MaxValue, int.MaxValue);
             Vector2Int maxPos = new Vector2Int(int.MinValue, int.MinValue);
 
+            var offset = Vector2Int.one;
+            switch (direction)
+            {
+                case 0: // 上
+                    // minPos = new Vector2Int(roadPoint.x + 1, roadPoint.y + 1);
+                    // maxPos = new Vector2Int(roadPoint.x + buildingWidth + 1, roadPoint.y + buildingHeight + 1);
+                    offset *= new Vector2Int(1, 1);
+                    break;
+                case 1: // 下
+                    // minPos = new Vector2Int(roadPoint.x - 1 - buildingWidth, roadPoint.y - 1 - buildingHeight);
+                    // maxPos = new Vector2Int(roadPoint.x - 1, roadPoint.y - 1);
+                    offset *= new Vector2Int(-1, -1);
+                    break;
+                case 2: // 左
+                    // minPos = new Vector2Int(roadPoint.x - 1 - buildingHeight, roadPoint.y + 1);
+                    // maxPos = new Vector2Int(roadPoint.x - 1, roadPoint.y + 1 + buildingWidth);
+                    offset *= new Vector2Int(-1, 1);
+                    break;
+                case 3: // 右
+                    // minPos = new Vector2Int(roadPoint.x + 1, roadPoint.y - 1 - buildingWidth);
+                    // maxPos = new Vector2Int(roadPoint.x + 1 + buildingHeight, roadPoint.y - 1);
+                    offset *= new Vector2Int(1, -1);
+                    break;
+            }
+
             // 先合并计算所有块的坐标，并同步更新边界
             for (int i = 1; i <= buildingWidth; i++)
             {
                 for (int j = 1; j <= buildingHeight; j++)
                 {
-                    Vector2Int pos = roadPoint;
-                    switch (direction)
-                    {
-                        case 0: // 上
-                            pos += new Vector2Int(i, j);
-                            break;
-                        case 1: // 下
-                            pos += new Vector2Int(-i, -j);
-                            break;
-                        case 2: // 左
-                            pos += new Vector2Int(-j, i);
-                            break;
-                        case 3: // 右
-                            pos += new Vector2Int(j, -i);
-                            break;
-                    }
+                    Vector2Int pos = roadPoint + offset * new Vector2Int(i, j);
 
                     minPos = new Vector2Int(Mathf.Min(minPos.x, pos.x), Mathf.Min(minPos.y, pos.y));
                     maxPos = new Vector2Int(Mathf.Max(maxPos.x, pos.x), Mathf.Max(maxPos.y, pos.y));
@@ -281,7 +286,7 @@ namespace Map
                 }
             }
 
-            return new House(buildingBlocks, new Vector2Int(buildingWidth, buildingHeight), this, ChunkRand);
+            return new House(buildingBlocks, new Vector2Int(buildingWidth, buildingHeight), minPos, this, ChunkRand);
         }
     }
 }

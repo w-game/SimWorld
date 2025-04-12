@@ -17,23 +17,23 @@ namespace UI.Views
 
         private void OnEnable()
         {
-            AgentState.OnAgentStateChangedEvent += OnAgentStateChanged;
+            GameManager.I.CurrentAgent.State.OnAgentStateChangedEvent += OnAgentStateChanged;
         }
 
         private void OnDisable()
         {
-            AgentState.OnAgentStateChangedEvent -= OnAgentStateChanged;
+            GameManager.I.CurrentAgent.State.OnAgentStateChangedEvent -= OnAgentStateChanged;
         }
 
         private void OnAgentStateChanged(AgentState state)
         {
-            if (hp != null) hp.value = state.Health / 100f;
-            if (hunger != null) hunger.fillAmount = state.Hunger / 100f;
-            if (toilet != null) toilet.fillAmount = state.Toilet / 100f;
-            if (social != null) social.fillAmount = state.Social / 100f;
-            if (mood != null) mood.fillAmount = state.Mood / 100f;
-            if (sleep != null) sleep.fillAmount = state.Sleep / 100f;
-            if (hygiene != null) hygiene.fillAmount = state.Hygiene / 100f;
+            if (hp != null) hp.value = state.Health.Value / 100f;
+            if (hunger != null) hunger.fillAmount = state.Hunger.Value / 100f;
+            if (toilet != null) toilet.fillAmount = state.Toilet.Value / 100f;
+            if (social != null) social.fillAmount = state.Social.Value / 100f;
+            if (mood != null) mood.fillAmount = state.Mood.Value / 100f;
+            if (sleep != null) sleep.fillAmount = state.Sleep.Value / 100f;
+            if (hygiene != null) hygiene.fillAmount = state.Hygiene.Value / 100f;
         }
     }
 }

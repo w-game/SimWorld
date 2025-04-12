@@ -19,11 +19,6 @@ namespace AI
             ActionName = "Hoe the ground";
         }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            return 0.5f;
-        }
-
         public override void OnRegister(Agent agent)
         {
             PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
@@ -50,11 +45,6 @@ namespace AI
             _seedId = seedId;
         }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            return 0.5f;
-        }
-
         public override void OnRegister(Agent agent)
         {
             PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
@@ -62,10 +52,11 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            var cellPos = MapManager.I.WorldPosToCellPos(_targetPos);
-            var plantObj = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f, 0));
-            var plant = plantObj.GetComponent<PlantItem>();
-            MapManager.I.RegisterGameItem(plant);
+            // PlantItem plantItem = new PlantItem(GameManager.I.ConfigReader.GetConfig<>(_seedId), _targetPos);
+
+            // var cellPos = MapManager.I.WorldPosToCellPos(_targetPos);
+            // var plantObj = GameManager.I.InstantiateObject("Prefabs/GameItems/PlantItem", new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f, 0));
+            // var plant = plantObj.GetComponent<PlantItem>();
         }
     }
 
@@ -90,11 +81,6 @@ namespace AI
             _plantItem = plantItem;
         }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            return 0.5f;
-        }
-
         public override void OnRegister(Agent agent)
         {
             PrecedingActions.Add(new CheckMoveToTarget(_plantItem.Pos));
@@ -110,7 +96,6 @@ namespace AI
                     var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
                     var propItem = new PropGameItem(confg, dropItem.count);
                     propItem.ShowUI();
-                    MapManager.I.RegisterGameItem(propItem);
                 }
             }
             else
@@ -118,7 +103,7 @@ namespace AI
 
             }
 
-            MapManager.I.RemoveGameItem(_plantItem);
+            _plantItem.Destroy();
         }
     }
 

@@ -4,7 +4,7 @@
             "id": "PROP_FOOD_APPLE",
             "name": "Apple",
             "description": "A delicious red apple.",
-            "type": "Wall",
+            "type": "Food",
             "icon": "wall_icon.png",
             "prefab": "Prefab/Wall",
             "maxStackSize": 1
@@ -21,7 +21,7 @@
             "id": "PROP_FOOD_CARROT",
             "name": "Carrot",
             "description": "A fresh carrot.",
-            "type": "Wall",
+            "type": "Food",
             "icon": "wall_icon.png",
             "prefab": "Prefab/Wall",
             "maxStackSize": 1

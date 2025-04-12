@@ -1,5 +1,6 @@
 using AI;
 using Citizens;
+using UI.Views;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -23,14 +24,14 @@ public class GameManager : MonoBehaviour
         ActionSystem = new ActionSystem();
         ActionSystem.Init();
         CitizenManager = new CitizenManager();
-        GameItemManager = new GameItemManager();
+        GameItemManager = new GameItemManager(MapManager.I.WorldPosToCellPos);
 
         GameTime = new GameTime();
 
         CreatePlayer();
+        ActionListElement.I.Init();
     }
 
-    // Update is called once per frame
     void Update()
     {
         ActionSystem.Update();

@@ -11,11 +11,6 @@ public class StartBuildingCraftAction : ActionBase
         ActionName = "Building Craft";
     }
 
-    public override float CalculateUtility(Agent agent)
-    {
-        return 0;
-    }
-
     public override void OnRegister(Agent agent)
     {
         

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Citizens;
+using GameItem;
 using UnityEngine;
 
 namespace AI
@@ -14,10 +15,12 @@ namespace AI
 
         private IAction _curAction;
 
-        // 每隔多少秒检测一次基础状态
-        private float _evaluationInterval = 20.0f;
-        private float _timeSinceLastEvaluation = 0f;
-        public static event Action<IAction> OnActionRegister;
+        public event Action<IAction> OnActionRegister;
+
+        private Dictionary<State, float> _actionCooldowns = new();
+        private float _actionCooldownTime = 10f;
+
+        public event Action<float> OnActionProgress;
 
         public AIController()
         {
@@ -53,45 +56,124 @@ namespace AI
         /// 这里构造了多个候选行为，然后比较它们的综合效用，
         /// 如果某个候选行为的效用比当前正在执行的行为高出一定比例，则进行替换。
         /// </summary>
-        private void CheckNormalState()
+        private bool CheckNormalState()
         {
-            // 构建候选行为列表（可以根据需求增加更多行为）
-            List<IAction> candidateActions = new List<IAction>
+            if (_curAction != null && !_curAction.CanBeInterrupted)
+                return false;
+
+            List<State> states = new List<State>
             {
-                // new EatAction(),
-                new ToiletAction(),
-                new SleepAction(),
-                new SocialAction()
+                _agent.State.Health,
+                _agent.State.Hunger,
+                _agent.State.Toilet,
+                _agent.State.Social,
+                _agent.State.Mood,
+                _agent.State.Sleep,
+                _agent.State.Hygiene
             };
 
-            IAction bestCandidate = null;
             float bestUtility = float.MinValue;
+            State bestState = null;
 
-            foreach (IAction action in candidateActions)
+            foreach (State state in states)
             {
-                float utility = action.CalculateUtility(_agent);
-                Debug.Log($"行为 {action.ActionName} 的综合效用: {utility}");
+                float utility = state.CheckState(_agent.State.Mood.Value);
                 if (utility > bestUtility)
                 {
+                    if (_actionCooldowns.TryGetValue(state, out float lastTime))
+                    {
+                        if (Time.time - lastTime < _actionCooldownTime)
+                            continue; // 冷却中，不执行
+                    }
                     bestUtility = utility;
-                    bestCandidate = action;
+                    bestState = state;
                 }
             }
 
-            if (bestUtility > 20) return;
+            if (bestUtility < 100f)
+                return false; // 当前没有足够的效用驱动切换行为
 
-            RegisterAction(bestCandidate, true);
+            _actionCooldowns[bestState] = Time.time;
+
+            if (_curAction is NormalAction curNormalAction)
+            {
+                float currentUtility = curNormalAction.State.CheckState(_agent.State.Mood.Value);
+                Debug.Log($"当前行为效用: {currentUtility}, 新行为效用: {bestUtility}");
+                if (bestUtility < currentUtility * 1.2f) // 只有新行为效用明显高，才换
+                    return false;
+            }
+
+            else if (_curAction is WorkAction curWorkAction)
+            {
+                if (bestState.Name == "Social"
+                || bestState.Name == "Mood"
+                || bestState.Name == "Sleep"
+                || bestState.Name == "Hygiene")
+                    return false; // 当前行为是工作，且新状态不是社交或心情，则不换
+            }
+
+            Debug.Log($"当前行为: {_curAction?.ActionName}, 新行为: {bestState.Name}, 效用: {bestUtility}");
+
+            switch (bestState.Name)
+            {
+                case "Health":
+                    break;
+                case "Hunger":
+                    var foodItem = _agent.GetGameItem<FoodItem>();
+                    if (foodItem != null)
+                    {
+                        RegisterAction(new EatAction(foodItem, _agent.State.Hunger), true);
+                    }
+                    else
+                    {
+                        var stoveItem = _agent.GetGameItem<StoveItem>();
+                        if (stoveItem != null)
+                        {
+                            Debug.Log($"StoveItem: {stoveItem.Pos}");
+                            RegisterAction(new CookAction(stoveItem), true);
+                        }
+                    }
+                    break;
+                case "Toilet":
+                    var toiletItem = _agent.GetGameItem<ToiletItem>();
+                    if (toiletItem != null)
+                        RegisterAction(new ToiletAction(toiletItem, _agent.State.Toilet), true);
+                    else
+                    {
+                        if (_agent.State.Toilet.Value <= 0f)
+                        {
+                            RegisterAction(new ToiletAction(null, _agent.State.Toilet), true);
+                        }
+                    }
+                    break;
+                case "Social":
+                    // RegisterAction(new SocialAction(_agent.State.Social), true);
+                    break;
+                case "Mood":
+                    // RegisterAction(new PlayAction(_agent.State.Mood), true);
+                    break;
+                case "Sleep":
+                    var bedItem = _agent.GetGameItem<BedItem>();
+                    if (bedItem != null)
+                        RegisterAction(new SleepAction(bedItem, _agent.State.Sleep), true);
+                    else
+                        // 如果没有床，直接睡觉
+                        // 这里可以考虑添加一个新的行为，比如在地上睡觉
+                        // RegisterAction(new SleepAction(null, _agent.State.Sleep), true);
+                        break;
+                    break;
+                case "Hygiene":
+                    // RegisterAction(new BathAction(null, _agent.State.Hygiene), true);
+                    break;
+            }
+
+            return true;
         }
 
         // 每个时间步更新状态，并根据评估周期进行行为检测
         public void Update()
         {
-            _timeSinceLastEvaluation += Time.deltaTime;
-            if (_timeSinceLastEvaluation >= _evaluationInterval)
-            {
-                CheckNormalState();
-                _timeSinceLastEvaluation = 0f;
-            }
+            var result = CheckNormalState();
 
             if (_curAction != null)
             {
@@ -102,23 +184,36 @@ namespace AI
             {
                 _curAction = _activeActionsFirst.Dequeue();
                 _curAction.OnCompleted += OnActionCompleted;
+                _curAction.OnActionProgress += OnActionProgress;
+            }
+            else if (!result)
+            {
+                // TODO: 发呆、按照兴趣指派行为等
+                if (GameManager.I.CurrentAgent != _agent)
+                {
+                    var prob = UnityEngine.Random.Range(0, 100);
+                    if (prob < 70)
+                    {
+                        RegisterAction(new IdleAction(null), true);
+                    }
+                    else
+                    {
+                        Vector3 pos = new Vector2(
+                            UnityEngine.Random.Range(-1, 1f),
+                            UnityEngine.Random.Range(-1, 1f)
+                        );
+                        var targetPos = _agent.Pos + pos.normalized * UnityEngine.Random.Range(1, 5f);
+                        RegisterAction(new HangingAction(targetPos), true);
+                    }
+                }
             }
         }
-        
+
         private void OnActionCompleted(IAction action)
         {
             action.OnCompleted -= OnActionCompleted;
+            action.OnActionProgress -= OnActionProgress;
             _curAction = null;
-
-            if (action.Done)
-            {
-                Log.LogInfo("AIController", "行为完成: " + action.ActionName);
-            }
-            else
-            {
-                Log.LogInfo("AIController", "行为未完成: " + action.ActionName);
-                RegisterAction(action, true);
-            }
         }
     }
 }

@@ -34,11 +34,6 @@ namespace Citizens
             _job = job;
         }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            throw new NotImplementedException();
-        }
-
         protected override void DoExecute(Agent agent)
         {
             // 判断工作时间
@@ -121,7 +116,7 @@ namespace Citizens
         {
             foreach (var block in house.Blocks)
             {
-                var items = MapManager.I.GetItemsAtPos(new Vector3(block.x, block.y, 0));
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(block.x, block.y, 0));
                 if (items.Count == 0)
                 {
                     var jobUnit = new JobUnit(new PlantAction(new Vector3(block.x, block.y, 0), "PROP_SEED_"));

@@ -1,41 +1,87 @@
 using System;
+using System.Collections.Generic;
 using AI;
 using GameItem;
 using UnityEngine;
 
 namespace Citizens
 {
+    public class State
+    {
+        public string Name { get; private set; }
+        public float Value { get; private set; }
+        public float Speed { get; private set; }
+
+        public State(string name, float value, float speed)
+        {
+            Name = name;
+            Value = value;
+            Speed = speed;
+        }
+
+        public void Update()
+        {
+            Value -= Speed * GameManager.I.GameTime.DeltaTime;
+            if (Value < 0)
+            {
+                Value = 0;
+            }
+        }
+
+        public float CheckState(float mood)
+        {
+            float urgency = Mathf.Clamp01((100 - Value) / 100f);
+            float utility = 100 - Value;
+            float moodModifier = Mathf.Lerp(0.5f, 1.5f, mood / 100f);
+            float finalScore = utility * (1 + urgency * 0.5f) * moodModifier;
+            return finalScore;
+        }
+
+        internal void Increase(float increment)
+        {
+            Value += increment;
+            if (Value > 100)
+            {
+                Value = 100;
+            }
+        }
+    }
+
     public class AgentState
     {
-        public float Health = 100;
-        public float Hunger = 100;
-        public float Toilet = 100;
-        public float Social = 100;
-        public float Mood = 100;
-        public float Sleep = 100;
-        public float Hygiene = 100;
+        public State Health { get; private set; }
+        public State Hunger { get; private set; }
+        public State Toilet { get; private set; }
+        public State Social { get; private set; }
+        public State Mood { get; private set; }
+        public State Sleep { get; private set; }
+        public State Hygiene { get; private set; }
         public Agent Agent { get; private set; }
 
-        public static event Action<AgentState> OnAgentStateChangedEvent;
+        public event Action<AgentState> OnAgentStateChangedEvent;
 
         public AgentState(Agent agent)
         {
             Agent = agent;
+
+            Health = new State("Health", 100, 0);
+            Hunger = new State("Hunger", 100, 0.00463f);
+            Toilet = new State("Toilet", 100, 0.00926f);
+            Social = new State("Social", 100, 0.00347f);
+            Mood = new State("Mood", 100, 0.00231f);
+            Sleep = new State("Sleep", 100, 0.00174f);
+            Hygiene = new State("Hygiene", 100, 0.00116f);
         }
 
         // 模拟状态随时间的消耗（例如每秒消耗一定值）
-        public void UpdateState(float deltaTime)
+        public void UpdateState()
         {
-            Hunger -= deltaTime * 2;    // 饥饿度随时间降低
-            Toilet -= deltaTime * 2;    // 厕所度随时间降低
-            Sleep -= deltaTime * 1.5f;  // 睡眠随时间降低
-            Hygiene -= deltaTime * 1;    // 清洁度随时间降低
-
-            // 保证数值不低于0
-            Hunger = Math.Max(0, Hunger);
-            Toilet = Math.Max(0, Toilet);
-            Sleep = Math.Max(0, Sleep);
-            Hygiene = Math.Max(0, Hygiene);
+            Hunger.Update();
+            Toilet.Update();
+            Sleep.Update();
+            Hygiene.Update();
+            Social.Update();
+            Mood.Update();
 
             OnAgentStateChangedEvent?.Invoke(this);
         }
@@ -70,12 +116,20 @@ namespace Citizens
 
         public override void Update()
         {
-            State.UpdateState(Time.deltaTime);
+            State.UpdateState();
+            Move();
+            Brain.Update();
+        }
 
-            float moveX = Input.GetAxis("Horizontal");
-            float moveY = Input.GetAxis("Vertical");
-            Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
-            Pos += movement;
+        private void Move()
+        {
+            if (GameManager.I.CurrentAgent == this)
+            {
+                float moveX = Input.GetAxis("Horizontal");
+                float moveY = Input.GetAxis("Vertical");
+                Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
+                Pos += movement;
+            }
 
             if (isMoving)
             {
@@ -88,8 +142,6 @@ namespace Citizens
                     isMoving = false;
                 }
             }
-
-            Brain.Update();
         }
 
         public void Init(FamilyMember ciziten)
@@ -107,27 +159,64 @@ namespace Citizens
             isMoving = true;
         }
 
-        public FoodItem GetFoodItem()
+        private FoodItem GetFoodItem()
         {
-            float searchRadius = 20f;
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(Pos, searchRadius);
-            FoodItem nearestFood = null;
-            float minDistance = Mathf.Infinity;
-
-            foreach (Collider2D collider in colliders)
+            foreach (var item in Bag.Items)
             {
-                var foodItem = collider.GetComponent<FoodItem>();
-                if (foodItem != null)
+                if (item.Config.id.Contains("PROP_FOOD"))
                 {
-                    float distance = Vector2.Distance(Pos, collider.transform.position);
-                    if (distance < minDistance)
+
+                }
+            }
+
+            return null;
+        }
+
+        private T BFSItem<T>() where T : GameItemBase
+        {
+            var visitedPositions = new HashSet<Vector2>();
+            var queue = new Queue<Vector2>();
+            queue.Enqueue(Pos);
+            visitedPositions.Add(Pos);
+
+            int maxDistance = 10;
+
+            while (queue.Count > 0)
+            {
+                Vector2 currentPos = queue.Dequeue();
+                // 检查当前位置是否有目标物品
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(currentPos);
+                foreach (var item in items)
+                {
+                    if (item is T tItem) return tItem;
+                }
+
+                // 向周围位置扩散（限定最大距离避免无穷扩散）
+                foreach (var dir in new Vector2[] {
+            Vector2.up, Vector2.down, Vector2.left, Vector2.right })
+                {
+                    Vector2 nextPos = currentPos + dir;
+                    if (!visitedPositions.Contains(nextPos)
+                        && Vector2.Distance(nextPos, Pos) <= maxDistance)
                     {
-                        minDistance = distance;
-                        nearestFood = foodItem;
+                        visitedPositions.Add(nextPos);
+                        queue.Enqueue(nextPos);
                     }
                 }
             }
-            return nearestFood;
+            return null;
+        }
+
+        public T GetGameItem<T>() where T : GameItemBase
+        {
+            var item = BFSItem<T>();
+            if (typeof(T) == typeof(FoodItem))
+            {
+                var foodItem = GetFoodItem();
+                return foodItem == null ? item : foodItem as T;
+            }
+
+            return item;
         }
 
         public TableItem FindNearestTableItem()
@@ -136,10 +225,6 @@ namespace Citizens
             // throw new NotImplementedException();
         }
 
-        public GameItemBase FindNearestWC()
-        {
-            throw new NotImplementedException();
-        }
 
         // 根据兴趣爱好寻找最近可交互的娱乐物品
         public GameItemBase FindByHobby()

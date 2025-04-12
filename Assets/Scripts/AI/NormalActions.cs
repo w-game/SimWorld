@@ -14,8 +14,10 @@ namespace AI
         public virtual string ActionName { get; protected set; }
         public abstract float ProgressSpeed { get; protected set; }
         public abstract int ProgressTimes { get; protected set; }
+        public virtual bool CanBeInterrupted => true;
 
         protected float CurProgress;
+        protected int CurProgressStage = 0;
 
         private bool _done = false;
 
@@ -32,10 +34,13 @@ namespace AI
             }
         }
 
-        public static event Action<float> OnProgress;
+        public event Action<float> OnActionProgress;
         public event Action<IAction> OnCompleted;
 
-        public abstract float CalculateUtility(Agent agent);
+        public virtual float CurrentUtility(AgentState state, float currentMood)
+        {
+            return 0f;
+        }
 
         // 先执行前置动作（如果有的话）
         public void ExecutePrecedingActions(Agent agent)
@@ -63,11 +68,11 @@ namespace AI
             {
                 if (ProgressTimes != -1)
                 {
-                    if (CurProgress < 100f)
+                    if (CurProgress <= 100f)
                     {
                         float previousProgress = CurProgress;
                         CurProgress += Time.deltaTime * ProgressSpeed;
-                        OnProgress?.Invoke(CurProgress);
+                        OnActionProgress?.Invoke(CurProgress);
 
                         // Debug.Log($"{ActionName} - {CurProgress}, {ProgressTimes}, {ProgressSpeed}");
 
@@ -77,6 +82,7 @@ namespace AI
 
                         if (thresholdsPassed > 0)
                         {
+                            CurProgressStage++;
                             DoExecute(agent);
                         }
                     }
@@ -113,12 +119,6 @@ namespace AI
             TargetPos = targetPos;
         }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            // 此动作仅作为前置动作使用，不参与决策
-            return 0f;
-        }
-
         public override void OnRegister(Agent agent)
         {
             // 不需要额外配置
@@ -152,12 +152,6 @@ namespace AI
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            // 此动作仅作为前置动作使用，不参与效用决策
-            return 0f;
-        }
-
         public override void OnRegister(Agent agent)
         {
             // 可在此添加需要的前置动作（如检查是否已移动到目标）
@@ -186,12 +180,6 @@ namespace AI
             _item = item;
         }
 
-        public override float CalculateUtility(Agent agent)
-        {
-            // 此动作仅作为前置动作使用
-            return 0f;
-        }
-
         public override void OnRegister(Agent agent)
         {
             // 此处可加入检查或移动动作
@@ -210,29 +198,33 @@ namespace AI
         {
             Debug.Log("执行捡取物品动作");
             agent.TakeItemInHand(_item);
-            MapManager.I.RemoveGameItemOnMap(_item);
+            GameManager.I.GameItemManager.RemoveGameItemOnMap(_item);
             // 模拟捡取物品的逻辑
             Done = true;
         }
     }
 
+    public abstract class NormalAction : ActionBase
+    {
+        public State State { get; private set; }
+        public NormalAction(State state)
+        {
+            State = state;
+        }
+    }
+
     // 示例行为：吃东西，根据饥饿值决定效用
-    public class EatAction : ActionBase
+    public class EatAction : NormalAction
     {
         public override float ProgressSpeed { get; protected set; } = 5f;
         public override int ProgressTimes { get; protected set; }
 
         private FoodItem _foodItem;
 
-        public EatAction(FoodItem foodItem)
+        public EatAction(FoodItem foodItem, State state) : base(state)
         {
             _foodItem = foodItem;
             ActionName = "Eat";
-        }
-
-        public override float CalculateUtility(Agent agent)
-        {
-            return 100 - agent.State.Hunger;
         }
 
         public override void OnRegister(Agent agent)
@@ -257,50 +249,50 @@ namespace AI
         {
             // 每个阈值增加的饱食度：使用 FoodValue * ProgressSpeed / 100 的计算公式
             float increment = _foodItem.FoodValue / _foodItem.MaxFoodTimes;
-            agent.State.Hunger = Mathf.Min(agent.State.Hunger + increment, 100);
+            agent.State.Hunger.Increase(increment);
             _foodItem.DecreaseFoodTimes();
             Debug.Log($"饱食度增加了 {increment}，当前饱食度: {agent.State.Hunger}");
         }
     }
 
     // 示例行为：上厕所，需要先移动到厕所位置
-    public class ToiletAction : ActionBase
+    public class ToiletAction : NormalAction
     {
         public override string ActionName => "上厕所";
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
+        public override float ProgressSpeed { get; protected set; } = 20f;
+        public override int ProgressTimes { get; protected set; } = 1;
 
-        private Vector3 _targetPos;
-
-        public override float CalculateUtility(Agent agent)
+        private GameItemBase _toiletItem;
+        public ToiletAction(GameItemBase toiletItem, State state) : base(state)
         {
-            return 100 - agent.State.Toilet;
+            _toiletItem = toiletItem;
+            ActionName = "上厕所";
         }
 
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到厕所位置
-            PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
+            if (_toiletItem != null)
+                PrecedingActions.Add(new CheckMoveToTarget(_toiletItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行上厕所动作，恢复厕所值");
-            agent.State.Toilet = 100;
-            Done = true;
+            agent.State.Toilet.Increase(100);
         }
     }
 
     // 示例行为：社交，不需要额外移动
-    public class SocialAction : ActionBase
+    public class SocialAction : NormalAction
     {
         public override string ActionName => "社交";
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        public override float CalculateUtility(Agent agent)
+        public SocialAction(State state) : base(state)
         {
-            return 100 - agent.State.Social;
+            ActionName = "社交";
         }
 
         public override void OnRegister(Agent agent)
@@ -311,85 +303,75 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行社交动作，提升社交值");
-            agent.State.Social = 100;
+            agent.State.Social.Increase(10);
             Done = true;
         }
     }
 
     // 示例行为：游玩，需要先移动到游玩区域
-    public class PlayAction : ActionBase
+    public class PlayAction : NormalAction
     {
         public override string ActionName => "游玩";
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        private Vector3 playPos;
-
-        public PlayAction(Vector3 playPos)
+        public PlayAction(State state) : base(state)
         {
-            this.playPos = playPos;
-        }
-
-        public override float CalculateUtility(Agent agent)
-        {
-            return 100 - agent.State.Mood;
         }
 
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到游玩区域
-            PrecedingActions.Add(new CheckMoveToTarget(playPos));
+            // PrecedingActions.Add(new CheckMoveToTarget(playPos));
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行游玩动作，提升心情");
-            agent.State.Mood = 100;
+            agent.State.Mood.Increase(10);
             Done = true;
         }
     }
 
     // 示例行为：洗澡，需要先移动到浴室位置
-    public class BathAction : ActionBase
+    public class BathAction : NormalAction
     {
         public override string ActionName => "洗澡";
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        private Vector3 bathPos;
+        private GameItemBase _bath;
 
-        public BathAction(Vector3 bathPos)
+        public BathAction(GameItemBase bath, State state) : base(state)
         {
-            this.bathPos = bathPos;
-        }
-
-        public override float CalculateUtility(Agent agent)
-        {
-            return 100 - agent.State.Hygiene;
+            _bath = bath;
+            ActionName = "洗澡";
         }
 
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到浴室
-            PrecedingActions.Add(new CheckMoveToTarget(bathPos));
+            PrecedingActions.Add(new CheckMoveToTarget(_bath.Pos));
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行洗澡动作，恢复清洁度");
-            agent.State.Hygiene = 100;
+            agent.State.Hygiene.Increase(100);
             Done = true;
         }
     }
 
-    public class SleepAction : ActionBase
+    public class SleepAction : NormalAction
     {
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        public override float CalculateUtility(Agent agent)
+        private BedItem _bedItem;
+        public SleepAction(BedItem bedItem, State state) : base(state)
         {
-            return 100 - agent.State.Sleep;
+            ActionName = "睡觉";
+            _bedItem = bedItem;
         }
 
         protected override void DoExecute(Agent agent)
@@ -400,6 +382,28 @@ namespace AI
         public override void OnRegister(Agent agent)
         {
             throw new System.NotImplementedException();
+        }
+    }
+
+    public class BackHome : ActionBase
+    {
+        public override float ProgressSpeed { get; protected set; }
+        public override int ProgressTimes { get; protected set; }
+
+        public BackHome()
+        {
+            ActionName = "Back Home";
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            // PrecedingActions.Add(new CheckMoveToTarget(agent.HomePos));
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            Debug.Log("执行回家动作");
+            Done = true;
         }
     }
 }

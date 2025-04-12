@@ -8,11 +8,6 @@ public class PutIntoBag : ActionBase
 
     private PropGameItem _gameItem;
 
-    public override float CalculateUtility(Agent agent)
-    {
-        return 0f;
-    }
-
     public PutIntoBag(PropGameItem gameItem)
     {
         _gameItem = gameItem;
@@ -27,6 +22,6 @@ public class PutIntoBag : ActionBase
     protected override void DoExecute(Agent agent)
     {
         agent.Bag.AddItem(_gameItem);
-        MapManager.I.RemoveGameItem(_gameItem);
+        _gameItem.Destroy();
     }
 }

@@ -14,6 +14,7 @@ public class ConfigBase
 [Serializable]
 public class BuildingConfig : ConfigBase
 {
+    public string type;
     public BuildingRequiredItem[] requiredItems;
 }
 
