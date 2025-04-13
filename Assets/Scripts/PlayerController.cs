@@ -19,7 +19,12 @@ public class PlayerController : GameItemUI
         actionProgress.fillAmount = curProgress / 100f;
     }
 
-    public override void OnHide()
+    public override void OnGet()
+    {
+        actionProgress.fillAmount = 0f;
+    }
+
+    public override void OnRelease()
     {
         _agent.Brain.OnActionProgress -= OnActionProgress;
     }

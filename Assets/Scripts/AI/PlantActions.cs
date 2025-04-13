@@ -139,10 +139,10 @@ namespace AI
         private Vector3 _targetPos;
         private PropGameItem _waterItem;
 
-        public WaterPlantAction(Vector3 targetPos)
+        public WaterPlantAction(Vector3 _targetPos)
         {
             ActionName = "Water the plant";
-            _targetPos = targetPos;
+            this._targetPos = _targetPos;
         }
 
         public override void OnRegister(Agent agent)
@@ -196,6 +196,30 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             agent.HarvestItem(_plantItem);
+        }
+    }
+
+    public class WeedingAction : ActionBase
+    {
+        public override float ProgressSpeed { get; protected set; } = 10;
+        public override int ProgressTimes { get; protected set; } = 1;
+
+        private PlantItem _plantItem;
+
+        public WeedingAction(PlantItem plantItem)
+        {
+            ActionName = "Weeding";
+            _plantItem = plantItem;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.Pos));
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            _plantItem.Weeding();
         }
     }
 }

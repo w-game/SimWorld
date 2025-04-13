@@ -1,19 +1,22 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Citizens;
 using GameItem;
 using UnityEngine;
 
 public class GameItemManager
 {
-    public List<IGameItem> GameItems { get; private set; } = new List<IGameItem>();
     private Dictionary<Vector2Int, List<IGameItem>> _gameItems = new Dictionary<Vector2Int, List<IGameItem>>();
 
     public static event Func<Vector3, Vector2Int> ItemPosToMapPosConverter;
 
+    public ObjectPool<GameItemUI> ItemUIPool { get; private set; }
+
     public GameItemManager(Func<Vector3, Vector2Int> func)
     {
         ItemPosToMapPosConverter = func;
+        ItemUIPool = new ObjectPool<GameItemUI>(128);
     }
 
     public void RegisterGameItem(IGameItem gameItem)
@@ -27,7 +30,6 @@ public class GameItemManager
         {
             _gameItems[mapPos].Add(gameItem);
         }
-        GameItems.Add(gameItem);
     }
 
     public void UnregisterGameItem(IGameItem gameItem)
@@ -41,7 +43,6 @@ public class GameItemManager
                 _gameItems.Remove(mapPos);
             }
         }
-        GameItems.Remove(gameItem);
     }
 
     public void RemoveGameItemOnMap(IGameItem gameItem)
@@ -72,9 +73,23 @@ public class GameItemManager
 
     public void Update()
     {
-        foreach (var gameItem in new List<IGameItem>(GameItems))
+        foreach (var gameItem in new List<IGameItem>(_gameItems.Values.SelectMany(x => x)))
         {
             gameItem.DoUpdate();
+            var dis = Vector2.Distance(gameItem.Pos, GameManager.I.CurrentAgent.Pos);
+            if (dis > 64)
+            {
+                gameItem.HideUI();
+            }
+            else if (gameItem.UI == null)
+            {
+                gameItem.ShowUI();
+            }
+
+            if (dis > 256)
+            {
+                gameItem.Destroy();
+            }
         }
     }
 

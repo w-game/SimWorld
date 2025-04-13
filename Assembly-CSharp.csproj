@@ -70,21 +70,17 @@
     <Compile Include="Assets/Scripts/AI/AIController.cs" />
     <Compile Include="Assets/Scripts/Localization/ActionLocalization.cs" />
     <Compile Include="Assets/Scripts/AI/InventoryAction.cs" />
-    <Compile Include="Assets/Scripts/GameItem/StoveItem.cs" />
     <Compile Include="Assets/Scripts/Config/ConfigReader.cs" />
     <Compile Include="Assets/Scripts/AI/PlantActions.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItemUI.cs" />
     <Compile Include="Assets/Scripts/Citizen/Job.cs" />
     <Compile Include="Assets/Scripts/Agent.cs" />
-    <Compile Include="Assets/Scripts/GameItem/ChairItem.cs" />
     <Compile Include="Assets/Scripts/PlayerController.cs" />
-    <Compile Include="Assets/Scripts/GameItem/WellItem.cs" />
     <Compile Include="Assets/Scripts/UIManager.cs" />
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
     <Compile Include="Assets/TIles/DirtTile.cs" />
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionMenu.cs" />
-    <Compile Include="Assets/Scripts/GameItem/CropItem.cs" />
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
@@ -96,7 +92,6 @@
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
     <Compile Include="Assets/Scripts/Map/MapJob.cs" />
     <Compile Include="Assets/Scripts/AI/EntertainmentActions.cs" />
-    <Compile Include="Assets/Scripts/GameItem/TableItem.cs" />
     <Compile Include="Assets/Scripts/ActionSystem.cs" />
     <Compile Include="Assets/Scripts/AI/Schedule.cs" />
     <Compile Include="Assets/Scripts/Map/AStar.cs" />
@@ -112,6 +107,7 @@
     <Compile Include="Assets/TIles/BuildingTile.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />
     <Compile Include="Assets/Scripts/GameItem/TreeItem.cs" />
+    <Compile Include="Assets/Scripts/Util/ObjectPool.cs" />
     <Compile Include="Assets/Scripts/AI/SkillActions.cs" />
     <Compile Include="Assets/Scripts/AI/IAction.cs" />
     <Compile Include="Assets/Scripts/UI/MainView.cs" />
@@ -124,7 +120,6 @@
     <Compile Include="Assets/Scripts/MapManager.cs" />
     <Compile Include="Assets/Scripts/GameTime.cs" />
     <Compile Include="Assets/Scripts/Util/Singleton.cs" />
-    <Compile Include="Assets/Scripts/GameItem/FoodItem.cs" />
     <Compile Include="Assets/Scripts/Util/Log.cs" />
     <Compile Include="Assets/Scripts/Test.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/BuildingElement.cs" />

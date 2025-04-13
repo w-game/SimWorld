@@ -121,8 +121,17 @@ namespace Citizens
         {
             if (UI == null)
             {
-                UI = GameManager.I.InstantiateObject("Prefabs/Player", Pos).GetComponent<GameItemUI>();
+                UI = GameManager.I.GameItemManager.ItemUIPool.Get("Prefabs/Player", Pos);
                 UI.Init(this);
+            }
+        }
+
+        public override void HideUI()
+        {
+            if (UI != null)
+            {
+                GameManager.I.GameItemManager.ItemUIPool.Release(UI, "Prefabs/Player");
+                UI = null;
             }
         }
 
@@ -165,7 +174,8 @@ namespace Citizens
                 Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
                 var targetPos = Pos + movement;
                 var buildingType = MapManager.I.CheckBuildingType(targetPos);
-                if (buildingType == BuildingType.Wall) {
+                if (buildingType == BuildingType.Wall)
+                {
                     return;
                 }
                 Pos += movement;
@@ -320,7 +330,12 @@ namespace Citizens
 
         internal void HarvestItem(PlantItem plantItem)
         {
-            
+
+        }
+
+        public override List<IAction> OnSelected()
+        {
+            throw new NotImplementedException();
         }
     }
 }

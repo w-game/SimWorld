@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using GameItem;
 
 public class PropItem
 {

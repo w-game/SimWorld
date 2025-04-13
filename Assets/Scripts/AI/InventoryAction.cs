@@ -1,5 +1,6 @@
 using AI;
 using Citizens;
+using GameItem;
 
 public class PutIntoBag : ActionBase
 {

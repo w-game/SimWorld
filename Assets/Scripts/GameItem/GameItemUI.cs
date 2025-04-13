@@ -2,7 +2,7 @@ using System;
 using GameItem;
 using UnityEngine;
 
-public class GameItemUI : MonoBehaviour
+public class GameItemUI : MonoBehaviour, IPoolable
 {
     [SerializeField] private SpriteRenderer sr;
     public GameItemBase GameItem { get; private set; }
@@ -17,7 +17,12 @@ public class GameItemUI : MonoBehaviour
         sr.sprite = Resources.Load<Sprite>(spritePath);
     }
 
-    public virtual void OnHide()
+    public virtual void OnGet()
+    {
+        
+    }
+
+    public virtual void OnRelease()
     {
         
     }
