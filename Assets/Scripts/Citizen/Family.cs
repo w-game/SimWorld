@@ -64,7 +64,6 @@ namespace Citizens
         public void SetAgent(Agent agent)
         {
             Agent = agent;
-            Agent.Brain.AddDetector(new WorkActionDetector(Job));
         }
 
         private void SetParent(FamilyMember parent)

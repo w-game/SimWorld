@@ -72,16 +72,16 @@ public class GameItemManager
 
     public void Update()
     {
-        foreach (var gameItem in GameItems)
+        foreach (var gameItem in new List<IGameItem>(GameItems))
         {
             gameItem.DoUpdate();
         }
     }
 
-    internal Agent CreateNPC(Vector2Int housePos)
+    internal Agent CreateNPC(Vector2Int pos, FamilyMember member)
     {
-        var agent = new Agent(null, GameManager.I.ActionSystem.CreateAIController(), housePos + new Vector2(0.5f, 0.5f));
-        agent.Init(GameManager.I.CitizenManager.CreatePlayer());
+        var agent = new Agent(null, GameManager.I.ActionSystem.CreateAIController(), pos + new Vector2(0.5f, 0.5f));
+        agent.Init(member);
         agent.ShowUI();
 
         return agent;

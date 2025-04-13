@@ -19,10 +19,17 @@ namespace GameItem
             UI.SetRenderer(resourceConfig.stages[GrowthStage]);
         }
 
-        public PlantItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public PlantItem(ConfigBase config, Vector3 pos = default, bool randomStage = false) : base(config, pos)
         {
             var resourceConfig = ConvtertConfig<ResourceConfig>();
-            GrowthStage = Random.Range(0, resourceConfig.stages.Length);
+            if (randomStage)
+            {
+                GrowthStage = Random.Range(0, resourceConfig.stages.Length);
+            }
+            else
+            {
+                GrowthStage = 0;
+            }
         }
     }
 }

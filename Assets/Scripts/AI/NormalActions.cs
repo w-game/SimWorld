@@ -36,6 +36,12 @@ namespace AI
 
         public event Action<float> OnActionProgress;
         public event Action<IAction> OnCompleted;
+        public event Action<IAction> OnActionFailed;
+
+        protected void OnActionFailedEvent()
+        {
+            OnActionFailed?.Invoke(this);
+        }
 
         public virtual float CurrentUtility(AgentState state, float currentMood)
         {
@@ -103,6 +109,12 @@ namespace AI
 
         // 注册时配置前置动作（例如移动、捡取物品等）
         public abstract void OnRegister(Agent agent);
+
+        public void Reset()
+        {
+            Done = false;
+            PrecedingActions.Clear();
+        }
     }
 
     // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
@@ -171,19 +183,17 @@ namespace AI
         public override string ActionName => "捡取物品";
         public override float ProgressSpeed { get; protected set; } = 50;
         public override int ProgressTimes { get; protected set; } = 1;
-        private Agent _agent;
         private PropGameItem _item;
 
-        public TakeItemInHand(Agent agent, PropGameItem item)
+        public TakeItemInHand(PropGameItem item)
         {
-            _agent = agent;
             _item = item;
         }
 
         public override void OnRegister(Agent agent)
         {
             // 此处可加入检查或移动动作
-            if (Vector3.Distance(_agent.Pos, _item.Pos) < 0.001f)
+            if (Vector3.Distance(agent.Pos, _item.Pos) < 0.001f)
             {
                 // TODO Do Take
                 Done = true;
@@ -232,7 +242,7 @@ namespace AI
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
             TableItem tableItem = agent.FindNearestTableItem();
 
-            var takeItem = new TakeItemInHand(agent, _foodItem);
+            var takeItem = new TakeItemInHand( _foodItem);
             takeItem.OnRegister(agent);
             PrecedingActions.Add(takeItem);
 

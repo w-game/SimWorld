@@ -32,11 +32,6 @@ namespace AI
             _agent = agent;
         }
 
-        internal void AddDetector(IActionDetector actionDetector)
-        {
-
-        }
-
         public void RegisterAction(IAction action, bool force)
         {
             if (force && _activeActionsFirst.Count == 6)
@@ -177,12 +172,12 @@ namespace AI
 
             if (_curAction != null)
             {
-                Log.LogInfo("AIController", "当前行为: " + _curAction.ActionName);
                 _curAction.Execute(_agent);
             }
             else if (_activeActionsFirst.Count != 0)
             {
                 _curAction = _activeActionsFirst.Dequeue();
+                Debug.Log($"当前行为: {_curAction.ActionName}");
                 _curAction.OnCompleted += OnActionCompleted;
                 _curAction.OnActionProgress += OnActionProgress;
             }

@@ -96,6 +96,18 @@ namespace Citizens
         public FamilyMember Ciziten { get; private set; }
         public AgentState State { get; private set; }
         public AIController Brain { get; private set; } // 大脑
+        private Dictionary<int, List<Schedule>> _schedules = new Dictionary<int, List<Schedule>>()
+        {
+            { 1, new List<Schedule>() },
+            { 2, new List<Schedule>() },
+            { 3, new List<Schedule>() },
+            { 4, new List<Schedule>() },
+            { 5, new List<Schedule>() },
+            { 6, new List<Schedule>() },
+            { 7, new List<Schedule>() }
+        };
+
+        private Schedule _currentSchedule;
 
         public Agent(ConfigBase config, AIController brain, Vector3 pos = default) : base(config, pos)
         {
@@ -119,6 +131,29 @@ namespace Citizens
             State.UpdateState();
             Move();
             Brain.Update();
+            CheckSchedules();
+        }
+
+        private void CheckSchedules()
+        {
+            if (_currentSchedule != null)
+            {
+                if (_currentSchedule.EndTime < GameManager.I.GameTime.CurrentTime)
+                {
+                    _currentSchedule = null;
+                }
+
+                return;
+            }
+
+            var schedules = _schedules[GameManager.I.GameTime.Day];
+            foreach (var schedule in schedules)
+            {
+                if (schedule.Check(GameManager.I.GameTime.CurrentTime, GameManager.I.GameTime.Day))
+                {
+                    _currentSchedule = schedule;
+                }
+            }
         }
 
         private void Move()
@@ -128,6 +163,11 @@ namespace Citizens
                 float moveX = Input.GetAxis("Horizontal");
                 float moveY = Input.GetAxis("Vertical");
                 Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
+                var targetPos = Pos + movement;
+                var buildingType = MapManager.I.CheckBuildingType(targetPos);
+                if (buildingType == BuildingType.Wall) {
+                    return;
+                }
                 Pos += movement;
             }
 
@@ -236,6 +276,51 @@ namespace Citizens
         {
             // item.transform.SetParent(handItem);
             // item.transform.localPosition = Vector3.zero;
+        }
+
+        internal void RegisterSchedule(Schedule newSchedule)
+        {
+            foreach (var day in newSchedule.Days)
+            {
+                var schedules = _schedules[day];
+                if (schedules.Count == 0)
+                {
+                    schedules.Add(newSchedule);
+                    return;
+                }
+                else
+                {
+                    // 检测时间是否重叠
+                    foreach (var sch in schedules)
+                    {
+                        if ((newSchedule.StartTime > sch.StartTime && newSchedule.StartTime < sch.EndTime) ||
+                            (newSchedule.EndTime > sch.StartTime && newSchedule.EndTime < sch.EndTime) ||
+                            (newSchedule.StartTime < sch.StartTime && newSchedule.EndTime > sch.EndTime))
+                        {
+                            if (newSchedule.Priority > sch.Priority)
+                            {
+                                schedules.Remove(sch);
+                                schedules.Add(newSchedule);
+                            }
+                            else
+                            {
+                                Debug.Log("时间冲突，无法添加新日程");
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        internal PropGameItem GetItemInHand()
+        {
+            return null;
+        }
+
+        internal void HarvestItem(PlantItem plantItem)
+        {
+            
         }
     }
 }

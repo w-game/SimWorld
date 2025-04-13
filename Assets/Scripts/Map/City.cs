@@ -69,7 +69,7 @@ namespace Map
             Roads.Add(verticalMainRoad);
 
             // 每个方向尝试添加1-2条次要道路
-            int roadCount = ChunkRand.Next(1, 3);
+            int roadCount = ChunkRand.Next(4, 8);
 
             // 记录已使用的偏移量，防止道路重叠
             HashSet<int> usedHorizontalOffsets = new HashSet<int>();
@@ -165,7 +165,7 @@ namespace Map
                         if (housesPlaced >= maxHousesPerRoad)
                             break;
 
-                        var house = PlaceBuilding(roadPoint, dir);
+                        var house = PlaceBuilding(roadPoint, 0);
                         if (house != null)
                         {
                             Houses.Add(house);
@@ -187,24 +187,12 @@ namespace Map
                 direction = ChunkRand.Next(0, 4);
             }
 
+            var roomConfigs = GameManager.I.ConfigReader.GetAllConfigs<RoomConfig>();
+
             // 随机选择建筑大小
-            var roomSize = ChunkRand.Next(1, 4);
-            int buildingWidth, buildingHeight;
-            if (roomSize == 1)
-            {
-                buildingWidth = ChunkRand.Next(5, 7);
-                buildingHeight = ChunkRand.Next(5, 7);
-            }
-            else if (roomSize == 2)
-            {
-                buildingWidth = ChunkRand.Next(8, 11);
-                buildingHeight = ChunkRand.Next(8, 11);
-            }
-            else
-            {
-                buildingWidth = ChunkRand.Next(12, 17);
-                buildingHeight = ChunkRand.Next(12, 17);
-            }
+            var roomSize = ChunkRand.Next(0, roomConfigs.Count);
+            var roomConfig = roomConfigs[roomSize];
+            int buildingWidth = roomConfig.width, buildingHeight = roomConfig.height;
 
             // 随机选择建筑方向
 
@@ -238,7 +226,7 @@ namespace Map
             }
 
             // 先合并计算所有块的坐标，并同步更新边界
-            for (int i = 1; i <= buildingWidth; i++)
+            for (int i = -buildingWidth / 2; i <= buildingWidth / 2; i++)
             {
                 for (int j = 1; j <= buildingHeight; j++)
                 {
@@ -286,7 +274,7 @@ namespace Map
                 }
             }
 
-            return new House(buildingBlocks, new Vector2Int(buildingWidth, buildingHeight), minPos, this, ChunkRand);
+            return new House(buildingBlocks, roomConfig, minPos, this, ChunkRand);
         }
     }
 }

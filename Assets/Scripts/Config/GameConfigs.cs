@@ -65,3 +65,19 @@ public class GameItemToActions : ConfigBase
 {
     public string[] actions;
 }
+
+[Serializable]
+public class RoomConfig : ConfigBase
+{
+    public int[] layout;
+    public int width;
+    public int height;
+    public RoomFurniture[] furnitures;
+}
+
+[Serializable]
+public class RoomFurniture
+{
+    public string id;
+    public int[] pos;
+}

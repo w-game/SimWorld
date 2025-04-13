@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 711d5020d9bc2443198656a3339ef184, type: 3}
-  m_Name: Room
+  m_Name: Door
   m_EditorClassIdentifier: 
-  m_DefaultSprite: {fileID: -5558002514471396697, guid: 4b654b720726347a49503da74a7f7a98, type: 3}
+  m_DefaultSprite: {fileID: -4092951896790114336, guid: fcd46002c841d46f18133dfdf8a9345f, type: 3}
   m_DefaultGameObject: {fileID: 0}
   m_DefaultColliderType: 1
   m_TilingRules:
@@ -35,7 +35,7 @@ MonoBehaviour:
     m_RuleTransform: 0
   - m_Id: 1
     m_Sprites:
-    - {fileID: -5558002514471396697, guid: 4b654b720726347a49503da74a7f7a98, type: 3}
+    - {fileID: -4092951896790114336, guid: fcd46002c841d46f18133dfdf8a9345f, type: 3}
     m_GameObject: {fileID: 0}
     m_MinAnimationSpeed: 1
     m_MaxAnimationSpeed: 1
@@ -103,7 +103,7 @@ MonoBehaviour:
     m_RuleTransform: 0
   - m_Id: 6
     m_Sprites:
-    - {fileID: 1680000076, guid: 4b654b720726347a49503da74a7f7a98, type: 3}
+    - {fileID: -4092951896790114336, guid: fcd46002c841d46f18133dfdf8a9345f, type: 3}
     m_GameObject: {fileID: 0}
     m_MinAnimationSpeed: 1
     m_MaxAnimationSpeed: 1

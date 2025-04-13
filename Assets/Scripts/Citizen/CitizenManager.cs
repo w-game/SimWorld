@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AI;
 using Map;
+using UnityEngine;
 
 namespace Citizens
 {
@@ -9,6 +10,16 @@ namespace Citizens
     {
         public Dictionary<City, List<Family>> Families { get; } = new Dictionary<City, List<Family>>();
         public Dictionary<City, Dictionary<Family, Company>> Companies { get; } = new Dictionary<City, Dictionary<Family, Company>>();
+
+        private FamilyMember CreateMember(Family family, House house, bool sex, int age)
+        {
+            var member = new FamilyMember(sex, age);
+            var agent = new Agent(null, GameManager.I.ActionSystem.CreateAIController(), house.RandomPos + new Vector2(0.5f, 0.5f));
+            agent.Init(member);
+            family.AddMember(member);
+
+            return member;
+        }
 
         public void GenerateNPCs(City city)
         {
@@ -32,67 +43,58 @@ namespace Citizens
                     {
                         // Single adult living alone.
                         int age = city.ChunkRand.Next(18, 60);
-                        family.AddMember(new FamilyMember(true, age));
+                        CreateMember(family, house, true, age);
                     }
                     else if (familyType < 30)
                     {
                         // Single parent family with 1-3 children.
                         int parentAge = city.ChunkRand.Next(25, 50);
-                        var adult = new FamilyMember(true, parentAge);
-                        family.AddMember(adult);
+                        var adult = CreateMember(family, house, true, parentAge);
                         int childrenCount = city.ChunkRand.Next(1, 4); // 1 to 3 children
                         for (int i = 0; i < childrenCount; i++)
                         {
                             int childAge = city.ChunkRand.Next(0, 18);
-                            var child = new FamilyMember(false, childAge);
+                            var child = CreateMember(family, house, false, childAge);
                             adult.AddChild(child);
-                            family.AddMember(child);
                         }
                     }
                     else if (familyType < 55)
                     {
                         // Nuclear family: two adults and 1-3 children.
                         int adultAge = city.ChunkRand.Next(25, 50);
-                        var father = new FamilyMember(true, adultAge);
-                        family.AddMember(father);
-                        var mother = new FamilyMember(false, adultAge - city.ChunkRand.Next(0, 5));
-                        family.AddMember(mother);
+                        var father = CreateMember(family, house, true, adultAge);
+                        var mother = CreateMember(family, house, false, adultAge - city.ChunkRand.Next(0, 5));
                         father.SetSpouse(mother);
                         int childrenCount = city.ChunkRand.Next(1, 4); // 1 to 3 children
                         for (int i = 0; i < childrenCount; i++)
                         {
                             int childAge = city.ChunkRand.Next(0, 18);
-                            var child = new FamilyMember(false, childAge);
+                            var child = CreateMember(family, house, false, childAge);
                             father.AddChild(child);
                             mother.AddChild(child);
-                            family.AddMember(child);
                         }
                     }
                     else if (familyType < 80)
                     {
                         // Extended family: couple, children, and a senior member.
                         int adultAge = city.ChunkRand.Next(25, 50);
-                        var father = new FamilyMember(true, adultAge);
-                        family.AddMember(father);
-                        var mother = new FamilyMember(false, adultAge - city.ChunkRand.Next(0, 5));
-                        family.AddMember(mother);
+                        var father = CreateMember(family, house, true, adultAge);
+                        var mother = CreateMember(family, house, false, adultAge - city.ChunkRand.Next(0, 5));
                         father.SetSpouse(mother);
 
                         int seniorAge = city.ChunkRand.Next(60, 90);
-                        var senior = new FamilyMember(false, seniorAge);
+                        var senior = CreateMember(family, house, city.ChunkRand.Next(0, 100) < 50, seniorAge);
                         senior.AddChild(father);
                         senior.AddChild(mother);
-                        family.AddMember(senior);
 
                         int childrenCount = city.ChunkRand.Next(2, 5); // 2 to 4 children
                         for (int i = 0; i < childrenCount; i++)
                         {
                             int childAge = city.ChunkRand.Next(0, 18);
-                            var child = new FamilyMember(false, childAge);
+                            var child = CreateMember(family, house, false, childAge);
                             father.AddChild(child);
                             mother.AddChild(child);
                             senior.AddGrandchild(child);
-                            family.AddMember(child);
                         }
                     }
                     else
@@ -103,7 +105,7 @@ namespace Citizens
                         {
                             bool isAdult = city.ChunkRand.Next(0, 100) < 70;
                             int age = isAdult ? city.ChunkRand.Next(18, 60) : city.ChunkRand.Next(0, 18);
-                            family.AddMember(new FamilyMember(isAdult, age));
+                            CreateMember(family, house, city.ChunkRand.Next(0, 100) < 50, age);
                         }
                     }
 
@@ -125,7 +127,7 @@ namespace Citizens
             {
                 return; // No families to assign jobs
             }
-            
+
             foreach (var property in cityProperties)
             {
                 var family = families[city.ChunkRand.Next(0, families.Count - 1)];
@@ -147,12 +149,11 @@ namespace Citizens
         {
             if (!companies.TryGetValue(family, out var company))
             {
-                company = new Company();
+                company = new Company(family);
                 companies.Add(family, company);
             }
 
             company.AddProperty(property);
-            company.SetOwner(family);
         }
 
         private void AssignMembersJobs(City city, Family family)

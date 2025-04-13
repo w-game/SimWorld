@@ -54,7 +54,7 @@
             "name": "Chair",
             "description": "A chair for sitting.",
             "type": "Furniture",
-            "icon": "Textures/Chair",
+            "icon": "Textures/ChairDown",
             "prefab": "Prefabs/GameItems/FurnitureItem",
             "requiredResources": {
                 "wood": 2,

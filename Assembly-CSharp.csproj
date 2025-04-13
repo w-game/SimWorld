@@ -78,6 +78,7 @@
     <Compile Include="Assets/Scripts/Agent.cs" />
     <Compile Include="Assets/Scripts/GameItem/ChairItem.cs" />
     <Compile Include="Assets/Scripts/PlayerController.cs" />
+    <Compile Include="Assets/Scripts/GameItem/WellItem.cs" />
     <Compile Include="Assets/Scripts/UIManager.cs" />
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
     <Compile Include="Assets/TIles/DirtTile.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="Assets/Scripts/Util/Singleton.cs" />
     <Compile Include="Assets/Scripts/GameItem/FoodItem.cs" />
     <Compile Include="Assets/Scripts/Util/Log.cs" />
+    <Compile Include="Assets/Scripts/Test.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/BuildingElement.cs" />
   </ItemGroup>
   <ItemGroup>

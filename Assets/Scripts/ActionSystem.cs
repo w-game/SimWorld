@@ -142,7 +142,7 @@ namespace AI
             List<ActionBase> actions = new List<ActionBase>();
             switch (buildingType)
             {
-                case BuildingType.House:
+                case BuildingType.Wall:
                     actions.Add(new CheckMoveToTarget(Vector3.zero));
                     break;
                 case BuildingType.Farm:

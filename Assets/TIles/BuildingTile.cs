@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -13,9 +11,13 @@ public class BuildingTile : RuleTile<BuildingTile.Neighbor> {
     }
 
     public override bool RuleMatch(int neighbor, TileBase tile) {
-        switch (neighbor) {
-            case Neighbor.Null: return tile == null;
-            case Neighbor.NotNull: return tile != null;
+        if (tile != null && tile is BuildingTile)
+        {
+            switch (neighbor)
+            {
+                case TilingRuleOutput.Neighbor.This: return true;
+                case TilingRuleOutput.Neighbor.NotThis: return false;
+            }
         }
         return base.RuleMatch(neighbor, tile);
     }

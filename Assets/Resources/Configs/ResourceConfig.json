@@ -36,6 +36,26 @@
                     "count": 1
                 }
             ]
+        },
+        {
+            "id": "PLANT_WHEAT",
+            "name": "Wheat",
+            "description": "Wheat",
+            "type": "Plant",
+            "icon": "Textures/Wheat_0",
+            "prefab": "Prefabs/GameItems/PlantItem",
+            "stages": [
+                "Textures/Wheat_0",
+                "Textures/Wheat_1",
+                "Textures/Wheat_2",
+                "Textures/Wheat_3"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_RESOURCE_WHEAT",
+                    "count": 1
+                }
+            ]
         }
     ]
 }
