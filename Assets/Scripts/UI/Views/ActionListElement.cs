@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using TMPro;
 using UnityEngine;
@@ -7,15 +8,10 @@ namespace UI.Views
 {
     public class ActionListElement : MonoSingleton<ActionListElement>
     {
-        [Header("Action List UI")]
-        [SerializeField] private GameObject actionListPanel;
-        [SerializeField] private GameObject actionItemPrefab;
-        [SerializeField] private Transform actionItemParent;
         [SerializeField] private List<TextMeshProUGUI> actionItems;
-        
-        // 新增：存储当前 Action 队列
-        private List<IAction> actionQueue = new List<IAction>();
 
+        private IAction CurAction => GameManager.I.CurrentAgent.Brain.CurAction;
+        
         public void Init()
         {
             GameManager.I.CurrentAgent.Brain.OnActionRegister += OnActionRegister;
@@ -28,9 +24,6 @@ namespace UI.Views
 
         private void OnActionRegister(IAction action)
         {
-            // 按顺序将 Action 添加到队列中
-            actionQueue.Add(action);
-            // 订阅 Action 完成事件，假定 IAction 包含 OnCompleted 事件
             action.OnCompleted += OnActionCompleted;
             UpdateUI();
         }
@@ -39,26 +32,31 @@ namespace UI.Views
         private void OnActionCompleted(IAction action)
         {
             action.OnCompleted -= OnActionCompleted;
-            if (actionQueue.Contains(action))
-            {
-                actionQueue.Remove(action);
-                UpdateUI();
-            }
+            UpdateUI();
         }
 
-        // 更新 UI 显示，根据队列顺序对应 actionItems
         private void UpdateUI()
         {
-            // 先隐藏所有 UI 元素
-            foreach (var image in actionItems)
+            foreach (var item in actionItems)
             {
-                image.enabled = false;
+                item.text = string.Empty;
+                item.enabled = false;
             }
 
-            // 将队列中的 Action 按顺序显示到 UI 上
-            for (int i = 0; i < actionQueue.Count && i < actionItems.Count; i++)
+            if (CurAction != null)
             {
-                // 这里假设每个 Action 对应一个图标，若 IAction 定义中包含 Icon 或 Sprite 属性，可以赋值给 image.sprite
+                actionItems[0].text = CurAction.ActionName;
+                actionItems[0].enabled = true;
+            }
+            else
+            {
+                return;
+            }
+
+            var actionQueue = GameManager.I.CurrentAgent.Brain.ActiveActions.ToList();
+
+            for (int i = 1; i < actionQueue.Count && i < actionItems.Count; i++)
+            {
                 actionItems[i].text = actionQueue[i].ActionName;
                 actionItems[i].enabled = true;
             }

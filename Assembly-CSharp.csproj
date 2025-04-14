@@ -83,9 +83,11 @@
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/CommericalActions.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionMenu.cs" />
+    <Compile Include="Assets/Scripts/GameItem/BuildingItem.cs" />
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
+    <Compile Include="Assets/Scripts/AI/Actions/SystemActions.cs" />
     <Compile Include="Assets/Scripts/UI/Views/MainView.cs" />
     <Compile Include="Assets/Scripts/Util.cs" />
     <Compile Include="Assets/Scripts/UI/ViewBase.cs" />
@@ -123,6 +125,7 @@
     <Compile Include="Assets/Scripts/GameManager.cs" />
     <Compile Include="Assets/Scripts/MapManager.cs" />
     <Compile Include="Assets/Scripts/GameTime.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopHouseDetails.cs" />
     <Compile Include="Assets/Scripts/Util/Singleton.cs" />
     <Compile Include="Assets/Scripts/Util/Log.cs" />
     <Compile Include="Assets/Scripts/Test.cs" />

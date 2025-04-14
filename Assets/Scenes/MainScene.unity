@@ -6910,9 +6910,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e0423ae6071466e86914bee5acdee36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  actionListPanel: {fileID: 0}
-  actionItemPrefab: {fileID: 0}
-  actionItemParent: {fileID: 0}
   actionItems:
   - {fileID: 196563546}
   - {fileID: 735927777}

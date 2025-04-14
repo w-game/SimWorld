@@ -97,10 +97,10 @@ namespace Citizens
         {
             foreach (var block in House.Blocks)
             {
-                var buildingType = MapManager.I.CheckBuildingType(new Vector3(block.x, block.y, 0));
-                if (buildingType != BuildingType.Farm)
+                MapManager.I.TryGetBuildingItem(new Vector3(block.x, block.y, 0), out var buildingItem);
+                if (buildingItem == null)
                 {
-                    var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0)), jobUnit =>
+                    var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0), House), jobUnit =>
                     {
                         CheckPlantToFarm(block);
                     });

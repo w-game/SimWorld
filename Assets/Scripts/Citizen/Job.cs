@@ -99,10 +99,10 @@ namespace Citizens
 
         private bool StepOne(Vector2Int block, UnityAction<JobUnit> onJobUnitCreated)
         {
-            var buildingType = MapManager.I.CheckBuildingType(new Vector3(block.x, block.y, 0));
-            if (buildingType != BuildingType.Farm)
+            MapManager.I.TryGetBuildingItem(new Vector3(block.x, block.y, 0), out var buildingItem);
+            if (buildingItem == null || buildingItem.House.HouseType != HouseType.Farm)
             {
-                var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0)), jobUnit =>
+                var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0), House), jobUnit =>
                 {
                     StepTwo(block, onJobUnitCreated);
                 });

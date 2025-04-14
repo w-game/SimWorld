@@ -198,8 +198,8 @@ namespace Citizens
                 float moveY = Input.GetAxis("Vertical");
                 Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
                 var targetPos = Pos + movement;
-                var buildingType = MapManager.I.CheckBuildingType(targetPos);
-                if (buildingType == BuildingType.Wall)
+                MapManager.I.TryGetBuildingItem(targetPos, out var buildingItem);
+                if (buildingItem is WallItem)
                 {
                     return;
                 }

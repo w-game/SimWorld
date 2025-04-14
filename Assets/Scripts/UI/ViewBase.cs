@@ -27,7 +27,7 @@ namespace UI
 
         public ViewBase CurrentView => _viewStack.Count > 0 ? _viewStack.Peek() : null;
 
-        public void Push(string prefabPath)
+        public void Push<T>(string prefabPath) where T : ViewBase
         {
             GameObject prefab = Resources.Load<GameObject>(prefabPath);
             if (prefab == null)
@@ -36,7 +36,7 @@ namespace UI
                 return;
             }
 
-            ViewBase view = Instantiate(prefab).GetComponent<ViewBase>();
+            T view = Instantiate(prefab).GetComponent<T>();
             if (view == null)
             {
                 Debug.LogError($"The prefab loaded from {prefabPath} does not contain a ViewBase component.");

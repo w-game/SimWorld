@@ -1,8 +1,6 @@
 
-using System;
 using System.Collections.Generic;
 using AI;
-using GameItem;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -37,7 +35,7 @@ public class ActionMenu : MonoBehaviour
         GameManager.I.ActionSystem.OnMouseClick -= ShowEventMenu;
     }
 
-    private void ShowEventMenu(List<ActionBase> actions, Vector3 position)
+    private void ShowEventMenu(List<IAction> actions, Vector3 position)
     {
         _menuPosition = UIManager.I.mainCamera.ScreenToWorldPoint(position);
         UpdateActionButtons(actions);
@@ -46,7 +44,7 @@ public class ActionMenu : MonoBehaviour
         Log.LogInfo("ActionMenu", "Event menu shown at position: " + position);
     }
 
-    private void UpdateActionButtons(List<ActionBase> actions)
+    private void UpdateActionButtons(List<IAction> actions)
     {
         foreach (var button in _actionButtons)
         {

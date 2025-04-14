@@ -1,18 +1,9 @@
 using System.Collections.Generic;
+using GameItem;
 using UnityEngine;
 
 namespace Map
 {
-    public enum MapItemType
-    {
-        None,
-        Tree,
-        Stone,
-        Iron,
-        Grass,
-        Rock
-    }
-
     public class Chunk
     {
         public const int CityLayer = 3;
@@ -26,9 +17,6 @@ namespace Map
         public int Size { get; private set; }
         public int Layer { get; private set; }
         public BlockType Type { get; private set; }
-        public MapItemType[,] MapItems { get; private set; }
-
-        public Dictionary<Vector2Int, HouseType> AreaTypes { get; private set; } = new Dictionary<Vector2Int, HouseType>(); 
 
         private System.Random _chunkRand;
 
@@ -39,7 +27,6 @@ namespace Map
             Map = map;
             Size = (int)Mathf.Pow(2, layer) * CartonMap.NORMAL_CHUNK_SIZE;
             Blocks = new BlockType[Size, Size];
-            MapItems = new MapItemType[Size, Size];
 
             _chunkRand = new System.Random(Map.seed + layer * 1000 + pos.x * 100 + pos.y);
 
@@ -129,34 +116,6 @@ namespace Map
                             Blocks[localPos.x, localPos.y] = BlockType.Road;
                             Debug.Log($"Set road at {roadPos}");
                         }
-                    }
-                }
-            }
-
-            // 检查房屋
-            if (chunk != null && chunk.City != null)
-            {
-                foreach (var house in chunk.City.Houses)
-                {
-                    List<Vector2Int> housePosInChunk = new List<Vector2Int>();
-                    foreach (var housePos in house.Blocks)
-                    {
-                        // 检查房屋点是否在当前Chunk内
-                        Vector2Int localPos = housePos - WorldPos;
-                        if (localPos.x >= 0 && localPos.x < Size && localPos.y >= 0 && localPos.y < Size)
-                        {
-                            if (Blocks[localPos.x, localPos.y] == BlockType.Ocean)
-                            {
-                                break;
-                            }
-                            housePosInChunk.Add(localPos);
-                        }
-                    }
-
-                    foreach (var housePos in housePosInChunk)
-                    {
-                        Blocks[housePos.x, housePos.y] = BlockType.Room;
-                        Debug.Log($"Set room at {housePos}");
                     }
                 }
             }
@@ -252,62 +211,53 @@ namespace Map
                     {
                         if (noiseValue > 0.9f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Tree;
+                            new TreeItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         }
                         else if (noiseValue > 0.8f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Stone;
                         }
                         else if (noiseValue > 0.6f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Grass;
+                            new PlantItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         }
                         else if (noiseValue > 0.4f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Rock;
                         }
                         else
                         {
-                            MapItems[i, j] = MapItemType.None;
                         }
                     }
                     else if (Blocks[i, j] == BlockType.Forest)
                     {
                         if (noiseValue > 0.7f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Tree;
+                            new TreeItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         }
                         else if (noiseValue > 0.3f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Stone;
                         }
                         else if (noiseValue > 0.1f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Grass;
+                            new PlantItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
                         }
                         else
                         {
-                            MapItems[i, j] = MapItemType.None;
                         }
                     }
                     else if (Blocks[i, j] == BlockType.Mountain)
                     {
                         if (noiseValue > 0.9f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Iron;
                         }
                         else if (noiseValue > 0.5f * frequency)
                         {
-                            MapItems[i, j] = MapItemType.Stone;
                         }
                         else
                         {
-                            MapItems[i, j] = MapItemType.None;
                         }
                     }
                     else
                     {
-                        MapItems[i, j] = MapItemType.None;
                     }
                 }
             }

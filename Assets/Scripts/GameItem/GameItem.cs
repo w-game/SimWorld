@@ -96,7 +96,6 @@ namespace GameItem
     {
         public StaticGameItem(ConfigBase config, Vector3 pos) : base(config, pos)
         {
-            
         }
     }
 

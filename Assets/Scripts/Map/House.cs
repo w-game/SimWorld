@@ -20,46 +20,6 @@ namespace Map
         Park
     }
 
-    public enum CellType
-    {
-        Empty,
-        Room,
-        Wall,
-        Door,
-        Window,
-        Commercial
-    }
-
-    public class Room
-    {
-        public Vector2Int Pos { get; private set; } // 房间位置
-        public Vector2Int Size { get; private set; } // 房间大小，影响房间半径
-        private System.Random _chunkRand;
-        public bool HasLeftWall { get; private set; } = true;
-        public bool HasRightWall { get; private set; } = true;
-        public bool HasTopWall { get; private set; } = true;
-        public bool HasBottomWall { get; private set; } = true;
-
-        public Room(Vector2Int pos, Vector2Int size, System.Random chunkRand,
-                    bool left = true, bool right = true, bool top = true, bool bottom = true)
-        {
-            Pos = pos;
-            _chunkRand = chunkRand;
-            Size = size;
-            HasLeftWall = left;
-            HasRightWall = right;
-            HasTopWall = top;
-            HasBottomWall = bottom;
-        }
-
-        public static Dictionary<Vector2Int, CellType> SplitBSPRooms(Vector2Int origin, Vector2Int size, System.Random rand, int depth = 0)
-        {
-            Dictionary<Vector2Int, CellType> cellMap = new Dictionary<Vector2Int, CellType>();
-
-            return cellMap;
-        }
-    }
-
     public class House
     {
         public List<Vector2Int> Blocks { get; private set; } // 房屋的所有块
@@ -67,7 +27,6 @@ namespace Map
         public City City { get; private set; } // 房屋所在的城市
         public HouseType HouseType { get; private set; } // 房屋类型
 
-        public Dictionary<Vector2Int, CellType> CellMap { get; private set; } = new(); // 格子类型映射
         public Vector2 RandomPos => new Vector2(_chunkRand.Next(MinPos.x + 1, MinPos.x + Size.x - 2), _chunkRand.Next(MinPos.y + 1, MinPos.y + Size.y - 2)); // 随机位置
 
         private System.Random _chunkRand;
@@ -91,11 +50,6 @@ namespace Map
             Enum.TryParse<HouseType>(config.type, true, out var houseType);
             HouseType = houseType;
             CalcRooms();
-
-            foreach (var block in blocks)
-            {
-                City.OriginChunk.AreaTypes.Add(block, HouseType); // 添加到城市的区域类型
-            }
         }
 
         private void CalcRooms()
@@ -104,31 +58,27 @@ namespace Map
             {
                 for (int j = 0; j < RoomConfig.height; j++)
                 {
-                    var pos = new Vector2Int(i, j);
+                    var pos = new Vector2Int(i, j) + MinPos;
                     if (RoomConfig.layout[i + j * RoomConfig.width] == 0)
                     {
-                        CellMap.Add(pos, CellType.Wall);
+                        new WallItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_WALL"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 1)
                     {
-                        CellMap.Add(pos, CellType.Room);
+                        new FloorItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 2)
                     {
-                        CellMap.Add(pos, CellType.Door);
+                        new DoorItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_DOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 3)
                     {
-                        CellMap.Add(pos, CellType.Window);
+                        // new FloorItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 4)
                     {
-                        CellMap.Add(pos, CellType.Commercial);
+                        new CommercialItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
                         CommercialPos.Add(pos);
-                    }
-                    else
-                    {
-                        CellMap.Add(pos, CellType.Empty);
                     }
                 }
             }
@@ -148,6 +98,21 @@ namespace Map
         internal float DistanceTo(Vector3 pos)
         {
             return Vector2.Distance(new Vector2(pos.x, pos.y), new Vector2(MinPos.x, MinPos.y));
+        }
+
+        public bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem
+        {
+            foreach (var item in FurnitureItems)
+            {
+                if (item.Value is T)
+                {
+                    furnitureItem = item.Value as T;
+                    return true;
+                }
+            }
+
+            furnitureItem = null;
+            return false;
         }
     }
 }

@@ -13,14 +13,6 @@ public enum MapLayer
     Building,
 }
 
-public enum BuildingType
-{
-    None,
-    Door,
-    Wall,
-    Farm,
-}
-
 public class MapManager : MonoSingleton<MapManager>
 {
     public const int SIGHT_RANGE = 10; // 视野范围
@@ -37,7 +29,6 @@ public class MapManager : MonoSingleton<MapManager>
     public List<TileBase> wallTiles;
     public List<TileBase> floorTiles;
     public TileBase doorTile;
-    private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
     private Agent _player;
@@ -135,23 +126,11 @@ public class MapManager : MonoSingleton<MapManager>
                 var blockWorldPos = pos + chunk.WorldPos;
                 SetBlockType(blockWorldPos, chunk.Blocks[i, j]);
 
-                var type = chunk.MapItems[i, j];
-                switch (type)
-                {
-                    case MapItemType.Tree:
-                        var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE");
-                        var treeItem = new TreeItem(config, new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
-                        treeItem.ShowUI();
-                        break;
-                    case MapItemType.Grass:
-                        var grassConfig = GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS");
-                        var grassItem = new PlantItem(grassConfig, new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0), randomStage: true);
-                        grassItem.ShowUI();
-                        break;
-                    case MapItemType.Rock:
+                var itemsAtPos = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
 
-                    default:
-                        break;
+                foreach (var item in itemsAtPos)
+                {
+                    item.ShowUI();
                 }
             }
         }
@@ -171,50 +150,6 @@ public class MapManager : MonoSingleton<MapManager>
                     //     continue;
                     // }
                     member.Agent.ShowUI();
-                }
-            }
-
-            foreach (var house in cityChunk.City.Houses)
-            {
-                foreach (var cell in house.CellMap)
-                {
-                    var worldPos = cell.Key + house.MinPos;
-                    var localPos = worldPos - chunk.WorldPos;
-                    if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
-                    {
-                        continue;
-                    }
-
-                    switch (cell.Value)
-                    {
-                        case CellType.Empty:
-                            break;
-                        case CellType.Wall:
-                            SetMapTile(worldPos, MapLayer.Building, wallTiles, BuildingType.Wall);
-                            break;
-                        case CellType.Room:
-                        case CellType.Commercial:
-                            SetMapTile(worldPos, MapLayer.Building, floorTiles, BuildingType.None);
-                            break;
-                        case CellType.Door:
-                            SetMapTile(worldPos, MapLayer.Building, new List<TileBase> { doorTile }, BuildingType.Door);
-                            break;
-                        case CellType.Window:
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                foreach (var furniture in house.FurnitureItems)
-                {
-                    var localPos = furniture.Key - chunk.WorldPos;
-                    if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
-                    {
-                        continue;
-                    }
-
-                    furniture.Value.ShowUI();
                 }
             }
         }
@@ -241,33 +176,6 @@ public class MapManager : MonoSingleton<MapManager>
         return blockType;
     }
 
-    public BuildingType CheckBuildingType(Vector3 pos)
-    {
-        var cellPos = WorldPosToCellPos(pos);
-        if (_buildings.ContainsKey(cellPos))
-        {
-            return _buildings[cellPos];
-        }
-
-        return BuildingType.None;
-    }
-
-    public HouseType CheckMapAera(Vector3 pos)
-    {
-        var cellPos = WorldPosToCellPos(pos);
-        var chunkPos = CartonMap.WorldPosToChunkPos(pos, Chunk.CityLayer);
-        var chunk = CartonMap.GetChunk(chunkPos, Chunk.CityLayer);
-        if (chunk != null)
-        {
-            if (chunk.AreaTypes.ContainsKey(cellPos))
-            {
-                return chunk.AreaTypes[cellPos];
-            }
-        }
-
-        return HouseType.None;
-    }
-
     private void SetBlockType(Vector2Int pos, BlockType type)
     {
         tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tile);
@@ -285,9 +193,6 @@ public class MapManager : MonoSingleton<MapManager>
                 break;
             case BlockType.Ocean:
                 tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), oceanColor);
-                break;
-            case BlockType.Room:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), roomColor);
                 break;
             case BlockType.Road:
                 tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), roadColor);
@@ -328,7 +233,7 @@ public class MapManager : MonoSingleton<MapManager>
         SetBlockType(cellPos, type);
     }
 
-    public void SetMapTile(Vector2Int cellPos, MapLayer layer, List<TileBase> tiles, BuildingType buildingType)
+    public void SetMapTile(Vector2Int cellPos, MapLayer layer, List<TileBase> tiles)
     {
         switch (layer)
         {
@@ -336,28 +241,12 @@ public class MapManager : MonoSingleton<MapManager>
                 if (tile != null)
                 {
                     floorLayer.SetTile(new Vector3Int(cellPos.x, cellPos.y, 0), RandomTile(tiles));
-                    if (!_buildings.ContainsKey(cellPos))
-                    {
-                        _buildings.Add(cellPos, buildingType);
-                    }
-                    else
-                    {
-
-                    }
                 }
                 break;
             case MapLayer.Building:
                 if (tile != null)
                 {
                     layer1.SetTile(new Vector3Int(cellPos.x, cellPos.y, 0), RandomTile(tiles));
-                    if (!_buildings.ContainsKey(cellPos))
-                    {
-                        _buildings.Add(cellPos, buildingType);
-                    }
-                    else
-                    {
-
-                    }
                 }
                 break;
             default:
@@ -365,9 +254,35 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    public void SetMapTile(Vector3 pos, MapLayer layer, List<TileBase> tiles, BuildingType buildingType)
+    public void SetMapTile(Vector3 pos, MapLayer layer, List<TileBase> tiles)
     {
         var cellPos = WorldPosToCellPos(pos);
-        SetMapTile(cellPos, layer, tiles, buildingType);
+        SetMapTile(cellPos, layer, tiles);
+    }
+
+    public bool TryGetBuildingItem(Vector3 pos, out BuildingItem buildingItem)
+    {
+        var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+        foreach (var item in items)
+        {
+            if (item is BuildingItem building)
+            {
+                buildingItem = building;
+                return true;
+            }
+        }
+
+        buildingItem = null;
+        return false;
+    }
+
+    public HouseType CheckMapAera(Vector3 pos)
+    {
+        if (TryGetBuildingItem(pos, out var buildingItem))
+        {
+            return buildingItem.House.HouseType;
+        }
+        
+        return HouseType.None;
     }
 }

@@ -9,9 +9,7 @@ namespace Map
         None,
         Plain,
         Ocean,
-        Room,
         Road,
-        Farm,
         Forest,
         Mountain,
         Desert

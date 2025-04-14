@@ -100,6 +100,33 @@
                 "stone": 2
             },
             "buildSpeed": 9
+        },
+        {
+            "id": "BUILDING_FLOOR",
+            "name": "Floor",
+            "description": "A floor for the building.",
+            "type": "Floor",
+            "icon": "Textures/Floor",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "requiredResources": {
+                "wood": 10,
+                "stone": 5
+            },
+            "buildSpeed": 12
+        },
+        {
+            "id": "BUILDING_FARM",
+            "name": "Farm",
+            "description": "A farm for growing crops.",
+            "type": "Farm",
+            "icon": "Textures/Farm",
+            "prefab": "Prefabs/GameItems/BuildingItem",
+            "requiredResources": {
+                "wood": 5,
+                "stone": 3,
+                "seed": 1
+            },
+            "buildSpeed": 15
         }
     ]
 }

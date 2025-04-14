@@ -15,7 +15,7 @@ namespace AI
         {
             ActionName = "Idle";
             _item = item;
-            ProgressSpeed = UnityEngine.Random.Range(0.5f, 10f);
+            ProgressSpeed = Random.Range(0.5f, 3f);
             ProgressTimes = 1;
         }
 

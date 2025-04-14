@@ -47,11 +47,6 @@ namespace AI
             OnActionFailed?.Invoke(this);
         }
 
-        public virtual float CurrentUtility(AgentState state, float currentMood)
-        {
-            return 0f;
-        }
-
         // 先执行前置动作（如果有的话）
         public void ExecutePrecedingActions(Agent agent)
         {
@@ -81,7 +76,7 @@ namespace AI
                     if (CurProgress <= 100f)
                     {
                         float previousProgress = CurProgress;
-                        CurProgress += Time.deltaTime * ProgressSpeed;
+                        CurProgress += GameManager.I.GameTime.DeltaTime * ProgressSpeed / 2f;
                         OnActionProgress?.Invoke(CurProgress);
 
                         // Debug.Log($"{ActionName} - {CurProgress}, {ProgressTimes}, {ProgressSpeed}");
@@ -273,6 +268,11 @@ namespace AI
             _foodItem.DecreaseFoodTimes();
             Debug.Log($"饱食度增加了 {increment}，当前饱食度: {agent.State.Hunger}");
         }
+
+        public override float Evaluate(Agent agent, HouseType houseType)
+        {
+            return base.Evaluate(agent, houseType);
+        }
     }
 
     // 示例行为：上厕所，需要先移动到厕所位置
@@ -282,24 +282,39 @@ namespace AI
         public override float ProgressSpeed { get; protected set; } = 20f;
         public override int ProgressTimes { get; protected set; } = 1;
 
-        private GameItemBase _toiletItem;
-        public ToiletAction(GameItemBase toiletItem, State state) : base(state)
+        private ToiletItem _toiletItem;
+        public ToiletAction(State state) : base(state)
         {
-            _toiletItem = toiletItem;
-            ActionName = "上厕所";
+            ActionName = "Toilet";
         }
 
         public override void OnRegister(Agent agent)
         {
-            // 加入前置动作：移动到厕所位置
-            if (_toiletItem != null)
+            if (agent.Ciziten.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
+            {
+                _toiletItem = toiletItem;
                 PrecedingActions.Add(new CheckMoveToTarget(_toiletItem.Pos));
+            }
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行上厕所动作，恢复厕所值");
-            agent.State.Toilet.Increase(100);
+            if (_toiletItem == null)
+            {
+                if (agent.State.Toilet.Value <= 0f)
+                {
+                    agent.State.Toilet.Increase(100);
+                }
+                Done = true;
+                return;
+            }
+            else
+            {
+                Debug.Log("执行上厕所动作，恢复厕所值");
+                agent.State.Toilet.Increase(100);
+                Done = true;
+            }
         }
     }
 
@@ -384,24 +399,27 @@ namespace AI
 
     public class SleepAction : NormalAction
     {
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
+        public override float ProgressSpeed { get => 100f / 8f / 60f / 60f; protected set {} }
+        public override int ProgressTimes { get => 100; protected set {} }
 
         private BedItem _bedItem;
-        public SleepAction(BedItem bedItem, State state) : base(state)
+        public SleepAction(State state) : base(state)
         {
             ActionName = "睡觉";
-            _bedItem = bedItem;
-        }
-
-        protected override void DoExecute(Agent agent)
-        {
-            throw new System.NotImplementedException();
         }
 
         public override void OnRegister(Agent agent)
         {
-            throw new System.NotImplementedException();
+            if (agent.Ciziten.Family.Houses[0].TryGetFurniture<BedItem>(out var bedItem))
+            {
+                _bedItem = bedItem;
+                PrecedingActions.Add(new CheckMoveToTarget(_bedItem.Pos));
+            }
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            agent.State.Sleep.Increase(1);
         }
     }
 

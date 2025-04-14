@@ -45,6 +45,16 @@ namespace GameItem
                 Destroy();
             }
         }
+
+        public override List<IAction> ItemActions()
+        {
+            return new List<IAction>()
+            {
+                new TakeItemInHand(this),
+                new PutIntoBag(this),
+                new EatAction(this, GameManager.I.CurrentAgent.State.Hunger),
+            };
+        }
     }
 
     public class BookItem : PropGameItem

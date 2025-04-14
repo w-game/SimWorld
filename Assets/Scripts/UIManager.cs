@@ -1,11 +1,13 @@
-using System;
 using Unity.Cinemachine;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class UIManager : MonoSingleton<UIManager>
 {
     public Camera mainCamera;
     public CinemachineCamera cinemachineCamera;
+
+    public static event UnityAction<Vector3> OnMouseBtnClicked;
 
     internal Vector3 MousePosToWorldPos()
     {
@@ -17,5 +19,14 @@ public class UIManager : MonoSingleton<UIManager>
     internal Vector3 WorldPosToScreenPos(Vector3 position)
     {
         return mainCamera.WorldToScreenPoint(position);
+    }
+
+    void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            Vector3 mousePos = MousePosToWorldPos();
+            OnMouseBtnClicked?.Invoke(mousePos);
+        }
     }
 }

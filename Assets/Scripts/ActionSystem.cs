@@ -15,7 +15,7 @@ namespace AI
 
     public class ActionSystem
     {
-        public event Action<List<ActionBase>, Vector3> OnMouseClick;
+        public event Action<List<IAction>, Vector3> OnMouseClick;
 
         internal void Init()
         {
@@ -41,121 +41,44 @@ namespace AI
                 if (EventSystem.current.IsPointerOverGameObject())
                     return;
 
-
                 Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
                 GameManager.I.selectSign.SetActive(true);
 
                 var items = GameManager.I.GameItemManager.GetItemsAtPos(mousePos);
 
-                if (items.Count > 0)
+                var actions = new List<IAction>();
+                foreach (var item in items)
                 {
-                    Log.LogInfo("ActionSystem", "Click on item");
-                    var actions = ItemsToActions(items);
-                    // TODO: 叠加手上道具行为
-
-                    if (actions.Count > 0)
-                    {
-                        OnMouseClick?.Invoke(actions, Input.mousePosition);
-                        Debug.Log("Mouse Clicked");
-                    }
+                    actions.AddRange(item.ItemActions());
                 }
-                else
-                {
-                    Log.LogInfo("ActionSystem", "Click on map");
-                    var blockType = MapManager.I.CheckBlockType(mousePos);
-                    var buildingType = MapManager.I.CheckBuildingType(mousePos);
 
-                    var actions = BuildingToActions(mousePos, buildingType);
-                    // TODO: 叠加手上道具行为
+                var blockType = MapManager.I.CheckBlockType(mousePos);
+                actions.AddRange(BlockTypeToActions(mousePos, blockType));
 
-                    switch (blockType)
-                    {
-                        case BlockType.Plain:
-                            actions.Add(new CheckMoveToTarget(mousePos));
-                            actions.Add(new HoeAction(mousePos));
-                            actions.Add(new StartBuildingCraftAction());
-
-                            OnMouseClick?.Invoke(actions, Input.mousePosition);
-                            break;
-                        case BlockType.Ocean:
-                            break;
-                    }
-
-                }
+                OnMouseClick?.Invoke(actions, Input.mousePosition);
             }
         }
 
-        private List<ActionBase> ItemsToActions(List<IGameItem> items)
+        private List<IAction> BlockTypeToActions(Vector3 pos, BlockType blockType)
         {
-            List<ActionBase> actions = new List<ActionBase>();
-            foreach (var item in items)
+            List<IAction> actions = new List<IAction>();
+            switch (blockType)
             {
-                switch (item)
-                {
-                    case PropGameItem propGameItem:
-                        if (propGameItem is FoodItem foodItem)
-                        {
-                            actions.Add(new EatAction(foodItem, GameManager.I.CurrentAgent.State.Hunger));
-                        }
-
-                        actions.Add(new PutIntoBag(propGameItem));
-                        actions.Add(new CheckMoveToTarget(propGameItem.Pos));
-                        break;
-                    case PlantItem plantItem:
-                        if (plantItem is TreeItem treeItem)
-                        {
-                        }
-                        else
-                        {
-                            actions.Add(new CheckMoveToTarget(plantItem.Pos));
-                        }
-                        actions.Add(new RemovePlantAction(plantItem));
-                        break;
-                    default:
-                        break;
-                }
-
-                var config = GameManager.I.ConfigReader.GetConfig<GameItemToActions>(item.Config.id);
-                if (config == null)
-                {
-                    continue;
-                }
-                foreach (var action in config.actions)
-                {
-                    var actionType = Type.GetType($"AI.{action}Action");
-                    if (actionType != null)
-                    {
-                        var actionInstance = Activator.CreateInstance(actionType, new object[] { item }) as ActionBase;
-                        if (actionInstance != null)
-                        {
-                            actions.Add(actionInstance);
-                        }
-                    }
-                }
-            }
-
-            return actions;
-        }
-
-        private List<ActionBase> BuildingToActions(Vector3 pos, BuildingType buildingType)
-        {
-            List<ActionBase> actions = new List<ActionBase>();
-            switch (buildingType)
-            {
-                case BuildingType.Wall:
-                    actions.Add(new CheckMoveToTarget(Vector3.zero));
+                case BlockType.Plain:
+                case BlockType.Road:
+                case BlockType.Forest:
+                case BlockType.Mountain:
+                case BlockType.Desert:
+                    actions.Add(new CheckMoveToTarget(pos));
                     break;
-                case BuildingType.Farm:
-                    actions.Add(new PlantAction(pos, "PROP_SEED_"));
-                    break;
-                case BuildingType.None:
+                case BlockType.Ocean:
                     break;
             }
 
             return actions;
         }
 
-        internal void RegisterAction(ActionBase action)
+        internal void RegisterAction(IAction action)
         {
             GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
         }

@@ -12,10 +12,12 @@ namespace AI
         public override int ProgressTimes { get; protected set; } = 1;
 
         private Vector3 _targetPos;
+        private House _house;
 
-        public HoeAction(Vector3 targetPos)
+        public HoeAction(Vector3 targetPos, House house)
         {
             _targetPos = targetPos;
+            _house = house;
             ActionName = "Hoe the ground";
         }
 
@@ -26,7 +28,8 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            MapManager.I.SetMapTile(_targetPos, MapLayer.Building, MapManager.I.farmTiles, BuildingType.Farm);
+            var farmItem = new FarmItem(_house, GameManager.I.ConfigReader.GetConfig<ResourceConfig>("BUILDING_FARM"), _targetPos + new Vector3(0.5f, 0.5f, 0));
+            farmItem.ShowUI();
         }
     }
 
@@ -158,14 +161,14 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            var buildingType = MapManager.I.CheckBuildingType(_targetPos);
-            if (buildingType == BuildingType.Farm)
+            MapManager.I.TryGetBuildingItem(_targetPos, out var buildingItem);
+            if (buildingItem is FarmItem farmItem)
             {
                 _waterItem = agent.GetItemInHand();
 
                 if (_waterItem != null)
                 {
-                    MapManager.I.SetMapTile(_targetPos, MapLayer.Building, MapManager.I.farmWateredTiles, BuildingType.Farm);
+                    farmItem.BeWatered(_waterItem);
                 }
                 else
                 {
