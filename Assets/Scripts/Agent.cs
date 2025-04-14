@@ -28,7 +28,7 @@ namespace Citizens
             }
         }
 
-        public float CheckState(float mood)
+        public virtual float CheckState(float mood)
         {
             float urgency = Mathf.Clamp01((100 - Value) / 100f);
             float utility = 100 - Value;
@@ -45,6 +45,29 @@ namespace Citizens
                 Value = 100;
             }
         }
+    }
+
+    public class SleepState : State
+    {
+        public SleepState(string name, float value, float speed) : base(name, value, speed)
+        {
+        }
+
+        public override float CheckState(float mood)
+        {
+            float time = GameManager.I.GameTime.TimeInHours;
+            float nightBoost = (time >= 20f || time < 6f) ? 1.25f : 1f; // 晚上8点到早上6点之间加成
+            float urgency = Mathf.Clamp01((100 - Value) / 100f);
+            float utility = 100 - Value;
+            float moodModifier = Mathf.Lerp(0.5f, 1.5f, mood / 100f);
+            float finalScore = utility * (1 + urgency * 0.5f) * moodModifier * nightBoost;
+            return finalScore;
+        }
+    }
+
+    public class Personality
+    {
+        public List<string> Hobbies { get; private set; } = new List<string>();
     }
 
     public class AgentState
@@ -87,14 +110,16 @@ namespace Citizens
         }
     }
 
-    public class Agent : GameItemBase
+    public class Agent : DynamicGameItem
     {
         private Vector2 targetPosition;
         private bool isMoving = false;
         public float MoveSpeed { get; private set; } = 10f;
+        public int SightRange { get; private set; } = 8;
 
         public FamilyMember Ciziten { get; private set; }
         public AgentState State { get; private set; }
+        public Personality Personality { get; private set; }
         public AIController Brain { get; private set; } // 大脑
         private Dictionary<int, List<Schedule>> _schedules = new Dictionary<int, List<Schedule>>()
         {
@@ -109,7 +134,7 @@ namespace Citizens
 
         private Schedule _currentSchedule;
 
-        public Agent(ConfigBase config, AIController brain, Vector3 pos = default) : base(config, pos)
+        public Agent(AIController brain, Vector3 pos = default) : base(null, pos)
         {
             Brain = brain;
             Brain.SetAgent(this);
@@ -229,8 +254,6 @@ namespace Citizens
             queue.Enqueue(Pos);
             visitedPositions.Add(Pos);
 
-            int maxDistance = 10;
-
             while (queue.Count > 0)
             {
                 Vector2 currentPos = queue.Dequeue();
@@ -247,7 +270,7 @@ namespace Citizens
                 {
                     Vector2 nextPos = currentPos + dir;
                     if (!visitedPositions.Contains(nextPos)
-                        && Vector2.Distance(nextPos, Pos) <= maxDistance)
+                        && Vector2.Distance(nextPos, Pos) <= SightRange)
                     {
                         visitedPositions.Add(nextPos);
                         queue.Enqueue(nextPos);
@@ -333,9 +356,30 @@ namespace Citizens
 
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             throw new NotImplementedException();
+        }
+
+        internal PropConfig GetOrder(Agent consumer)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal List<IGameItem> ScanAllItemsAround()
+        {
+            List<IGameItem> foundItems = new List<IGameItem>();
+
+            for (int i = 0; i < SightRange; i++)
+            {
+                for (int j = 0; j < SightRange; j++)
+                {
+                    var pos = new Vector2(Pos.x + i, Pos.y + j);
+                    var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+                    foundItems.AddRange(items);
+                }
+            }
+            return foundItems;
         }
     }
 }

@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
 
     private void CreatePlayer()
     {
-        CurrentAgent = new Agent(null, ActionSystem.CreateAIController(), Vector2.zero);
+        CurrentAgent = new Agent(ActionSystem.CreateAIController(), Vector2.zero);
         CurrentAgent.Init(CitizenManager.CreatePlayer());
         CurrentAgent.ShowUI();
         UIManager.I.cinemachineCamera.Follow = CurrentAgent.UI.transform;

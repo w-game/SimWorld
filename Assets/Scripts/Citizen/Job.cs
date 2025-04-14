@@ -51,79 +51,6 @@ namespace Citizens
         }
     }
 
-    public class Company
-    {
-        public string CompanyName { get; private set; }
-        public Dictionary<House, PropertyToJobActions> Properties { get; } = new Dictionary<House, PropertyToJobActions>();
-
-        public Family Owner { get; private set; }
-        public List<Employee> Employees { get; } = new List<Employee>();
-        private Queue<JobUnit> _jobUnits { get; set; } = new Queue<JobUnit>();
-        public int RecriutmentCount { get; set; } = 1;
-
-        private float[] _workTime = new float[2] { 8 * 60 * 60, 18 * 60 * 60 };
-
-        public Company(Family owner, string companyName = "Company")
-        {
-            Owner = owner;
-            CompanyName = companyName + UnityEngine.Random.Range(0, 1000);
-
-            foreach (var member in owner.Members)
-            {
-                if (member.IsAdult)
-                {
-                    var ownerJob = new Owner();
-                    ownerJob.Company = this;
-                    member.SetJob(ownerJob);
-                    Schedule schedule = new Schedule(
-                        _workTime[0], _workTime[1],
-                        new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                        new WorkAction(member.Job), member,
-                        SchedulePriority.High
-                        );
-
-                    member.Agent.RegisterSchedule(schedule);
-                }
-            }
-        }
-
-        public JobUnit GetJobUnit()
-        {
-            if (_jobUnits.Count == 0)
-            {
-                return null;
-            }
-            var jobUnit = _jobUnits.Dequeue();
-            return jobUnit;
-        }
-
-        public void AddEmployee(Employee employee)
-        {
-            Employees.Add(employee);
-            employee.Company = this;
-            Schedule schedule = new Schedule(
-                _workTime[0], _workTime[1],
-                new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                new WorkAction(employee), employee.Member
-                );
-            employee.Member.Agent.RegisterSchedule(schedule);
-        }
-
-        public void AddProperty(House house)
-        {
-            if (house.HouseType == HouseType.Farm)
-            {
-                var farmJobActions = new FarmJobActions(house, OnJobUnitCreated);
-                Properties.Add(house, farmJobActions);
-            }
-        }
-
-        private void OnJobUnitCreated(JobUnit jobUnit)
-        {
-            _jobUnits.Enqueue(jobUnit);
-        }
-    }
-
     public abstract class PropertyToJobActions
     {
         public event UnityAction<JobUnit> OnJobUnitCreated;
@@ -261,11 +188,30 @@ namespace Citizens
         public FamilyMember Member { get; set; }
         public float[] WorkTime { get; set; } = new float[2] { 0 * 60 * 60, 18 * 60 * 60 };
 
-        public Company Company { get; set; }
+        public Property Property { get; set; }
+        public Queue<JobUnit> JobUnits { get; set; } = new Queue<JobUnit>();
 
-        internal JobUnit CheckJobUnit()
+        public JobUnit CheckJobUnit()
         {
-            return Company.GetJobUnit();
+            if (JobUnits.Count == 0)
+            {
+                return null;
+            }
+
+            return JobUnits.Dequeue();
+        }
+
+        public void AssignJobUnit(JobUnit jobUnit)
+        {
+            jobUnit.OnJobUnitDone += OnJobUnitDone;
+            Property.JobUnits.Add(jobUnit);
+            JobUnits.Enqueue(jobUnit);
+        }
+        
+        private void OnJobUnitDone(JobUnit jobUnit)
+        {
+            jobUnit.OnJobUnitDone -= OnJobUnitDone;
+            Property.JobUnits.Remove(jobUnit);
         }
     }
 
@@ -278,5 +224,17 @@ namespace Citizens
     {
         public int WorkDays { get; set; } = 5;
         public int Salary { get; set; } = 1000;
+    }
+
+    public class Farmer : Job
+    {
+    }
+
+    public class Cooker : Job
+    {
+    }
+
+    public class Waiter : Job
+    {
     }
 }

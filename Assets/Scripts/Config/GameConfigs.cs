@@ -1,4 +1,5 @@
 using System;
+using Map;
 
 [Serializable]
 public class ConfigBase
@@ -69,6 +70,7 @@ public class GameItemToActions : ConfigBase
 [Serializable]
 public class RoomConfig : ConfigBase
 {
+    public string type;
     public int[] layout;
     public int width;
     public int height;

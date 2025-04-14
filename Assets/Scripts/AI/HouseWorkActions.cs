@@ -9,9 +9,12 @@ namespace AI
         public override int ProgressTimes { get; protected set; } = 3;
 
         private StoveItem _stoveItem;
-        public CookAction(StoveItem stoveItem)
+        private PropConfig _config;
+
+        public CookAction(StoveItem stoveItem, PropConfig config = null)
         {
             _stoveItem = stoveItem;
+            _config = config;
         }
 
         public override float CurrentUtility(AgentState state, float currentMood)

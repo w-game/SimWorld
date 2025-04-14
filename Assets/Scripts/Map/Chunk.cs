@@ -12,6 +12,7 @@ namespace Map
         Grass,
         Rock
     }
+
     public class Chunk
     {
         public const int CityLayer = 3;
@@ -26,6 +27,8 @@ namespace Map
         public int Layer { get; private set; }
         public BlockType Type { get; private set; }
         public MapItemType[,] MapItems { get; private set; }
+
+        public Dictionary<Vector2Int, HouseType> AreaTypes { get; private set; } = new Dictionary<Vector2Int, HouseType>(); 
 
         private System.Random _chunkRand;
 

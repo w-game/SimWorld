@@ -15,6 +15,7 @@ namespace GameItem
         void HideUI();
         void Destroy();
         void DoUpdate();
+        List<IAction> ItemActions();
     }
 
     public abstract class GameItemBase : IGameItem
@@ -79,7 +80,7 @@ namespace GameItem
 
         }
 
-        public void Destroy()
+        public virtual void Destroy()
         {
             if (UI != null)
             {
@@ -88,6 +89,21 @@ namespace GameItem
             GameManager.I.GameItemManager.UnregisterGameItem(this);
         }
 
-        public abstract List<IAction> OnSelected();
+        public abstract List<IAction> ItemActions();
+    }
+
+    public abstract class StaticGameItem : GameItemBase
+    {
+        public StaticGameItem(ConfigBase config, Vector3 pos) : base(config, pos)
+        {
+            
+        }
+    }
+
+    public abstract class DynamicGameItem : GameItemBase
+    {
+        public DynamicGameItem(ConfigBase config, Vector3 pos) : base(config, pos)
+        {
+        }
     }
 }

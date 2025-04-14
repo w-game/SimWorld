@@ -22,7 +22,7 @@ namespace GameItem
         Weeds
     }
 
-    public class PlantItem : GameItemBase
+    public class PlantItem : StaticGameItem
     {
         public float GrowthTime { get; set; } // 成长时间
         public PlantStage GrowthStage { get; set; } // 成长阶段
@@ -77,7 +77,7 @@ namespace GameItem
             // 一定几率触发事件
             // 例如：生病、干旱、杂草等
             var prob = Random.Range(0, 100);
-            
+
             if (prob < 0.1) // 10% 的几率触发事件
             {
                 State = PlantState.Drought;
@@ -93,11 +93,16 @@ namespace GameItem
             {
                 GrowthTime = 0;
                 GrowthStage++;
+            }
+
+            if (GrowthStage == PlantStage.Harvestable)
+            {
+                // 触发成熟事件
                 OnEventInvoked?.Invoke(this);
             }
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             List<IAction> actions = new List<IAction>();
             if (GrowthStage == PlantStage.Harvestable)
@@ -125,6 +130,13 @@ namespace GameItem
             {
                 State = PlantState.None;
             }
+        }
+    }
+
+    public class TreeItem : PlantItem
+    {
+        public TreeItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        {
         }
     }
 }

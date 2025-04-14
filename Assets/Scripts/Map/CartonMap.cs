@@ -110,16 +110,16 @@ namespace Map
             return chunk;
         }
 
-        public Vector2Int WorldPosToChunkPos(Vector3 pos)
+        public Vector2Int WorldPosToChunkPos(Vector3 pos, int layer)
         {
             return new Vector2Int(
-                Mathf.FloorToInt(pos.x / NORMAL_CHUNK_SIZE),
-                Mathf.FloorToInt(pos.y / NORMAL_CHUNK_SIZE));
+                Mathf.FloorToInt(pos.x / Mathf.Pow(2, layer) / NORMAL_CHUNK_SIZE),
+                Mathf.FloorToInt(pos.y / Mathf.Pow(2, layer) / NORMAL_CHUNK_SIZE));
         }
 
         internal BlockType GetBlockType(Vector3 pos)
         {
-            var chunkPos = WorldPosToChunkPos(pos);
+            var chunkPos = WorldPosToChunkPos(pos, 0);
 
             var chunk = GetChunk(chunkPos, 0);
 
@@ -128,6 +128,18 @@ namespace Map
                             (Mathf.FloorToInt(pos.y) % NORMAL_CHUNK_SIZE + NORMAL_CHUNK_SIZE) % NORMAL_CHUNK_SIZE);
 
             return chunk.Blocks[localPos.x, localPos.y];
+        }
+
+        public City GetCity(Vector3 pos)
+        {
+            var chunkPos = WorldPosToChunkPos(pos, Chunk.CityLayer);
+
+            if (chunks[Chunk.CityLayer].ContainsKey(chunkPos))
+            {
+                return chunks[Chunk.CityLayer][chunkPos].City;
+            }
+
+            return null;
         }
     }
 }

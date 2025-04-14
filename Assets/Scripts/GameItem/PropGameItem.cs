@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace GameItem
 {
-    public class PropGameItem : GameItemBase
+    public class PropGameItem : StaticGameItem
     {
         public int Count { get; private set; } = 1;
 
@@ -17,7 +17,7 @@ namespace GameItem
             Count = count;
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             return new List<IAction>()
             {
@@ -44,6 +44,20 @@ namespace GameItem
             {
                 Destroy();
             }
+        }
+    }
+
+    public class BookItem : PropGameItem
+    {
+        public BookItem(ConfigBase config, int count, Vector3 pos = default) : base(config, count, pos)
+        {
+        }
+    }
+
+    public class PaperItem : PropGameItem
+    {
+        public PaperItem(ConfigBase config, int count, Vector3 pos = default) : base(config, count, pos)
+        {
         }
     }
 }

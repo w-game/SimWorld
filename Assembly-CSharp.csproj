@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/Scripts/Citizen/CitizenManager.cs" />
+    <Compile Include="Assets/Scripts/AI/AIUtil.cs" />
     <Compile Include="Assets/Scripts/Citizen/Family.cs" />
     <Compile Include="Assets/Scripts/AI/AIController.cs" />
     <Compile Include="Assets/Scripts/Localization/ActionLocalization.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
     <Compile Include="Assets/TIles/DirtTile.cs" />
     <Compile Include="Assets/TIles/MapTile.cs" />
+    <Compile Include="Assets/Scripts/AI/Actions/CommericalActions.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionMenu.cs" />
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
@@ -87,6 +89,7 @@
     <Compile Include="Assets/Scripts/UI/Views/MainView.cs" />
     <Compile Include="Assets/Scripts/Util.cs" />
     <Compile Include="Assets/Scripts/UI/ViewBase.cs" />
+    <Compile Include="Assets/Scripts/DayLightSystem.cs" />
     <Compile Include="Assets/Scripts/AI/HouseWorkActions.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopBuildingCraft.cs" />
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
@@ -104,10 +107,11 @@
     <Compile Include="Assets/Scripts/MonoSingleton.cs" />
     <Compile Include="Assets/Scripts/UI/Views/TestPanel.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItem.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Property.cs" />
     <Compile Include="Assets/TIles/BuildingTile.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />
-    <Compile Include="Assets/Scripts/GameItem/TreeItem.cs" />
     <Compile Include="Assets/Scripts/Util/ObjectPool.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Company.cs" />
     <Compile Include="Assets/Scripts/AI/SkillActions.cs" />
     <Compile Include="Assets/Scripts/AI/IAction.cs" />
     <Compile Include="Assets/Scripts/UI/MainView.cs" />

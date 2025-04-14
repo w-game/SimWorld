@@ -20,13 +20,18 @@ public class GameTime
     public float CurrentTime { get; private set; } = 0f;
     public float DeltaTime { get; private set; } = 0f;
     public int Day { get; private set; } = 1;
+    public float TimeInHours => CurrentTime / 60f / 60f; // 转换为小时
 
     private List<TimeToInvoke> timeToInvokeList = new List<TimeToInvoke>();
+
+    public event UnityAction<float> OnTimeChanged;
 
     public void Update()
     {
         DeltaTime = Time.deltaTime * TimeScale;
         CurrentTime += DeltaTime;
+
+        OnTimeChanged?.Invoke(CurrentTime);
 
         if (CurrentTime >= 24f * 60f * 60f)
         {

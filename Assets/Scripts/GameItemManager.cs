@@ -7,7 +7,8 @@ using UnityEngine;
 
 public class GameItemManager
 {
-    private Dictionary<Vector2Int, List<IGameItem>> _gameItems = new Dictionary<Vector2Int, List<IGameItem>>();
+    private Dictionary<Vector2Int, List<IGameItem>> _staticGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
+    private List<IGameItem> _dynamicGameItems = new List<IGameItem>();
 
     public static event Func<Vector3, Vector2Int> ItemPosToMapPosConverter;
 
@@ -21,41 +22,58 @@ public class GameItemManager
 
     public void RegisterGameItem(IGameItem gameItem)
     {
-        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-        if (!_gameItems.ContainsKey(mapPos))
+        if (gameItem is StaticGameItem staticGameItem)
         {
-            _gameItems.Add(mapPos, new List<IGameItem>() { gameItem });
-        }
-        else
+            var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
+            if (!_staticGameItems.ContainsKey(mapPos))
+            {
+                _staticGameItems.Add(mapPos, new List<IGameItem>() { gameItem });
+            }
+            else
+            {
+                _staticGameItems[mapPos].Add(gameItem);
+            }
+        } else if (gameItem is DynamicGameItem)
         {
-            _gameItems[mapPos].Add(gameItem);
+            _dynamicGameItems.Add(gameItem);
         }
     }
 
     public void UnregisterGameItem(IGameItem gameItem)
     {
-        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-        if (_gameItems.ContainsKey(mapPos))
+        if (gameItem is DynamicGameItem)
         {
-            _gameItems[mapPos].Remove(gameItem);
-            if (_gameItems[mapPos].Count == 0)
+            _dynamicGameItems.Remove(gameItem);
+            return;
+        }
+
+        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
+        if (_staticGameItems.ContainsKey(mapPos))
+        {
+            _staticGameItems[mapPos].Remove(gameItem);
+            if (_staticGameItems[mapPos].Count == 0)
             {
-                _gameItems.Remove(mapPos);
+                _staticGameItems.Remove(mapPos);
             }
         }
     }
 
     public void RemoveGameItemOnMap(IGameItem gameItem)
     {
-        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-        if (_gameItems.ContainsKey(mapPos))
+        if (gameItem is DynamicGameItem)
         {
-            if (_gameItems[mapPos].Contains(gameItem))
+            return;
+        }
+        
+        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
+        if (_staticGameItems.ContainsKey(mapPos))
+        {
+            if (_staticGameItems[mapPos].Contains(gameItem))
             {
-                _gameItems[mapPos].Remove(gameItem);
-                if (_gameItems[mapPos].Count == 0)
+                _staticGameItems[mapPos].Remove(gameItem);
+                if (_staticGameItems[mapPos].Count == 0)
                 {
-                    _gameItems.Remove(mapPos);
+                    _staticGameItems.Remove(mapPos);
                 }
             }
         }
@@ -64,16 +82,35 @@ public class GameItemManager
     public List<IGameItem> GetItemsAtPos(Vector3 pos)
     {
         var mapPos = ItemPosToMapPosConverter.Invoke(pos);
-        if (_gameItems.ContainsKey(mapPos))
+        if (_staticGameItems.ContainsKey(mapPos))
         {
-            return _gameItems[mapPos];
+            return _staticGameItems[mapPos];
         }
         return new List<IGameItem>();
     }
 
     public void Update()
     {
-        foreach (var gameItem in new List<IGameItem>(_gameItems.Values.SelectMany(x => x)))
+        foreach (var gameItem in new List<IGameItem>(_staticGameItems.Values.SelectMany(x => x)))
+        {
+            gameItem.DoUpdate();
+            var dis = Vector2.Distance(gameItem.Pos, GameManager.I.CurrentAgent.Pos);
+            if (dis > 64)
+            {
+                gameItem.HideUI();
+            }
+            else if (gameItem.UI == null)
+            {
+                gameItem.ShowUI();
+            }
+
+            if (dis > 256)
+            {
+                gameItem.Destroy();
+            }
+        }
+
+        foreach (var gameItem in new List<IGameItem>(_dynamicGameItems))
         {
             gameItem.DoUpdate();
             var dis = Vector2.Distance(gameItem.Pos, GameManager.I.CurrentAgent.Pos);
@@ -95,7 +132,7 @@ public class GameItemManager
 
     internal Agent CreateNPC(Vector2Int pos, FamilyMember member)
     {
-        var agent = new Agent(null, GameManager.I.ActionSystem.CreateAIController(), pos + new Vector2(0.5f, 0.5f));
+        var agent = new Agent(GameManager.I.ActionSystem.CreateAIController(), pos + new Vector2(0.5f, 0.5f));
         agent.Init(member);
         agent.ShowUI();
 

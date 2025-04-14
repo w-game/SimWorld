@@ -10,6 +10,8 @@ namespace Map
         None,
         House,
         Farm,
+        Teahouse,
+        Restaurant,
         Factory,
         Shop,
         Office,
@@ -25,6 +27,7 @@ namespace Map
         Wall,
         Door,
         Window,
+        Commercial
     }
 
     public class Room
@@ -64,14 +67,17 @@ namespace Map
         public City City { get; private set; } // 房屋所在的城市
         public HouseType HouseType { get; private set; } // 房屋类型
 
-        public Dictionary<Vector2Int, string> Furnitures { get; private set; } = new Dictionary<Vector2Int, string>();
         public Dictionary<Vector2Int, CellType> CellMap { get; private set; } = new(); // 格子类型映射
         public Vector2 RandomPos => new Vector2(_chunkRand.Next(MinPos.x + 1, MinPos.x + Size.x - 2), _chunkRand.Next(MinPos.y + 1, MinPos.y + Size.y - 2)); // 随机位置
 
         private System.Random _chunkRand;
         public Vector2Int MinPos { get; private set; } // 房屋最小坐标
+        public Vector2Int MidPos => new Vector2Int(MinPos.x + Size.x / 2, MinPos.y + Size.y / 2); // 房屋中心坐标
 
         public RoomConfig RoomConfig { get; private set; } // 房间配置
+
+        public Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; private set; } = new Dictionary<Vector2Int, FurnitureItem>(); // 家具物品
+        public List<Vector2Int> CommercialPos { get; private set; } = new List<Vector2Int>(); // 商业位置
 
         public House(List<Vector2Int> blocks, RoomConfig config, Vector2Int minPos, City city, System.Random chunkRand)
         {
@@ -82,62 +88,18 @@ namespace Map
             City = city;
             _chunkRand = chunkRand;
 
-            CalcHouseType();
-            // CalcFurnitures();
+            Enum.TryParse<HouseType>(config.type, true, out var houseType);
+            HouseType = houseType;
             CalcRooms();
-        }
 
-        private void CalcFurnitures()
-        {
-            // if (HouseType != HouseType.House) return;
-            // List<string> furnitures = new List<string>()
-            // {
-            //     "BUILDING_TOILET",
-            //     "BUILDING_TABLE",
-            //     "BUILDING_STOVE"
-            // };
-
-            // foreach (var furniture in furnitures)
-            // {
-            //     var pos = new Vector2Int(
-            //         _chunkRand.Next(MinPos.x + 1, MinPos.x + Size.x - 2),
-            //         _chunkRand.Next(MinPos.y + 1, MinPos.y + Size.y - 2));
-            //     var config = GameManager.I.ConfigReader.GetConfig<BuildingConfig>(furniture);
-            //     Debug.Log($"生成家具: {config.name}，位置: {pos}, 类型: {config.type}");
-            //     var type = Type.GetType($"GameItem.{config.type}Item");
-            //     var item = Activator.CreateInstance(type, new object[] { config, new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0) }) as GameItemBase;
-            //     Furnitures.Add(item);
-            // }
-        }
-
-        private void CalcHouseType()
-        {
-            if (HouseType != HouseType.None)
+            foreach (var block in blocks)
             {
-                return;
-            }
-            var prob = _chunkRand.Next(0, 100);
-            if (prob < 60)
-            {
-                HouseType = HouseType.House;
-            }
-            else if (prob < 80)
-            {
-                HouseType = HouseType.Farm;
-            }
-            else if (prob < 100)
-            {
-                HouseType = HouseType.Shop;
+                City.OriginChunk.AreaTypes.Add(block, HouseType); // 添加到城市的区域类型
             }
         }
 
         private void CalcRooms()
         {
-            if (HouseType != HouseType.House)
-            {
-                return;
-            }
-
             for (int i = 0; i < RoomConfig.width; i++)
             {
                 for (int j = 0; j < RoomConfig.height; j++)
@@ -159,6 +121,11 @@ namespace Map
                     {
                         CellMap.Add(pos, CellType.Window);
                     }
+                    else if (RoomConfig.layout[i + j * RoomConfig.width] == 4)
+                    {
+                        CellMap.Add(pos, CellType.Commercial);
+                        CommercialPos.Add(pos);
+                    }
                     else
                     {
                         CellMap.Add(pos, CellType.Empty);
@@ -169,8 +136,18 @@ namespace Map
             foreach (var furniture in RoomConfig.furnitures)
             {
                 var pos = new Vector2Int(furniture.pos[0], furniture.pos[1]) + MinPos;
-                Furnitures.Add(pos, furniture.id);
+
+                var config = GameManager.I.ConfigReader.GetConfig<BuildingConfig>(furniture.id);
+                Debug.Log($"生成家具: {config.name}，位置: {pos}, 类型: {config.type}");
+                var type = Type.GetType($"GameItem.{config.type}Item");
+                var furnitureItem = Activator.CreateInstance(type, new object[] { config, new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0) }) as FurnitureItem;
+                FurnitureItems.Add(pos, furnitureItem);
             }
+        }
+
+        internal float DistanceTo(Vector3 pos)
+        {
+            return Vector2.Distance(new Vector2(pos.x, pos.y), new Vector2(MinPos.x, MinPos.y));
         }
     }
 }

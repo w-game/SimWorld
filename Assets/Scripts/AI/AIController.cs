@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Citizens;
 using GameItem;
 using UnityEngine;
@@ -46,11 +47,6 @@ namespace AI
             OnActionRegister?.Invoke(action);
         }
 
-        /// <summary>
-        /// 结合状态效用和优先级修正来判断是否需要切换行为。
-        /// 这里构造了多个候选行为，然后比较它们的综合效用，
-        /// 如果某个候选行为的效用比当前正在执行的行为高出一定比例，则进行替换。
-        /// </summary>
         private bool CheckNormalState()
         {
             if (_curAction != null && !_curAction.CanBeInterrupted)
@@ -114,20 +110,7 @@ namespace AI
                 case "Health":
                     break;
                 case "Hunger":
-                    var foodItem = _agent.GetGameItem<FoodItem>();
-                    if (foodItem != null)
-                    {
-                        RegisterAction(new EatAction(foodItem, _agent.State.Hunger), true);
-                    }
-                    else
-                    {
-                        var stoveItem = _agent.GetGameItem<StoveItem>();
-                        if (stoveItem != null)
-                        {
-                            Debug.Log($"StoveItem: {stoveItem.Pos}");
-                            RegisterAction(new CookAction(stoveItem), true);
-                        }
-                    }
+                    ResolveHungerBehavior();
                     break;
                 case "Toilet":
                     var toiletItem = _agent.GetGameItem<ToiletItem>();
@@ -165,6 +148,58 @@ namespace AI
             return true;
         }
 
+        private void ResolveHungerBehavior()
+        {
+            var foodItem = _agent.GetGameItem<FoodItem>();
+            if (foodItem != null && foodItem.Owner == _agent.Ciziten.Family)
+            {
+                RegisterAction(new EatAction(foodItem, _agent.State.Hunger), true);
+                return;
+            }
+
+            var type = MapManager.I.CheckMapAera(_agent.Pos);
+
+            switch (type)
+            {
+                case Map.HouseType.House:
+                    var stoveItem = _agent.GetGameItem<StoveItem>();
+                    if (stoveItem != null)
+                    {
+                        RegisterAction(new CookAction(stoveItem), true);
+                        return;
+                    }
+                    break;
+                case Map.HouseType.None:
+                case Map.HouseType.Restaurant:
+                    var city = MapManager.I.CartonMap.GetCity(_agent.Pos);
+                    if (city != null)
+                    {
+                        var houses = city.GetHouses(Map.HouseType.Restaurant);
+                        if (houses.Count > 0)
+                        {
+                            var restaurant = houses.OrderBy(a => a.DistanceTo(_agent.Pos)).First();
+                            var restaurantProperty = Property.Properties[restaurant] as RestaurantProperty;
+                            var availableCommercialPos = restaurantProperty.GetAvailableCommericalPos();
+                            if (availableCommercialPos.Count > 0)
+                            {
+                                var pos = availableCommercialPos[UnityEngine.Random.Range(0, availableCommercialPos.Count)];
+                                var moveToTarget = new CheckMoveToTarget(new Vector3(pos.x, pos.y), "Restaurant");
+                                moveToTarget.NextAction = new WaitForAvailableSitAction(Property.Properties[restaurant] as RestaurantProperty);
+                                RegisterAction(moveToTarget, true);
+                            }
+                            return;
+                        }
+                    }
+                    // var store = GameManager.I.PropertyManager.FindNearestFoodShop(_agent.Pos);
+                    // if (store != null)
+                    // {
+                    //     RegisterAction(new BuyFoodAction(store), true);
+                    //     return;
+                    // }
+                    break;
+            }
+        }
+
         // 每个时间步更新状态，并根据评估周期进行行为检测
         public void Update()
         {
@@ -183,23 +218,76 @@ namespace AI
             }
             else if (!result)
             {
+                var type = MapManager.I.CheckMapAera(_agent.Pos);
+                var actions = Behavior.ScanEnvironment(_agent);
+                var (action, score) = Behavior.Evaluate(_agent, actions, type);
+                if (action != null)
+                {
+                    RegisterAction(action, true);
+                }
+
+                switch (type)
+                {
+                    case Map.HouseType.Teahouse:
+                        var chairItem = _agent.GetGameItem<ChairItem>();
+                        if (chairItem != null && chairItem.Using == null)
+                        {
+                            RegisterAction(new SitAction(chairItem), true);
+                        }
+                        break;
+                    case Map.HouseType.House:
+
+                        var bookItem = _agent.GetGameItem<BookItem>();
+                        if (bookItem != null)
+                        {
+                            RegisterAction(new ReadAction(bookItem), true);
+                        }
+
+                        // 古代其他行为：读书、写字、绘画、弹琴、下棋、听曲、写作
+
+
+                        // 手工艺：编草编、刺绣、剪纸、陶艺、木工、金工、石工
+
+
+                        // 检测宣纸
+                        var paperItem = _agent.GetGameItem<PaperItem>();
+                        if (paperItem != null)
+                        {
+                            // RegisterAction(new WriteAction(paperItem), true);
+                            // RegisterAction(new PaintAction(null), true);
+                        }
+                        // RegisterAction(new PlayMusicAction(null), true);
+                        // RegisterAction(new ChessAction(null), true);
+                        // RegisterAction(new ListenMusicAction(null), true);
+                        break;
+                    case Map.HouseType.Farm:
+                        break;
+                    default:
+                        break;
+                }
+
                 // TODO: 发呆、按照兴趣指派行为等
                 if (GameManager.I.CurrentAgent != _agent)
                 {
                     var prob = UnityEngine.Random.Range(0, 100);
-                    if (prob < 70)
+                    if (prob < 50)
                     {
                         RegisterAction(new IdleAction(null), true);
                     }
-                    else
+                    else if (prob < 90)
                     {
-                        Vector3 pos = new Vector2(
-                            UnityEngine.Random.Range(-1, 1f),
-                            UnityEngine.Random.Range(-1, 1f)
-                        );
-                        var targetPos = _agent.Pos + pos.normalized * UnityEngine.Random.Range(1, 5f);
-                        RegisterAction(new HangingAction(targetPos), true);
+                        // 散步、逛街
+
                     }
+                    // else
+                    // {
+                    //     Vector3 pos = new Vector2(
+                    //         UnityEngine.Random.Range(-1, 1f),
+                    //         UnityEngine.Random.Range(-1, 1f)
+                    //     );
+                    //     var targetPos = _agent.Pos + pos.normalized * UnityEngine.Random.Range(1, 5f);
+                    //     RegisterAction(new HangingAction(targetPos), true);
+                    // }
                 }
             }
         }
@@ -208,7 +296,17 @@ namespace AI
         {
             action.OnCompleted -= OnActionCompleted;
             action.OnActionProgress -= OnActionProgress;
-            _curAction = null;
+
+            if (_curAction.NextAction != null)
+            {
+                _curAction = _curAction.NextAction;
+                _curAction.OnCompleted += OnActionCompleted;
+                _curAction.OnActionProgress += OnActionProgress;
+            }
+            else
+            {
+                _curAction = null;
+            }
         }
     }
 }

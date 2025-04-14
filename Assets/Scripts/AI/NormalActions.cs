@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Citizens;
 using GameItem;
+using Map;
 using UnityEngine;
 
 namespace AI
@@ -37,6 +38,9 @@ namespace AI
         public event Action<float> OnActionProgress;
         public event Action<IAction> OnCompleted;
         public event Action<IAction> OnActionFailed;
+
+        // 后续行为，当前行为完成后替换主行为
+        public IAction NextAction { get; set; }
 
         protected void OnActionFailedEvent()
         {
@@ -115,6 +119,11 @@ namespace AI
             Done = false;
             PrecedingActions.Clear();
         }
+
+        public virtual float Evaluate(Agent agent, HouseType houseType)
+        {
+            return 0f;
+        }
     }
 
     // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
@@ -126,9 +135,10 @@ namespace AI
         public override int ProgressTimes { get; protected set; } = -1;
         private bool _isMoving = false;
 
-        public CheckMoveToTarget(Vector3 targetPos)
+        public CheckMoveToTarget(Vector3 targetPos, string targetName = "")
         {
             TargetPos = targetPos;
+            ActionName = targetName;
         }
 
         public override void OnRegister(Agent agent)
@@ -242,7 +252,7 @@ namespace AI
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
             TableItem tableItem = agent.FindNearestTableItem();
 
-            var takeItem = new TakeItemInHand( _foodItem);
+            var takeItem = new TakeItemInHand(_foodItem);
             takeItem.OnRegister(agent);
             PrecedingActions.Add(takeItem);
 
@@ -413,6 +423,61 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行回家动作");
+            Done = true;
+        }
+    }
+
+    public class SitAction : ActionBase
+    {
+        public override string ActionName => "Sit";
+        public override float ProgressSpeed { get; protected set; } = 5f;
+        public override int ProgressTimes { get; protected set; } = -1;
+
+        private ChairItem _chairItem;
+
+        public SitAction(ChairItem chairItem)
+        {
+            _chairItem = chairItem;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            // 加入前置动作：移动到椅子位置
+            PrecedingActions.Add(new CheckMoveToTarget(_chairItem.Pos));
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            Debug.Log("执行坐下动作");
+            _chairItem.SitDown(agent);
+            Done = true;
+        }
+    }
+
+    public class ReadAction : ActionBase
+    {
+        public override string ActionName => "Read";
+        public override float ProgressSpeed { get; protected set; } = 5f;
+        public override int ProgressTimes { get; protected set; } = 1;
+
+        private BookItem _bookItem;
+
+        public ReadAction(BookItem bookItem)
+        {
+            _bookItem = bookItem;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            // 加入前置动作：移动到书本位置
+            PrecedingActions.Add(new CheckMoveToTarget(_bookItem.Pos));
+            PrecedingActions.Add(new TakeItemInHand(_bookItem));
+            PrecedingActions.Add(new SitAction(agent.GetGameItem<ChairItem>()));
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            Debug.Log("执行阅读动作");
             Done = true;
         }
     }

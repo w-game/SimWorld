@@ -1,16 +1,21 @@
+using System;
 using System.Collections.Generic;
 using AI;
+using Citizens;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GameItem
 {
-    public class FurnitureItem : GameItemBase
+    public class FurnitureItem : StaticGameItem
     {
+        public Agent Using { get; internal set; }
+
         public FurnitureItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             return new List<IAction>()
             {
@@ -59,7 +64,7 @@ namespace GameItem
             return Chairs[0];
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             return new List<IAction>()
             {
@@ -69,16 +74,23 @@ namespace GameItem
 
     public class ChairItem : FurnitureItem
     {
+        public event UnityAction<Agent> OnSit;
         public ChairItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             return new List<IAction>()
             {
 
             };
+        }
+
+        internal void SitDown(Agent agent)
+        {
+            Using = agent;
+            OnSit?.Invoke(agent);
         }
     }
 
@@ -88,7 +100,7 @@ namespace GameItem
         {
         }
 
-        public override List<IAction> OnSelected()
+        public override List<IAction> ItemActions()
         {
             return new List<IAction>()
             {
@@ -101,6 +113,12 @@ namespace GameItem
     {
         public StoveItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
+        }
+
+
+        public void SetUsing(Agent agent)
+        {
+            Using = agent;
         }
     }
 }

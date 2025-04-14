@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using AI;
 using Map;
 using UnityEngine;
 
@@ -14,7 +12,7 @@ namespace Citizens
         private FamilyMember CreateMember(Family family, House house, bool sex, int age)
         {
             var member = new FamilyMember(sex, age);
-            var agent = new Agent(null, GameManager.I.ActionSystem.CreateAIController(), house.RandomPos + new Vector2(0.5f, 0.5f));
+            var agent = new Agent(GameManager.I.ActionSystem.CreateAIController(), house.RandomPos + new Vector2(0.5f, 0.5f));
             agent.Init(member);
             family.AddMember(member);
 
@@ -145,11 +143,13 @@ namespace Citizens
             Families.Add(city, families);
         }
 
-        private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, House property)
+        private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, House house)
         {
+            var property = new Property(house, family);
             if (!companies.TryGetValue(family, out var company))
             {
                 company = new Company(family);
+                company.AddProperty(property);
                 companies.Add(family, company);
             }
 

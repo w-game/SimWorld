@@ -276,5 +276,10 @@ namespace Map
 
             return new House(buildingBlocks, roomConfig, minPos, this, ChunkRand);
         }
+
+        public List<House> GetHouses(HouseType houseType)
+        {
+            return Houses.Where(h => h.HouseType == houseType).ToList();
+        }
     }
 }

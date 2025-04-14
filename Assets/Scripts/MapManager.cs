@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using Citizens;
 using GameItem;
 using Map;
@@ -39,7 +38,6 @@ public class MapManager : MonoSingleton<MapManager>
     public List<TileBase> floorTiles;
     public TileBase doorTile;
     private Dictionary<Vector2Int, BuildingType> _buildings = new Dictionary<Vector2Int, BuildingType>();
-
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();
 
     private Agent _player;
@@ -164,7 +162,6 @@ public class MapManager : MonoSingleton<MapManager>
             var families = GameManager.I.CitizenManager.GetCitizens(cityChunk.City);
             foreach (var family in families)
             {
-                var house = family.Houses[0];
                 foreach (var member in family.Members)
                 {
                     // var localPos = WorldPosToCellPos(member.Agent.Pos) - chunk.WorldPos;
@@ -179,49 +176,45 @@ public class MapManager : MonoSingleton<MapManager>
 
             foreach (var house in cityChunk.City.Houses)
             {
-                if (house.HouseType == HouseType.House)
+                foreach (var cell in house.CellMap)
                 {
-                    foreach (var cell in house.CellMap)
+                    var worldPos = cell.Key + house.MinPos;
+                    var localPos = worldPos - chunk.WorldPos;
+                    if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
                     {
-                        var worldPos = cell.Key + house.MinPos;
-                        var localPos = worldPos - chunk.WorldPos;
-                        if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        if (cell.Value == CellType.Wall)
-                        {
+                    switch (cell.Value)
+                    {
+                        case CellType.Empty:
+                            break;
+                        case CellType.Wall:
                             SetMapTile(worldPos, MapLayer.Building, wallTiles, BuildingType.Wall);
-                        }
-                        else if (cell.Value == CellType.Room)
-                        {
+                            break;
+                        case CellType.Room:
+                        case CellType.Commercial:
                             SetMapTile(worldPos, MapLayer.Building, floorTiles, BuildingType.None);
-                        }
-                        else if (cell.Value == CellType.Door)
-                        {
+                            break;
+                        case CellType.Door:
                             SetMapTile(worldPos, MapLayer.Building, new List<TileBase> { doorTile }, BuildingType.Door);
-                        }
+                            break;
+                        case CellType.Window:
+                            break;
+                        default:
+                            break;
                     }
+                }
 
-                    if (house.Furnitures.Count > 0)
+                foreach (var furniture in house.FurnitureItems)
+                {
+                    var localPos = furniture.Key - chunk.WorldPos;
+                    if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
                     {
-                        foreach (var furniture in house.Furnitures)
-                        {
-                            var localPos = furniture.Key - chunk.WorldPos;
-                            if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
-                            {
-                                continue;
-                            }
-
-                            var config = GameManager.I.ConfigReader.GetConfig<BuildingConfig>(furniture.Value);
-                            Debug.Log($"生成家具: {config.name}，位置: {furniture.Key}, 类型: {config.type}");
-                            var type = Type.GetType($"GameItem.{config.type}Item");
-                            var furnitureItem = Activator.CreateInstance(type, new object[] { config, new Vector3(furniture.Key.x + 0.5f, furniture.Key.y + 0.5f, 0) }) as GameItemBase;
-
-                            furnitureItem.ShowUI();
-                        }
+                        continue;
                     }
+
+                    furniture.Value.ShowUI();
                 }
             }
         }
@@ -257,6 +250,22 @@ public class MapManager : MonoSingleton<MapManager>
         }
 
         return BuildingType.None;
+    }
+
+    public HouseType CheckMapAera(Vector3 pos)
+    {
+        var cellPos = WorldPosToCellPos(pos);
+        var chunkPos = CartonMap.WorldPosToChunkPos(pos, Chunk.CityLayer);
+        var chunk = CartonMap.GetChunk(chunkPos, Chunk.CityLayer);
+        if (chunk != null)
+        {
+            if (chunk.AreaTypes.ContainsKey(cellPos))
+            {
+                return chunk.AreaTypes[cellPos];
+            }
+        }
+
+        return HouseType.None;
     }
 
     private void SetBlockType(Vector2Int pos, BlockType type)
@@ -313,7 +322,7 @@ public class MapManager : MonoSingleton<MapManager>
     {
         var cellPos = WorldPosToCellPos(pos);
 
-        var chunkPos = CartonMap.WorldPosToChunkPos(pos);
+        var chunkPos = CartonMap.WorldPosToChunkPos(pos, 0);
         var chunk = CartonMap.GetChunk(chunkPos, 0);
         chunk.Blocks[chunk.WorldPos.x, chunk.WorldPos.y] = type;
         SetBlockType(cellPos, type);
