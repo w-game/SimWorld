@@ -14,6 +14,7 @@ namespace Citizens
         public void AddMember(FamilyMember member)
         {
             Members.Add(member);
+            member.Family = this;
         }
 
         public void RemoveMember(FamilyMember member)
@@ -31,7 +32,7 @@ namespace Citizens
     {
         public bool Sex { get; private set; } // 性别
         public int Age { get; private set; } // 年龄
-        public Family Family { get; private set; } // 家庭
+        public Family Family { get; set; } // 家庭
         public List<FamilyMember> Parent { get; } = new List<FamilyMember>(); // 父母
         public List<FamilyMember> Grandparents { get; } = new List<FamilyMember>(); // 祖父母
         public List<FamilyMember> Grandchildren { get; } = new List<FamilyMember>(); // 孙子女
@@ -79,8 +80,11 @@ namespace Citizens
 
         public void AddChild(FamilyMember child)
         {
-            Children.Add(child);
-            child.SetParent(this);
+            if (child != null)
+            {
+                Children.Add(child);
+                child.SetParent(this);
+            }
         }
 
         public void AddGrandchild(FamilyMember grandchild)

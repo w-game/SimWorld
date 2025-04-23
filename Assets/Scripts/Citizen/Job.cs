@@ -224,17 +224,31 @@ namespace Citizens
     {
         public int WorkDays { get; set; } = 5;
         public int Salary { get; set; } = 1000;
+
+        public Employee(Agent agent)
+        {
+            Member = agent.Ciziten;
+        }
     }
 
-    public class Farmer : Job
+    public class Farmer : Employee
     {
+        public Farmer(Agent agent) : base(agent)
+        {
+        }
     }
 
-    public class Cooker : Job
+    public class Cooker : Employee
     {
+        public Cooker(Agent agent) : base(agent)
+        {
+        }
     }
 
-    public class Waiter : Job
+    public class Waiter : Employee
     {
+        public Waiter(Agent agent) : base(agent)
+        {
+        }
     }
 }

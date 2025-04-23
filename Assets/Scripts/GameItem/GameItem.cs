@@ -11,11 +11,14 @@ namespace GameItem
         Vector3 Pos { get; set; }
         ConfigBase Config { get; }
         GameItemUI UI { get; }
+        bool Walkable { get; }
+
         void ShowUI();
         void HideUI();
         void Destroy();
         void DoUpdate();
         List<IAction> ItemActions();
+        List<IAction> ClickItemActions();
     }
 
     public abstract class GameItemBase : IGameItem
@@ -37,6 +40,7 @@ namespace GameItem
         public ConfigBase Config { get; protected set; }
         public GameItemUI UI { get; protected set; }
         public Family Owner { get; set; }
+        public abstract bool Walkable { get; }
 
         public GameItemBase(ConfigBase config, Vector3 pos = default)
         {
@@ -90,6 +94,14 @@ namespace GameItem
         }
 
         public abstract List<IAction> ItemActions();
+        public List<IAction> ClickItemActions()
+        {
+            var actions = ItemActions();
+            actions.AddRange(ActionsOnClick());
+            return actions;
+        }
+
+        protected virtual List<IAction> ActionsOnClick() { return new List<IAction>(); }
     }
 
     public abstract class StaticGameItem : GameItemBase
@@ -101,6 +113,7 @@ namespace GameItem
 
     public abstract class DynamicGameItem : GameItemBase
     {
+        public override bool Walkable => true;
         public DynamicGameItem(ConfigBase config, Vector3 pos) : base(config, pos)
         {
         }

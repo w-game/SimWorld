@@ -1,0 +1,37 @@
+{
+    "items": [
+        {
+            "familyMembers": ["adult", "adult", "child"]
+        },
+        {
+            "familyMembers": ["adult", "adult", "child", "child"]
+        },
+        {
+            "familyMembers": ["adult", "adult", "child", "child", "child"]
+        },
+        {
+            "familyMembers": ["senior", "adult", "adult"]
+        },
+        {
+            "familyMembers": ["senior", "adult", "adult", "child"]
+        },
+        {
+            "familyMembers": ["senior", "adult", "adult", "child", "child"]
+        },
+        {
+            "familyMembers": ["senior", "adult", "adult", "child", "child", "child"]
+        },
+        {
+            "familyMembers": ["senior", "senior", "adult", "adult"]
+        },
+        {
+            "familyMembers": ["senior", "senior", "adult", "adult", "child"]
+        },
+        {
+            "familyMembers": ["senior", "senior", "adult", "adult", "child", "child"]
+        },
+        {
+            "familyMembers": ["senior", "senior", "adult", "adult", "child", "child", "child"]
+        }
+    ]
+}

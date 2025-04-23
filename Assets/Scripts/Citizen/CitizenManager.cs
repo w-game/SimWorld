@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using AI;
+using GameItem;
 using Map;
 using UnityEngine;
 
@@ -9,12 +11,39 @@ namespace Citizens
         public Dictionary<City, List<Family>> Families { get; } = new Dictionary<City, List<Family>>();
         public Dictionary<City, Dictionary<Family, Company>> Companies { get; } = new Dictionary<City, Dictionary<Family, Company>>();
 
+        private List<string[]> _familyType = new List<string[]>()
+        {
+            new string[] { "Adult" },
+            new string[] { "Adult", "Adult" },
+            new string[] { "Adult", "Adult", "Child" },
+            new string[] { "Adult", "Adult", "Child", "Child" },
+            new string[] { "Adult", "Adult", "Child", "Child", "Child" },
+            new string[] { "Adult", "Child" },
+            new string[] { "Adult", "Child", "Child" },
+            new string[] { "Senior", "Adult", "Adult" },
+            new string[] { "Senior", "Adult", "Adult", "Child" },
+            new string[] { "Senior", "Adult", "Adult", "Child", "Child" },
+            new string[] { "Senior", "Adult", "Adult", "Child", "Child", "Child" },
+            new string[] { "Senior", "Senior", "Adult", "Adult" },
+            new string[] { "Senior", "Senior", "Adult", "Adult", "Child" },
+            new string[] { "Senior", "Senior", "Adult", "Adult", "Child", "Child" },
+            new string[] { "Senior", "Senior", "Adult", "Adult", "Child", "Child", "Child" }
+        };
+
         private FamilyMember CreateMember(Family family, House house, bool sex, int age)
         {
             var member = new FamilyMember(sex, age);
             var agent = new Agent(GameManager.I.ActionSystem.CreateAIController(), house.RandomPos + new Vector2(0.5f, 0.5f));
             agent.Init(member);
             family.AddMember(member);
+
+            agent.RegisterSchedule(
+                new Schedule(
+                    20 * 60 * 60,
+                    5 * 60 * 60,
+                    new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
+                    new SleepAction(agent.State.Sleep),
+                    member));
 
             return member;
         }
@@ -33,79 +62,86 @@ namespace Citizens
             {
                 if (house.HouseType == HouseType.House)
                 {
-                    Family family = new Family();
-                    var familyType = city.ChunkRand.Next(0, 100);
+                    house.TryGetFurnitures<BedItem>(out var beds);
+                    if (beds.Count == 0)
+                    {
+                        continue; // 如果没有床，则跳过
+                    }
+                    var family = new Family();
                     family.AddHouse(house);
 
-                    if (familyType < 15)
-                    {
-                        // Single adult living alone.
-                        int age = city.ChunkRand.Next(18, 60);
-                        CreateMember(family, house, true, age);
-                    }
-                    else if (familyType < 30)
-                    {
-                        // Single parent family with 1-3 children.
-                        int parentAge = city.ChunkRand.Next(25, 50);
-                        var adult = CreateMember(family, house, true, parentAge);
-                        int childrenCount = city.ChunkRand.Next(1, 4); // 1 to 3 children
-                        for (int i = 0; i < childrenCount; i++)
-                        {
-                            int childAge = city.ChunkRand.Next(0, 18);
-                            var child = CreateMember(family, house, false, childAge);
-                            adult.AddChild(child);
-                        }
-                    }
-                    else if (familyType < 55)
-                    {
-                        // Nuclear family: two adults and 1-3 children.
-                        int adultAge = city.ChunkRand.Next(25, 50);
-                        var father = CreateMember(family, house, true, adultAge);
-                        var mother = CreateMember(family, house, false, adultAge - city.ChunkRand.Next(0, 5));
-                        father.SetSpouse(mother);
-                        int childrenCount = city.ChunkRand.Next(1, 4); // 1 to 3 children
-                        for (int i = 0; i < childrenCount; i++)
-                        {
-                            int childAge = city.ChunkRand.Next(0, 18);
-                            var child = CreateMember(family, house, false, childAge);
-                            father.AddChild(child);
-                            mother.AddChild(child);
-                        }
-                    }
-                    else if (familyType < 80)
-                    {
-                        // Extended family: couple, children, and a senior member.
-                        int adultAge = city.ChunkRand.Next(25, 50);
-                        var father = CreateMember(family, house, true, adultAge);
-                        var mother = CreateMember(family, house, false, adultAge - city.ChunkRand.Next(0, 5));
-                        father.SetSpouse(mother);
+                    var familyTypes = _familyType.FindAll(_ => _.Length == beds.Count);
+                    if (familyTypes.Count == 0) continue;
+                    var selectedType = familyTypes[city.ChunkRand.Next(0, familyTypes.Count - 1)];
+                    var familyType = new List<string>(selectedType);
 
-                        int seniorAge = city.ChunkRand.Next(60, 90);
-                        var senior = CreateMember(family, house, city.ChunkRand.Next(0, 100) < 50, seniorAge);
-                        senior.AddChild(father);
-                        senior.AddChild(mother);
+                    FamilyMember father = null;
+                    FamilyMember mother = null;
+                    
+                    FamilyMember gradfather = null;
+                    FamilyMember gradmother = null;
 
-                        int childrenCount = city.ChunkRand.Next(2, 5); // 2 to 4 children
-                        for (int i = 0; i < childrenCount; i++)
-                        {
-                            int childAge = city.ChunkRand.Next(0, 18);
-                            var child = CreateMember(family, house, false, childAge);
-                            father.AddChild(child);
-                            mother.AddChild(child);
-                            senior.AddGrandchild(child);
-                        }
-                    }
-                    else
+                    do
                     {
-                        // Diverse household: a mix of adults and children (e.g., roommates or mixed-age group).
-                        int numMembers = city.ChunkRand.Next(2, 6); // Between 2 and 5 members
-                        for (int i = 0; i < numMembers; i++)
+                        var adultItems = familyType.FindAll(_ => _ == "Adult");
+
+                        if (adultItems.Count == 2)
                         {
-                            bool isAdult = city.ChunkRand.Next(0, 100) < 70;
-                            int age = isAdult ? city.ChunkRand.Next(18, 60) : city.ChunkRand.Next(0, 18);
-                            CreateMember(family, house, city.ChunkRand.Next(0, 100) < 50, age);
+                            father = CreateMember(family, house, true, city.ChunkRand.Next(20, 60));
+                            mother = CreateMember(family, house, false, Mathf.Max(father.Age - city.ChunkRand.Next(0, 10), 20));
+                            father.SetSpouse(mother);
+
+                            familyType.Remove(adultItems[0]);
+                            familyType.Remove(adultItems[1]);
                         }
-                    }
+                        else if (adultItems.Count == 1)
+                        {
+                            familyType.Remove(adultItems[0]);
+
+                            mother = CreateMember(family, house, city.ChunkRand.Next(0, 100) > 50 ? true : false, city.ChunkRand.Next(20, 60));
+                        }
+                        else
+                        {
+                            var seniorItems = familyType.FindAll(_ => _ == "Senior");
+                            if (seniorItems.Count == 2)
+                            {
+                                var baseAge = (father != null ? father.Age : mother.Age) + city.ChunkRand.Next(18, 35);
+                                gradfather = CreateMember(family, house, true, baseAge + city.ChunkRand.Next(0, 10));
+                                gradmother = CreateMember(family, house, false, baseAge);
+                                gradfather.SetSpouse(gradmother);
+
+                                gradfather.AddChild(father);
+                                gradmother.AddChild(mother);
+
+                                familyType.Remove(seniorItems[0]);
+                                familyType.Remove(seniorItems[1]);
+                            }
+                            else if (seniorItems.Count == 1)
+                            {
+                                familyType.Remove(seniorItems[0]);
+                                gradfather = CreateMember(family, house, true, city.ChunkRand.Next(60, 90));
+                            }
+                            else
+                            {
+                                var childItems = familyType.FindAll(_ => _ == "Child");
+                                if (childItems.Count > 0)
+                                {
+                                    var maxAge = mother.Age - 18;
+                                    foreach (var item in childItems)
+                                    {
+                                        var child = CreateMember(family, house, city.ChunkRand.Next(0, 100) > 50 ? true : false, city.ChunkRand.Next(0, maxAge));
+                                        father?.AddChild(child);
+                                        mother?.AddChild(child);
+
+                                        gradfather?.AddGrandchild(child);
+                                        gradmother?.AddGrandchild(child);
+
+                                        familyType.Remove(item);
+                                    }
+                                }
+                            }
+                        }
+                    } while (familyType.Count > 0);
 
                     families.Add(family);
                 }
@@ -116,9 +152,11 @@ namespace Citizens
                 else if (house.HouseType == HouseType.Shop)
                 {
                     cityProperties.Add(house);
+                } else if (house.HouseType == HouseType.Teahouse)
+                {
+                    cityProperties.Add(house);
                 }
             }
-
 
             Companies.Add(city, new Dictionary<Family, Company>());
             if (families.Count == 0)
@@ -145,7 +183,20 @@ namespace Citizens
 
         private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, House house)
         {
-            var property = new Property(house, family);
+            Property property = null;
+            switch (house.HouseType)
+            {
+                case HouseType.Farm:
+                    property = new FarmProperty(house, family);
+                    break;
+                case HouseType.Shop:
+                    return;
+                case HouseType.Teahouse:
+                    property = new TeahouseProperty(house, family);
+                    break;
+                default:
+                    break;
+            }
             if (!companies.TryGetValue(family, out var company))
             {
                 company = new Company(family);

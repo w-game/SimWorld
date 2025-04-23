@@ -238,15 +238,19 @@ public class MapManager : MonoSingleton<MapManager>
         switch (layer)
         {
             case MapLayer.Floor:
-                if (tile != null)
+                if (tiles != null)
                 {
                     floorLayer.SetTile(new Vector3Int(cellPos.x, cellPos.y, 0), RandomTile(tiles));
                 }
                 break;
             case MapLayer.Building:
-                if (tile != null)
+                if (tiles != null)
                 {
                     layer1.SetTile(new Vector3Int(cellPos.x, cellPos.y, 0), RandomTile(tiles));
+                }
+                else
+                {
+                    layer1.SetTile(new Vector3Int(cellPos.x, cellPos.y, 0), null);
                 }
                 break;
             default:
@@ -276,13 +280,75 @@ public class MapManager : MonoSingleton<MapManager>
         return false;
     }
 
+    public bool TryGetResourceItems(Vector3 pos, out List<PlantItem> plantItems)
+    {
+        plantItems = new List<PlantItem>();
+        var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+        foreach (var item in items)
+        {
+            if (item is PlantItem plant)
+            {
+                plantItems.Add(plant);
+            }
+        }
+
+        return plantItems.Count > 0;
+    }
+
     public HouseType CheckMapAera(Vector3 pos)
     {
         if (TryGetBuildingItem(pos, out var buildingItem))
         {
             return buildingItem.House.HouseType;
         }
-        
+
         return HouseType.None;
+    }
+
+    public bool IsWalkable(Vector3 pos)
+    {
+        var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+        foreach (var item in items)
+        {
+            if (!item.Walkable)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public Vector3 GetItemArroundPos(Agent agent, IGameItem item)
+    {
+        var arroundPos = new List<Vector3>()
+        {
+            item.Pos + new Vector3(1, 0, 0),
+            item.Pos + new Vector3(-1, 0, 0),
+            item.Pos + new Vector3(0, 1, 0),
+            item.Pos + new Vector3(0, -1, 0),
+        };
+        
+        var walkablePos = new List<Vector3>();
+        foreach (var pos in arroundPos)
+        {
+            if (IsWalkable(pos))
+            {
+                walkablePos.Add(pos);
+            }
+        }
+
+        float minDistance = float.MaxValue;
+        Vector3 closestPos = Vector3.zero;
+        foreach (var pos in walkablePos)
+        {
+            float distance = Vector3.Distance(agent.Pos, pos);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closestPos = pos;
+            }
+        }
+
+        return closestPos;
     }
 }

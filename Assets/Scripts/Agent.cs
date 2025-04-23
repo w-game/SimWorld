@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using AI;
 using GameItem;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Citizens
 {
@@ -112,16 +114,15 @@ namespace Citizens
 
     public class Agent : DynamicGameItem
     {
-        private Vector2 targetPosition;
-        private bool isMoving = false;
-        public float MoveSpeed { get; private set; } = 10f;
+        public float MoveSpeed { get; private set; } = 5f;
         public int SightRange { get; private set; } = 8;
 
         public FamilyMember Ciziten { get; private set; }
         public AgentState State { get; private set; }
         public Personality Personality { get; private set; }
         public AIController Brain { get; private set; } // 大脑
-        private Dictionary<int, List<Schedule>> _schedules = new Dictionary<int, List<Schedule>>()
+        private List<Vector2Int> _paths;
+        public Dictionary<int, List<Schedule>> Schedules = new Dictionary<int, List<Schedule>>()
         {
             { 1, new List<Schedule>() },
             { 2, new List<Schedule>() },
@@ -172,20 +173,21 @@ namespace Citizens
         {
             if (_currentSchedule != null)
             {
-                if (_currentSchedule.EndTime < GameManager.I.GameTime.CurrentTime)
+                _currentSchedule.Update(() =>
                 {
                     _currentSchedule = null;
-                }
+                });
 
                 return;
             }
 
-            var schedules = _schedules[GameManager.I.GameTime.Day];
+            var schedules = Schedules[GameManager.I.GameTime.Day];
             foreach (var schedule in schedules)
             {
                 if (schedule.Check(GameManager.I.GameTime.CurrentTime, GameManager.I.GameTime.Day))
                 {
                     _currentSchedule = schedule;
+                    break;
                 }
             }
         }
@@ -206,16 +208,16 @@ namespace Citizens
                 Pos += movement;
             }
 
-            if (isMoving)
+            if (_paths == null || _paths.Count == 0)
             {
-                Vector2 newPosition = Vector2.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
-                Pos = newPosition;
+                return;
+            }
+            var targetPosition = new Vector3(_paths[0].x + 0.5f, _paths[0].y + 0.5f);
+            Pos = Vector3.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
 
-                // 当距离足够接近目标点时，停止移动
-                if (Vector2.Distance(newPosition, targetPosition) < 0.001f)
-                {
-                    isMoving = false;
-                }
+            if (Vector3.Distance(Pos, targetPosition) < 0.1f)
+            {
+                _paths.RemoveAt(0);
             }
         }
 
@@ -227,11 +229,21 @@ namespace Citizens
             Bag = new Inventory(16);
         }
 
-        // 设置目标点并开始移动
-        public void MoveToTarget(Vector2 pos)
+        public bool MoveToTarget(Vector2 pos)
         {
-            targetPosition = pos;
-            isMoving = true;
+            if (!MapManager.I.IsWalkable(pos))
+            {
+                return false;
+            }
+
+            var cellPos = MapManager.I.WorldPosToCellPos(Pos);
+            var targetCellPos = MapManager.I.WorldPosToCellPos(pos);
+            _paths = AStar.FindPath(cellPos, targetCellPos, (pos) =>
+            {
+                return MapManager.I.IsWalkable(new Vector3(pos.x, pos.y));
+            });
+
+            return _paths != null && _paths.Count > 0;
         }
 
         private FoodItem GetFoodItem()
@@ -315,7 +327,7 @@ namespace Citizens
         {
             foreach (var day in newSchedule.Days)
             {
-                var schedules = _schedules[day];
+                var schedules = Schedules[day];
                 if (schedules.Count == 0)
                 {
                     schedules.Add(newSchedule);
@@ -324,7 +336,7 @@ namespace Citizens
                 else
                 {
                     // 检测时间是否重叠
-                    foreach (var sch in schedules)
+                    foreach (var sch in new List<Schedule>(schedules))
                     {
                         if ((newSchedule.StartTime > sch.StartTime && newSchedule.StartTime < sch.EndTime) ||
                             (newSchedule.EndTime > sch.StartTime && newSchedule.EndTime < sch.EndTime) ||

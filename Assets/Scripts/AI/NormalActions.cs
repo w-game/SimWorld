@@ -119,20 +119,34 @@ namespace AI
         {
             return 0f;
         }
+
+        protected void CheckMoveToArroundPos(Agent agent, IGameItem item)
+        {
+            var pos = MapManager.I.GetItemArroundPos(agent, item);
+            if (pos != Vector3.zero)
+            {
+                PrecedingActions.Add(new CheckMoveToTarget(pos));
+            }
+            else
+            {
+                Done = true;
+            }
+        }
     }
 
     // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
     public class CheckMoveToTarget : ActionBase
     {
-        public Vector3 TargetPos { get; private set; }
         public override string ActionName => "Move to here";
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; } = -1;
-        private bool _isMoving = false;
 
+        private bool _isMoving = false;
+        public Vector3 TargetPos { get; private set; }
         public CheckMoveToTarget(Vector3 targetPos, string targetName = "")
         {
-            TargetPos = targetPos;
+            var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
+            TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
             ActionName = targetName;
         }
 
@@ -143,14 +157,19 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            if (Vector3.Distance(agent.Pos, TargetPos) > 0.1f)
+            if (!_isMoving)
             {
-                if (_isMoving) return;
-                Debug.Log($"【移动系统】从 {agent.Pos} 移动到 {TargetPos}");
-                agent.MoveToTarget(TargetPos);
+                // 如果正在移动，则不执行任何操作
+                if (!agent.MoveToTarget(TargetPos))
+                {
+                    Done = true;
+                }
                 _isMoving = true;
+                return;
             }
-            else
+            
+            // 检查是否到达目标位置
+            if (Vector3.Distance(agent.Pos, TargetPos) < 0.1f)
             {
                 Done = true;
             }
@@ -403,18 +422,31 @@ namespace AI
         public override int ProgressTimes { get => 100; protected set {} }
 
         private BedItem _bedItem;
-        public SleepAction(State state) : base(state)
+        public SleepAction(State state, BedItem bedItem = null) : base(state)
         {
             ActionName = "睡觉";
+            _bedItem = bedItem;
         }
 
         public override void OnRegister(Agent agent)
         {
-            if (agent.Ciziten.Family.Houses[0].TryGetFurniture<BedItem>(out var bedItem))
+            if (_bedItem == null)
             {
-                _bedItem = bedItem;
-                PrecedingActions.Add(new CheckMoveToTarget(_bedItem.Pos));
+                if (agent.Ciziten.Family.Houses[0].TryGetFurnitures<BedItem>(out var bedItems))
+                {
+                    foreach (var bedItem in bedItems)
+                    {
+                        if (bedItem.Using == null)
+                        {
+                            _bedItem = bedItem;
+                            _bedItem.Using = agent;
+                            break;
+                        }
+                    }
+                }
             }
+
+            PrecedingActions.Add(new CheckMoveToTarget(_bedItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)

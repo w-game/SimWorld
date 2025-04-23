@@ -1,7 +1,6 @@
 using Citizens;
 using Map;
-using UI;
-using UI.Views;
+using UI.Models;
 
 namespace AI
 {
@@ -20,7 +19,9 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            PopStack.Instance.Push<PopHouseDetails>("Prefabs/UI/Popups/PopHouseDetails");
+            var model = IModel.GetModel<PopHouseDetailsModel>(_house);
+            model.ShowUI();
+            Done = true;
         }
 
         public override void OnRegister(Agent agent)

@@ -83,7 +83,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.Pos));
+            CheckMoveToArroundPos(agent, _plantItem);
         }
 
         protected override void DoExecute(Agent agent)

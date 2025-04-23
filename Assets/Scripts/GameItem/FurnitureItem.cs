@@ -9,6 +9,7 @@ namespace GameItem
 {
     public class FurnitureItem : StaticGameItem
     {
+        public override bool Walkable => true;
         public Agent Using { get; internal set; }
 
         public FurnitureItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
@@ -49,10 +50,19 @@ namespace GameItem
         public BedItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
         }
+
+        protected override List<IAction> ActionsOnClick()
+        {
+            return new List<IAction>()
+            {
+                new SleepAction(GameManager.I.CurrentAgent.State.Sleep, this)
+            };
+        }
     }
 
     public class TableItem : FurnitureItem
     {
+        public override bool Walkable => false;
         public List<ChairItem> Chairs { get; } = new List<ChairItem>();
 
         public TableItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
@@ -96,6 +106,7 @@ namespace GameItem
 
     public class WellItem : FurnitureItem
     {
+        public override bool Walkable => false;
         public WellItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
         }
@@ -111,6 +122,7 @@ namespace GameItem
 
     public class StoveItem : FurnitureItem
     {
+        public override bool Walkable => false;
         public StoveItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
         }

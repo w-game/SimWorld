@@ -70,9 +70,11 @@
     <Compile Include="Assets/Scripts/Citizen/Family.cs" />
     <Compile Include="Assets/Scripts/AI/AIController.cs" />
     <Compile Include="Assets/Scripts/Localization/ActionLocalization.cs" />
+    <Compile Include="Assets/Scripts/AI/AStar.cs" />
     <Compile Include="Assets/Scripts/AI/InventoryAction.cs" />
     <Compile Include="Assets/Scripts/Config/ConfigReader.cs" />
     <Compile Include="Assets/Scripts/AI/PlantActions.cs" />
+    <Compile Include="Assets/Scripts/UI/PopStack.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItemUI.cs" />
     <Compile Include="Assets/Scripts/Citizen/Job.cs" />
     <Compile Include="Assets/Scripts/Agent.cs" />
@@ -95,10 +97,13 @@
     <Compile Include="Assets/Scripts/AI/HouseWorkActions.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopBuildingCraft.cs" />
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
+    <Compile Include="Assets/Scripts/UI/ElementBase.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopHouseDetailsModel.cs" />
     <Compile Include="Assets/Scripts/Map/MapJob.cs" />
     <Compile Include="Assets/Scripts/AI/EntertainmentActions.cs" />
     <Compile Include="Assets/Scripts/ActionSystem.cs" />
     <Compile Include="Assets/Scripts/AI/Schedule.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/ModelBase.cs" />
     <Compile Include="Assets/Scripts/Map/AStar.cs" />
     <Compile Include="Assets/Scripts/GameItemManager.cs" />
     <Compile Include="Assets/Scripts/AI/Inventory.cs" />
@@ -110,6 +115,7 @@
     <Compile Include="Assets/Scripts/UI/Views/TestPanel.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItem.cs" />
     <Compile Include="Assets/Scripts/Citizen/Property.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/JobRecruitElement.cs" />
     <Compile Include="Assets/TIles/BuildingTile.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />
     <Compile Include="Assets/Scripts/Util/ObjectPool.cs" />
@@ -122,6 +128,7 @@
     <Compile Include="Assets/Scripts/Map/CartonMap.cs" />
     <Compile Include="Assets/Scripts/Map/City.cs" />
     <Compile Include="Assets/Textures/Sprout Lands - Sprites - premium pack/Tilesets/ground tiles/water frames/WaterTile.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopSchdule.cs" />
     <Compile Include="Assets/Scripts/GameManager.cs" />
     <Compile Include="Assets/Scripts/MapManager.cs" />
     <Compile Include="Assets/Scripts/GameTime.cs" />

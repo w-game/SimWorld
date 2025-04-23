@@ -203,6 +203,12 @@ namespace Map
                     var pos = new Vector2Int(i, j);
                     var blockWorldPos = pos + WorldPos;
 
+                    MapManager.I.TryGetBuildingItem(new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0), out var buildingItem);
+                    if (buildingItem != null)
+                    {
+                        continue;
+                    }
+
                     float scale = 0.9f;
                     float frequency = 20f;
                     float noiseValue = frequency * Mathf.PerlinNoise(blockWorldPos.x * scale, blockWorldPos.y * scale);

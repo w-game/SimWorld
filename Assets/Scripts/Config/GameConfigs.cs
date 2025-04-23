@@ -83,3 +83,9 @@ public class RoomFurniture
     public string id;
     public int[] pos;
 }
+
+[Serializable]
+public class JobConfig : ConfigBase
+{
+    
+}

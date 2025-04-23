@@ -47,13 +47,23 @@ namespace AI
                 var items = GameManager.I.GameItemManager.GetItemsAtPos(mousePos);
 
                 var actions = new List<IAction>();
+                var isWalkable = true;
                 foreach (var item in items)
                 {
-                    actions.AddRange(item.ItemActions());
+                    actions.AddRange(item.ClickItemActions());
+                    if (!item.Walkable)
+                    {
+                        isWalkable = false;
+                    }
                 }
 
                 var blockType = MapManager.I.CheckBlockType(mousePos);
                 actions.AddRange(BlockTypeToActions(mousePos, blockType));
+
+                if (isWalkable && blockType != BlockType.Ocean)
+                {
+                    actions.Add(new CheckMoveToTarget(mousePos));
+                }
 
                 OnMouseClick?.Invoke(actions, Input.mousePosition);
             }
@@ -65,11 +75,12 @@ namespace AI
             switch (blockType)
             {
                 case BlockType.Plain:
+                    // actions.Add(new HoeAction());
+                    break;
                 case BlockType.Road:
                 case BlockType.Forest:
                 case BlockType.Mountain:
                 case BlockType.Desert:
-                    actions.Add(new CheckMoveToTarget(pos));
                     break;
                 case BlockType.Ocean:
                     break;

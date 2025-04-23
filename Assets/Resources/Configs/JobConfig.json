@@ -1,0 +1,19 @@
+{
+    "items": [
+        {
+            "id": "JOB_WAITER",
+            "name": "Waiter",
+            "description": "A person who serves food and drinks to customers at a restaurant."
+        },
+        {
+            "id": "JOB_COOKER",
+            "name": "Cooker",
+            "description": "A person who prepares and cooks food."
+        },
+        {
+            "id": "JOB_FARMER",
+            "name": "Farmer",
+            "description": "A person who cultivates land and grows crops."
+        }
+    ]
+}

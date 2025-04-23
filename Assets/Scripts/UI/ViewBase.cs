@@ -1,67 +1,72 @@
-using System;
 using System.Collections.Generic;
+using System.IO;
+using UI.Models;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI
 {
-    // Base class for all UI views
+    public enum ViewType
+    {
+        View,
+        Popup,
+        Element
+    }
     public class ViewBase : MonoBehaviour
     {
-        // Called when the view is displayed
-        public virtual void Show()
+        [SerializeField] private Button closeBtn;
+
+        public IModel Model { get; set; }
+        public virtual void OnShow()
         {
-            // Override to implement view appearance logic
+            closeBtn.onClick.AddListener(Close);
         }
 
-        // Called when the view is hidden
-        public virtual void Hide()
+        public virtual void OnHide()
         {
-            // Override to implement view disappearance logic
+            closeBtn.onClick.RemoveListener(Close);
+        }
+
+        private void Close()
+        {
+            Model.HideUI();
         }
     }
 
     // UIStack manages a stack of views for navigation
     public class UIStack : MonoBehaviour
     {
-        private readonly Stack<ViewBase> _viewStack = new();
+        protected readonly List<IModel> ViewStack = new();
 
-        public ViewBase CurrentView => _viewStack.Count > 0 ? _viewStack.Peek() : null;
-
-        public void Push<T>(string prefabPath) where T : ViewBase
+        public virtual void Push<T>(IModel model, string path) where T : ViewBase
         {
-            GameObject prefab = Resources.Load<GameObject>(prefabPath);
+            GameObject prefab = Resources.Load<GameObject>(path);
             if (prefab == null)
             {
-                Debug.LogError($"Failed to load prefab at path: {prefabPath}");
+                Debug.LogError($"Failed to load prefab at path: {path}");
                 return;
             }
 
-            T view = Instantiate(prefab).GetComponent<T>();
+            T view = Instantiate(prefab, transform).GetComponent<T>();
             if (view == null)
             {
-                Debug.LogError($"The prefab loaded from {prefabPath} does not contain a ViewBase component.");
+                Debug.LogError($"The prefab loaded from {path} does not contain a ViewBase component.");
                 return;
             }
-
-            if (_viewStack.Count > 0)
-            {
-                _viewStack.Peek().Hide();
-            }
-            _viewStack.Push(view);
-            view.Show();
+            
+            ViewStack.Add(model);
+            model.SetView(view);
         }
 
         // Pop the current view from the stack
-        public void Pop()
+        public virtual void Pop(IModel model)
         {
-            if (_viewStack.Count > 0)
+            if (ViewStack.Count > 0)
             {
-                var topView = _viewStack.Pop();
-                topView.Hide();
-                if (_viewStack.Count > 0)
+                if (ViewStack.Contains(model))
                 {
-                    // Show the previous view
-                    _viewStack.Peek().Show();
+                    ViewStack.Remove(model);
+                    Destroy(model.View.gameObject);
                 }
             }
         }
@@ -69,10 +74,11 @@ namespace UI
         // Clear all views from the stack
         public void Clear()
         {
-            while (_viewStack.Count > 0)
+            while (ViewStack.Count > 0)
             {
-                var view = _viewStack.Pop();
-                view.Hide();
+                var model = ViewStack[^1];
+                ViewStack.RemoveAt(ViewStack.Count - 1);
+                model.HideUI();
             }
         }
     }
@@ -92,30 +98,27 @@ namespace UI
                 return;
             }
             Instance = this;
-            // Optionally uncomment the following line if you want the ViewStack to persist between scenes
-            // DontDestroyOnLoad(gameObject);
         }
-        // Additional functionality can be added here if needed.
-    }
 
-    /// <summary>
-    /// PopStack is a specialized UIStack intended for scenarios where a different popping behavior may be implemented in the future.
-    /// </summary>
-    public class PopStack : UIStack
-    {
-        public static PopStack Instance { get; private set; }
-
-        private void Awake()
+        public override void Push<T>(IModel model, string path)
         {
-            if (Instance != null && Instance != this)
+            if (ViewStack.Count > 0)
             {
-                Destroy(gameObject);
-                return;
+                var previousModel = ViewStack[^1];
+                previousModel.View.gameObject.SetActive(false);
+                previousModel.View.OnHide();
             }
-            Instance = this;
-            // Optionally uncomment the following line if you want the PopStack to persist between scenes
-            // DontDestroyOnLoad(gameObject);
+            base.Push<T>(model, path);
         }
-        // Custom pop-related functionality can be added here in the future.
+
+        public override void Pop(IModel model)
+        {
+            base.Pop(model);
+            if (ViewStack.Count > 0)
+            {
+                var previousModel = ViewStack[^1];
+                previousModel.ShowUI();
+            }
+        }
     }
 }

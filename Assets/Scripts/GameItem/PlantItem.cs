@@ -24,6 +24,7 @@ namespace GameItem
 
     public class PlantItem : StaticGameItem
     {
+        public override bool Walkable => true;
         public float GrowthTime { get; set; } // 成长时间
         public PlantStage GrowthStage { get; set; } // 成长阶段
         public int GrowthRate { get; set; } // 成长速度
@@ -135,6 +136,7 @@ namespace GameItem
 
     public class TreeItem : PlantItem
     {
+        public override bool Walkable => false;
         public TreeItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
         {
         }

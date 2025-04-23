@@ -114,5 +114,19 @@ namespace Map
             furnitureItem = null;
             return false;
         }
+
+        public bool TryGetFurnitures<T>(out List<T> furnitureItems) where T : FurnitureItem
+        {
+            furnitureItems = new List<T>();
+            foreach (var item in FurnitureItems)
+            {
+                if (item.Value is T)
+                {
+                    furnitureItems.Add(item.Value as T);
+                }
+            }
+
+            return furnitureItems.Count > 0;
+        }
     }
 }

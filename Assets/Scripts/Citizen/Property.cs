@@ -15,6 +15,7 @@ namespace Citizens
         public List<Employee> Employees { get; } = new List<Employee>();
         public List<JobUnit> JobUnits { get; } = new List<JobUnit>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 18 * 60 * 60 };
+        public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
 
         public Property(House house, Family owner)
         {
@@ -84,6 +85,12 @@ namespace Citizens
             employee.AssignJobUnit(jobUnit);
             return true;
         }
+
+        internal void AddApplicant(JobConfig jobConfig, Agent agent)
+        {
+
+            AddEmployee(new Waiter(agent));
+        }
     }
 
     public class FarmProperty : Property
@@ -107,6 +114,8 @@ namespace Citizens
                     AddJobUnit<Farmer>(jobUnit);
                 }
             }
+
+            JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_FARMER"), 1);
         }
 
         private void CheckPlantToFarm(Vector2Int block)
@@ -176,6 +185,9 @@ namespace Citizens
                     _stoveItems.Add(stoveItem);
                 }
             }
+
+            JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_COOKER"), 1);
+            JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_WAITER"), 1);
         }
 
         public void AddOrder(PropConfig propConfig)

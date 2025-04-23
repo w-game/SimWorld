@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AI;
 using Citizens;
 using UI.Views;
@@ -37,6 +38,17 @@ public class GameManager : MonoBehaviour
         ActionSystem.Update();
         GameTime.Update();
         GameItemManager.Update();
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            CurrentAgent.RegisterSchedule(
+                new Schedule(
+                    20 * 60 * 60,
+                    29 * 60 * 60,
+                    new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
+                    new SleepAction(CurrentAgent.State.Sleep),
+                    CurrentAgent.Ciziten));
+        }
     }
 
     private void CreatePlayer()

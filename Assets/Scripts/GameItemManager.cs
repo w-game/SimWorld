@@ -99,7 +99,7 @@ public class GameItemManager
             {
                 gameItem.HideUI();
             }
-            else if (gameItem.UI == null)
+            else if (gameItem.UI == null && gameItem is not BuildingItem)
             {
                 gameItem.ShowUI();
             }
