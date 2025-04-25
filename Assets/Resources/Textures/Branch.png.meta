@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 039c4772afc9348da8e88d207e7b7b25
+guid: 0b77816e14b644a129a19203645a721b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1210567997190752626
-    second: Basic_Furniture_15_0
+      213: -8063967177157531436
+    second: tools-n-meterial-items_7_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Basic_Furniture_15_0
+      name: tools-n-meterial-items_7_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 10
-        height: 13
+        x: 1
+        y: 1
+        width: 14
+        height: 14
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e863df602d2333fe0800000000000000
-      internalID: -1210567997190752626
+      spriteID: 4d8ad1db398071090800000000000000
+      internalID: -8063967177157531436
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Basic_Furniture_15_0: -1210567997190752626
+      tools-n-meterial-items_7_0: -8063967177157531436
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

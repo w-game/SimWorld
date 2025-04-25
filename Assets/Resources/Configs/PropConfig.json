@@ -10,6 +10,24 @@
             "maxStackSize": 1
         },
         {
+            "id": "PROP_MATERIAL_BRANCH",
+            "name": "Branch",
+            "description": "A small branch.",
+            "type": "Material",
+            "icon": "Textures/Branch",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10
+        },
+        {
+            "id": "PROP_MATERIAL_STONE",
+            "name": "Stone",
+            "description": "A small stone.",
+            "type": "Material",
+            "icon": "Textures/Stone",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10
+        },
+        {
             "id": "PROP_RESOURCE_WOOD",
             "name": "Wood",
             "description": "A piece of wood.",
@@ -34,6 +52,15 @@
             "type": "Food",
             "icon": "wall_icon.png",
             "prefab": "Prefab/Wall",
+            "maxStackSize": 1
+        },
+        {
+            "id": "PROP_TOOL_AXE",
+            "name": "Axe",
+            "description": "A tool for chopping wood.",
+            "type": "Tool",
+            "icon": "Textures/Axe",
+            "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1
         }
     ]

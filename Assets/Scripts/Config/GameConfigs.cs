@@ -85,5 +85,18 @@ public class RoomFurniture
 [Serializable]
 public class JobConfig : ConfigBase
 {
-    
+
+}
+
+[Serializable]
+public class CraftConfig : ConfigBase
+{
+    public CraftMaterialConfig[] materials;
+}
+
+[Serializable]
+public class CraftMaterialConfig
+{
+    public string id;
+    public int amount;
 }

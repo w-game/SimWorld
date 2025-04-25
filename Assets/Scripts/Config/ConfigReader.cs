@@ -29,7 +29,8 @@ public class ConfigReader
         { typeof(ResourceConfig)   , "Configs/ResourceConfig"    },
         { typeof(GameItemToActions), "Configs/GameItemToActions" },
         { typeof(RoomConfig)       , "Configs/RoomConfig"        },
-        { typeof(JobConfig)        , "Configs/JobConfig"         }
+        { typeof(JobConfig)        , "Configs/JobConfig"         },
+        { typeof(CraftConfig)      , "Configs/CraftConfig"       },
     };
 
     /// <summary>Load/refresh every registered config file.</summary>

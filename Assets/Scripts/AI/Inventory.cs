@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using GameItem;
 using UnityEngine.Events;
@@ -55,5 +56,11 @@ public class Inventory
     public void RemoveItem(PropItem item)
     {
         Items.Remove(item);
+    }
+
+    internal List<PropItem> CheckItem(string id)
+    {
+        var items = Items.FindAll(i => i.Config.id == id);
+        return items;
     }
 }

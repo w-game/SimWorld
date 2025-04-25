@@ -24,12 +24,13 @@ namespace UI.Elements
                 itemCountText.gameObject.SetActive(false);
                 return;
             }
+
+            itemIcon.sprite = Resources.Load<Sprite>(newConfig.icon);
+            itemIcon.gameObject.SetActive(true);
             if (count > 0)
             {
-                itemIcon.sprite = Resources.Load<Sprite>(newConfig.icon);
                 itemCountText.text = count.ToString();
                 itemCountText.gameObject.SetActive(true);
-                itemIcon.gameObject.SetActive(true);
             }
             else
             {

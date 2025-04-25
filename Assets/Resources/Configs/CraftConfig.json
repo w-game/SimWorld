@@ -1,0 +1,17 @@
+{
+    "items": [
+        {
+            "id": "PROP_TOOL_AXE",
+            "materials": [
+                {
+                    "id": "PROP_MATERIAL_BRANCH",
+                    "amount": 1
+                },
+                {
+                    "id": "PROP_MATERIAL_STONE",
+                    "amount": 2
+                }
+            ]
+        }
+    ]
+}
