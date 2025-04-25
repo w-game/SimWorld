@@ -11,11 +11,18 @@ public class ConfigBase
     public string prefab;
 }
 
+[Serializable]
+public class PosConfig
+{
+    public int x;
+    public int y;
+}
 
 [Serializable]
 public class BuildingConfig : ConfigBase
 {
     public string type;
+    public int[] size;    
     public BuildingRequiredItem[] requiredItems;
 }
 
@@ -36,15 +43,6 @@ public class ConfigList<T>
 public class PropConfig : ConfigBase
 {
     public int maxStackSize;
-
-    public PropConfig(string id, string name, int maxStackSize)
-    {
-        this.id = id;
-        this.name = name;
-        this.maxStackSize = maxStackSize;
-        this.icon = $"Icons/{id}";
-        this.prefab = $"Prefabs/Props/{id}";
-    }
 }
 
 [Serializable]

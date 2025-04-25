@@ -22,7 +22,7 @@ namespace GameItem
         Weeds
     }
 
-    public class PlantItem : StaticGameItem
+    public class PlantItem : GameItemBase<ResourceConfig>
     {
         public override bool Walkable => true;
         public float GrowthTime { get; set; } // 成长时间
@@ -50,11 +50,10 @@ namespace GameItem
         {
             base.ShowUI();
 
-            var resourceConfig = ConvtertConfig<ResourceConfig>();
-            UI.SetRenderer(resourceConfig.stages[(int)GrowthStage]);
+            UI.SetRenderer(Config.stages[(int)GrowthStage]);
         }
 
-        public PlantItem(ConfigBase config, Vector3 pos = default, bool randomStage = false) : base(config, pos)
+        public PlantItem(ResourceConfig config, Vector3 pos, bool randomStage) : base(config, pos)
         {
             if (randomStage)
             {
@@ -137,7 +136,7 @@ namespace GameItem
     public class TreeItem : PlantItem
     {
         public override bool Walkable => false;
-        public TreeItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public TreeItem(ResourceConfig config, Vector3 pos) : base(config, pos, false)
         {
         }
     }

@@ -112,12 +112,12 @@ namespace Citizens
         }
     }
 
-    public class Agent : DynamicGameItem
+    public class Agent : GameItemBase<ConfigBase>
     {
         public float MoveSpeed { get; private set; } = 5f;
         public int SightRange { get; private set; } = 8;
 
-        public FamilyMember Ciziten { get; private set; }
+        public FamilyMember Citizen { get; private set; }
         public AgentState State { get; private set; }
         public Personality Personality { get; private set; }
         public AIController Brain { get; private set; } // 大脑
@@ -135,13 +135,15 @@ namespace Citizens
 
         private Schedule _currentSchedule;
 
-        public Agent(AIController brain, Vector3 pos = default) : base(null, pos)
+        public Agent(ConfigBase config, Vector3 pos, AIController brain) : base(null, pos)
         {
             Brain = brain;
             Brain.SetAgent(this);
         }
 
         public Inventory Bag { get; private set; }
+
+        public override bool Walkable => false;
 
         public override void ShowUI()
         {
@@ -221,10 +223,10 @@ namespace Citizens
             }
         }
 
-        public void Init(FamilyMember ciziten)
+        public void Init(FamilyMember citizen)
         {
-            Ciziten = ciziten;
-            Ciziten.SetAgent(this);
+            Citizen = citizen;
+            Citizen.SetAgent(this);
             State = new AgentState(this);
             Bag = new Inventory(16);
         }
@@ -259,7 +261,7 @@ namespace Citizens
             return null;
         }
 
-        private T BFSItem<T>() where T : GameItemBase
+        private T BFSItem<T>() where T : IGameItem
         {
             var visitedPositions = new HashSet<Vector2>();
             var queue = new Queue<Vector2>();
@@ -289,16 +291,16 @@ namespace Citizens
                     }
                 }
             }
-            return null;
+            return default;
         }
 
-        public T GetGameItem<T>() where T : GameItemBase
+        public T GetGameItem<T>() where T : class, IGameItem
         {
             var item = BFSItem<T>();
             if (typeof(T) == typeof(FoodItem))
             {
                 var foodItem = GetFoodItem();
-                return foodItem == null ? item : foodItem as T;
+                return foodItem as T;
             }
 
             return item;
@@ -312,12 +314,12 @@ namespace Citizens
 
 
         // 根据兴趣爱好寻找最近可交互的娱乐物品
-        public GameItemBase FindByHobby()
+        public IGameItem FindByHobby()
         {
             throw new NotImplementedException();
         }
 
-        public void TakeItemInHand(GameItemBase item)
+        public void TakeItemInHand(IGameItem item)
         {
             // item.transform.SetParent(handItem);
             // item.transform.localPosition = Vector3.zero;

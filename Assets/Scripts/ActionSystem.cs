@@ -91,6 +91,12 @@ namespace AI
 
         internal void RegisterAction(IAction action)
         {
+            if (action is SystemAction)
+            {
+                action.OnRegister(GameManager.I.CurrentAgent);
+                action.Execute(GameManager.I.CurrentAgent);
+                return;
+            }
             GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
         }
     }

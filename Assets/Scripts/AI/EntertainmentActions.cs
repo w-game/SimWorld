@@ -10,9 +10,9 @@ namespace AI
         public override float ProgressSpeed { get; protected set; } = 2f;
         public override int ProgressTimes { get; protected set; } = -1;
 
-        private GameItemBase _item;
+        private IGameItem _item;
 
-        public IdleAction(GameItemBase item)
+        public IdleAction(IGameItem item)
         {
             ActionName = "Idle";
             _item = item;

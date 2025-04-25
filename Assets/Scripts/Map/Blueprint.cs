@@ -2,12 +2,25 @@ using UnityEngine;
 
 public class Blueprint : MonoBehaviour
 {
-    [SerializeField] private SpriteRenderer sr;
+    private SpriteRenderer _sr;
 
-    public void Place(Vector2Int position, Sprite sprite)
+    private void Awake()
     {
-        // 将蓝图放置在指定位置
-        transform.position = new Vector3(position.x, position.y, 0);
-        sr.sprite = sprite;
+        _sr = GetComponent<SpriteRenderer>();
+    }
+
+    public void Place(Sprite sprite)
+    {
+        _sr.sprite = sprite;
+    }
+}
+
+public class BuildingSign : Blueprint
+{
+    void Update()
+    {
+        var mousePos = UIManager.I.MousePosToWorldPos();
+        var gridPos = MapManager.I.WorldPosToCellPos(mousePos);
+        transform.position = new Vector2(gridPos.x + 0.5f, gridPos.y + 0.5f);
     }
 }

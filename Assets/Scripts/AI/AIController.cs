@@ -146,7 +146,7 @@ namespace AI
         private void ResolveHungerBehavior()
         {
             var foodItem = _agent.GetGameItem<FoodItem>();
-            if (foodItem != null && foodItem.Owner == _agent.Ciziten.Family)
+            if (foodItem != null && foodItem.Owner == _agent.Citizen.Family)
             {
                 RegisterAction(new EatAction(foodItem, _agent.State.Hunger), true);
                 return;

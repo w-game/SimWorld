@@ -217,14 +217,23 @@ namespace Map
                     {
                         if (noiseValue > 0.9f * frequency)
                         {
-                            new TreeItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                            GameItemManager.CreateGameItem<TreeItem>(
+                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
+                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                GameItemType.Static
+                            );
                         }
                         else if (noiseValue > 0.8f * frequency)
                         {
                         }
                         else if (noiseValue > 0.6f * frequency)
                         {
-                            new PlantItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                            GameItemManager.CreateGameItem<PlantItem>(
+                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
+                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                GameItemType.Static,
+                                false
+                            );
                         }
                         else if (noiseValue > 0.4f * frequency)
                         {
@@ -237,14 +246,26 @@ namespace Map
                     {
                         if (noiseValue > 0.7f * frequency)
                         {
-                            new TreeItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                            GameItemManager.CreateGameItem<TreeItem>(
+                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
+                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                GameItemType.Static
+                            );
+                        }
+                        else if (noiseValue > 0.5f * frequency)
+                        {
+                            
                         }
                         else if (noiseValue > 0.3f * frequency)
                         {
                         }
                         else if (noiseValue > 0.1f * frequency)
                         {
-                            new PlantItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"), new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
+                            GameItemManager.CreateGameItem<PlantItem>(
+                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
+                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                GameItemType.Static
+                            );
                         }
                         else
                         {

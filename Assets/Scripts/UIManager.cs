@@ -1,3 +1,4 @@
+using UI.Models;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
@@ -27,6 +28,18 @@ public class UIManager : MonoSingleton<UIManager>
         {
             Vector3 mousePos = MousePosToWorldPos();
             OnMouseBtnClicked?.Invoke(mousePos);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            var model = new PopBuildingCraftModel();
+            model.ShowUI();
+        }
+
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            var model = new PopBagModel();
+            model.ShowUI();
         }
     }
 }

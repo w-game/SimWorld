@@ -227,7 +227,7 @@ namespace Citizens
 
         public Employee(Agent agent)
         {
-            Member = agent.Ciziten;
+            Member = agent.Citizen;
         }
     }
 

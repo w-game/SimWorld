@@ -6,12 +6,21 @@ using UnityEngine;
 
 namespace GameItem
 {
+    public enum GameItemType
+    {
+        Static,
+        Dynamic
+    }
+
     public interface IGameItem
     {
         Vector3 Pos { get; set; }
-        ConfigBase Config { get; }
+        GameItemType ItemType { get; set; }
+        Vector2Int Size { get; }
+        ConfigBase ConfigBase { get; }
         GameItemUI UI { get; }
         bool Walkable { get; }
+        void CalcSize();
 
         void ShowUI();
         void HideUI();
@@ -19,9 +28,10 @@ namespace GameItem
         void DoUpdate();
         List<IAction> ItemActions();
         List<IAction> ClickItemActions();
+        List<Vector2Int> OccupiedPositions { get; }
     }
 
-    public abstract class GameItemBase : IGameItem
+    public abstract class GameItemBase<T> : IGameItem where T : ConfigBase
     {
         private Vector3 _pos;
         public Vector3 Pos
@@ -37,16 +47,36 @@ namespace GameItem
             }
         }
 
-        public ConfigBase Config { get; protected set; }
+        public GameItemType ItemType { get; set; }
+        public Vector2Int Size { get; protected set; } = new Vector2Int(1, 1);
+
+        public ConfigBase ConfigBase { get; protected set; }
+        public T Config => (T)ConfigBase;
         public GameItemUI UI { get; protected set; }
         public Family Owner { get; set; }
         public abstract bool Walkable { get; }
+        public virtual List<Vector2Int> OccupiedPositions { get; } = new List<Vector2Int>();
 
-        public GameItemBase(ConfigBase config, Vector3 pos = default)
+        public GameItemBase(T config, Vector3 pos = default)
         {
-            Config = config;
+            ConfigBase = config;
             Pos = pos;
-            GameManager.I.GameItemManager.RegisterGameItem(this);
+        }
+
+        public void CalcSize()
+        {
+            int sizeX = Size.x, sizeY = Size.y;
+
+            int startX = sizeX == 1 ? 0 : -sizeX % 2;
+            int startY = sizeY == 1 ? 0 : -sizeY % 2;
+
+            for (int i = startX; i < startX + sizeX; i++)
+            {
+                for (int j = startY; j < startY + sizeY; j++)
+                {
+                    OccupiedPositions.Add(new Vector2Int(i, j));
+                }
+            }
         }
 
         public virtual void ShowUI()
@@ -69,11 +99,6 @@ namespace GameItem
             }
         }
 
-        public T ConvtertConfig<T>() where T : ConfigBase
-        {
-            return Config as T;
-        }
-
         public void DoUpdate()
         {
             Update();
@@ -86,11 +111,7 @@ namespace GameItem
 
         public virtual void Destroy()
         {
-            if (UI != null)
-            {
-                HideUI();
-            }
-            GameManager.I.GameItemManager.UnregisterGameItem(this);
+            HideUI();
         }
 
         public abstract List<IAction> ItemActions();
@@ -102,20 +123,5 @@ namespace GameItem
         }
 
         protected virtual List<IAction> ActionsOnClick() { return new List<IAction>(); }
-    }
-
-    public abstract class StaticGameItem : GameItemBase
-    {
-        public StaticGameItem(ConfigBase config, Vector3 pos) : base(config, pos)
-        {
-        }
-    }
-
-    public abstract class DynamicGameItem : GameItemBase
-    {
-        public override bool Walkable => true;
-        public DynamicGameItem(ConfigBase config, Vector3 pos) : base(config, pos)
-        {
-        }
     }
 }

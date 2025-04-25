@@ -4,6 +4,7 @@ using Citizens;
 using GameItem;
 using Map;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace AI
 {
@@ -120,9 +121,9 @@ namespace AI
             return 0f;
         }
 
-        protected void CheckMoveToArroundPos(Agent agent, IGameItem item)
+        protected void CheckMoveToArroundPos(Agent agent, Vector3 targetPos)
         {
-            var pos = MapManager.I.GetItemArroundPos(agent, item);
+            var pos = MapManager.I.GetItemArroundPos(agent, targetPos);
             if (pos != Vector3.zero)
             {
                 PrecedingActions.Add(new CheckMoveToTarget(pos));
@@ -167,7 +168,7 @@ namespace AI
                 _isMoving = true;
                 return;
             }
-            
+
             // 检查是否到达目标位置
             if (Vector3.Distance(agent.Pos, TargetPos) < 0.1f)
             {
@@ -179,7 +180,7 @@ namespace AI
     // 将物品放到指定位置（例如将食物放到嘴边或桌上）
     public class PutItemToTarget : ActionBase
     {
-        public PutItemToTarget(PropGameItem item, GameItemBase targetItem)
+        public PutItemToTarget(PropGameItem item, IGameItem targetItem)
         {
             throw new System.NotImplementedException();
         }
@@ -232,7 +233,6 @@ namespace AI
         {
             Debug.Log("执行捡取物品动作");
             agent.TakeItemInHand(_item);
-            GameManager.I.GameItemManager.RemoveGameItemOnMap(_item);
             // 模拟捡取物品的逻辑
             Done = true;
         }
@@ -309,7 +309,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            if (agent.Ciziten.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
+            if (agent.Citizen.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
             {
                 _toiletItem = toiletItem;
                 PrecedingActions.Add(new CheckMoveToTarget(_toiletItem.Pos));
@@ -394,9 +394,9 @@ namespace AI
         public override float ProgressSpeed { get; protected set; }
         public override int ProgressTimes { get; protected set; }
 
-        private GameItemBase _bath;
+        private IGameItem _bath;
 
-        public BathAction(GameItemBase bath, State state) : base(state)
+        public BathAction(IGameItem bath, State state) : base(state)
         {
             _bath = bath;
             ActionName = "洗澡";
@@ -418,13 +418,13 @@ namespace AI
 
     public class SleepAction : NormalAction
     {
-        public override float ProgressSpeed { get => 100f / 8f / 60f / 60f; protected set {} }
-        public override int ProgressTimes { get => 100; protected set {} }
+        public override float ProgressSpeed { get => 100f / 8f / 60f / 60f; protected set { } }
+        public override int ProgressTimes { get => 100; protected set { } }
 
         private BedItem _bedItem;
         public SleepAction(State state, BedItem bedItem = null) : base(state)
         {
-            ActionName = "睡觉";
+            ActionName = "Sleep";
             _bedItem = bedItem;
         }
 
@@ -432,7 +432,7 @@ namespace AI
         {
             if (_bedItem == null)
             {
-                if (agent.Ciziten.Family.Houses[0].TryGetFurnitures<BedItem>(out var bedItems))
+                if (agent.Citizen.Family.Houses[0].TryGetFurnitures<BedItem>(out var bedItems))
                 {
                     foreach (var bedItem in bedItems)
                     {

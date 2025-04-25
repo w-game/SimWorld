@@ -5,9 +5,6 @@ public class PopBuildingCraft : ViewBase
 {
     [SerializeField] private GameObject buildingElemebtPrefab;
     [SerializeField] private Transform buildingElementParent;
-    [SerializeField] private GameObject panel;
-
-    public static PopBuildingCraft I { get; private set; }
 
     void Start()
     {
@@ -16,12 +13,6 @@ public class PopBuildingCraft : ViewBase
         {
             GenerateBuildingElement(config);
         }
-        I = this;
-    }
-
-    public static void StartCraft()
-    {
-        I.panel.SetActive(true);
     }
 
     private void GenerateBuildingElement(BuildingConfig config)
@@ -34,9 +25,9 @@ public class PopBuildingCraft : ViewBase
         }
     }
 
-    public void EndCraft()
+    public override void OnHide()
     {
-        BuildingManager.I.CraftMode = false;
-        panel.SetActive(false);
+        base.OnHide();
+        BuildingManager.I.StopBuildingMode();
     }
 }

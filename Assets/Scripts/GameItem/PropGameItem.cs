@@ -1,19 +1,26 @@
+using System;
 using System.Collections.Generic;
 using AI;
 using Citizens;
-using GameItem;
 using UnityEngine;
+using DG.Tweening;
 
 namespace GameItem
 {
-    public class PropGameItem : StaticGameItem
+    public class PropGameItem : GameItemBase<PropConfig>
     {
         public override bool Walkable => true;
         public int Count { get; private set; } = 1;
 
-        public PropGameItem(ConfigBase config, int count, Vector3 pos = default) : base(config, pos)
+        public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
             Count = count;
+        }
+
+        public override void ShowUI()
+        {
+            base.ShowUI();
+            UI.SetRenderer(Config.icon);
         }
 
         public override List<IAction> ItemActions()
@@ -24,6 +31,33 @@ namespace GameItem
                 new PutIntoBag(this),
             };
         }
+
+        public void BePickedUp(Agent agent)
+        {
+            var originalPos = Pos;
+            Tween tween = DOTween.To(() => Pos,
+                                     v =>
+                                     {
+                                         Pos = v;
+                                         if ((Pos - agent.Pos).sqrMagnitude < 0.5f)
+                                         {
+                                             if (agent.Bag.AddItem(this))
+                                             {
+                                                 GameItemManager.DestroyGameItem(this);
+                                                 DOTween.Kill(this);
+                                             }
+                                             else
+                                             {
+                                                DOTween.Kill(this);
+                                                Pos = originalPos;
+                                             }
+                                         }
+                                     },
+                                     agent.Pos,
+                                     0.25f)
+                                 .SetEase(Ease.Linear)
+                                 .SetTarget(this);
+        }
     }
 
     public class FoodItem : PropGameItem
@@ -32,7 +66,7 @@ namespace GameItem
         public int MaxFoodTimes { get; set; } = 5;
         public int FoodTimes { get; set; } = 5;
 
-        public FoodItem(ConfigBase config, int count, Vector3 pos = default) : base(config, count, pos)
+        public FoodItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
         {
         }
 
@@ -58,14 +92,14 @@ namespace GameItem
 
     public class BookItem : PropGameItem
     {
-        public BookItem(ConfigBase config, int count, Vector3 pos = default) : base(config, count, pos)
+        public BookItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
         {
         }
     }
 
     public class PaperItem : PropGameItem
     {
-        public PaperItem(ConfigBase config, int count, Vector3 pos = default) : base(config, count, pos)
+        public PaperItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
         {
         }
     }

@@ -17,9 +17,13 @@ namespace UI
         [SerializeField] private Button closeBtn;
 
         public IModel Model { get; set; }
+        void Awake()
+        {
+            closeBtn?.onClick.AddListener(Close);
+        }
+
         public virtual void OnShow()
         {
-            closeBtn.onClick.AddListener(Close);
         }
 
         public virtual void OnHide()

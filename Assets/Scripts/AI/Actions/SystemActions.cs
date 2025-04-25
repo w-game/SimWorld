@@ -1,32 +1,27 @@
 using Citizens;
-using Map;
-using UI.Models;
+using UnityEngine.Events;
 
 namespace AI
 {
-    public class ViewHouseDetailsAction : ActionBase
+    public class SystemAction : ActionBase
     {
-        public override string ActionName => "ViewHouseDetails";
+        public override float ProgressSpeed { get; protected set; } = 0;
+        public override int ProgressTimes { get; protected set; } = -1;
 
-        public override float ProgressSpeed { get => 1f; protected set => throw new System.NotImplementedException(); }
-        public override int ProgressTimes { get => -1; protected set => throw new System.NotImplementedException(); }
-
-        private House _house;
-        public ViewHouseDetailsAction(House house)
+        public SystemAction(string actionName, UnityAction<IAction> action)
         {
-            _house = house;
-        }
-
-        protected override void DoExecute(Agent agent)
-        {
-            var model = IModel.GetModel<PopHouseDetailsModel>(_house);
-            model.ShowUI();
-            Done = true;
+            ActionName = actionName;
+            OnCompleted += (a) => action?.Invoke(a);
         }
 
         public override void OnRegister(Agent agent)
         {
-            
+
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            Done = true;
         }
     }
 }

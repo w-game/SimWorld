@@ -61,15 +61,29 @@ namespace Map
                     var pos = new Vector2Int(i, j) + MinPos;
                     if (RoomConfig.layout[i + j * RoomConfig.width] == 0)
                     {
-                        new WallItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_WALL"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
+                        GameItemManager.CreateGameItem<WallItem>(
+                            GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_WALL"),
+                            new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                            GameItemType.Static,
+                            this);
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 1)
                     {
-                        new FloorItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
+                        GameItemManager.CreateGameItem<FloorItem>(
+                            GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"),
+                            new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                            GameItemType.Static,
+                            this
+                        );
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 2)
                     {
-                        new DoorItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_DOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
+                        GameItemManager.CreateGameItem<DoorItem>(
+                            GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_DOOR"),
+                            new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                            GameItemType.Static,
+                            this
+                        );
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 3)
                     {
@@ -77,7 +91,12 @@ namespace Map
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 4)
                     {
-                        new CommercialItem(this, GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"), new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0));
+                        GameItemManager.CreateGameItem<CommercialItem>(
+                            GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"),
+                            new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                            GameItemType.Static,
+                            this
+                        );
                         CommercialPos.Add(pos);
                     }
                 }
@@ -88,9 +107,13 @@ namespace Map
                 var pos = new Vector2Int(furniture.pos[0], furniture.pos[1]) + MinPos;
 
                 var config = GameManager.I.ConfigReader.GetConfig<BuildingConfig>(furniture.id);
-                Debug.Log($"生成家具: {config.name}，位置: {pos}, 类型: {config.type}");
                 var type = Type.GetType($"GameItem.{config.type}Item");
-                var furnitureItem = Activator.CreateInstance(type, new object[] { config, new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0) }) as FurnitureItem;
+                var furnitureItem = GameItemManager.CreateGameItem<FurnitureItem>(
+                    type,
+                    config,
+                    new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                    GameItemType.Static);
+                
                 FurnitureItems.Add(pos, furnitureItem);
             }
         }

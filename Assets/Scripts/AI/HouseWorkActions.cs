@@ -22,7 +22,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            if (_stoveItem == null && agent.Ciziten.Family.Houses[0].TryGetFurniture<StoveItem>(out var stoveItem))
+            if (_stoveItem == null && agent.Citizen.Family.Houses[0].TryGetFurniture<StoveItem>(out var stoveItem))
             {
                 _stoveItem = stoveItem;
             }

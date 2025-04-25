@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using GameItem;
 using Map;
 using UnityEngine;
 
@@ -7,14 +8,39 @@ public class BuildingManager : MonoSingleton<BuildingManager>
 {
     [SerializeField] private GameObject blueprintPrefab;
     public Camera mainCamera; // 主摄像机
-    public bool CraftMode { get; set; }
+    public bool CraftMode { get; private set; }
     private BuildingConfig _currentBuildingConfig; // 当前建筑配置
-
-
     private bool _isBuilding = false;  // 标记是否正在进行拖动建造
-    private Dictionary<Vector2Int, GameObject> _blueprints = new Dictionary<Vector2Int, GameObject>(); // 存储预览的 sign
+
+    // 建造模式
+    public enum BuildMode
+    {
+        Single,  // 单格点击
+        Line,    // 线性拖动（现有实现）
+        Area     // 矩形范围拖动
+    }
+
+    // 当前建造模式，默认为线性拖动
+    public BuildMode CurrentBuildMode = BuildMode.Line;
+
+    /// <summary>
+    /// 清除所有蓝图预览对象
+    /// </summary>
+    private void ClearSigns()
+    {
+        foreach (var bp in _signs.Values)
+        {
+            if (bp != null) Destroy(bp);
+        }
+        _signs.Clear();
+    }
+
+    private Dictionary<Vector2Int, GameObject> _signs = new Dictionary<Vector2Int, GameObject>(); // 存储预览的 sign
+    private Dictionary<Vector2Int, GameObject> _blueprints = new Dictionary<Vector2Int, GameObject>(); // 存储已建造的建筑物
 
     private Vector2Int _originPos; // 起始格子坐标
+
+    private IGameItem _sign;
 
 
     // 检查是否满足建造条件（这里仅作示例，实际可加入判断逻辑）
@@ -36,119 +62,178 @@ public class BuildingManager : MonoSingleton<BuildingManager>
         }
     }
 
+    public void StartBuildingMode(BuildingConfig config)
+    {
+        CraftMode = true;
+        _isBuilding = false;
+        _currentBuildingConfig = config;
+        if (_currentBuildingConfig.type == "Wall")
+        {
+            CurrentBuildMode = BuildMode.Line; // 墙体默认线性建造
+        }
+        else if (_currentBuildingConfig.type == "Floor")
+        {
+            CurrentBuildMode = BuildMode.Area; // 地板默认矩形建造
+        }
+        else
+        {
+            CurrentBuildMode = BuildMode.Single; // 其他类型默认单格建造
+        }
+
+        _sign = GenerateBlueprint(UIManager.I.MousePosToWorldPos());
+    }
+
+    public void StopBuildingMode()
+    {
+        CraftMode = false;
+        _isBuilding = false;
+    }
+
+    private BlueprintItem GenerateBlueprint(Vector3 pos)
+    {
+       var item = GameItemManager.CreateGameItem<BlueprintItem>(
+            _currentBuildingConfig,
+            pos,
+            GameItemType.Dynamic
+        );
+        item.ShowUI();
+
+        return item;
+    }
+
+    private void GenerateBlueprint()
+    {
+        foreach (var sign in _signs.Values)
+        {
+            GenerateBlueprint(sign.transform.position);
+        }
+    }
+
     void Update()
     {
+        if (_sign != null)
+        {
+            var cellPos = MapManager.I.WorldPosToCellPos(UIManager.I.MousePosToWorldPos());
+            _sign.Pos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f, 0);
+        }
         if (!CraftMode)
             return;
+            
+        if (Input.GetMouseButtonDown(1))
+        {
+            StopBuildingMode();
+            return;
+        }
 
-        // 鼠标左键按下时，确定起始点并开始建造
+        // 鼠标左键按下
         if (Input.GetMouseButtonDown(0))
         {
             var mousePos = UIManager.I.MousePosToWorldPos();
             var blockType = MapManager.I.CheckBlockType(mousePos);
-            if (CheckCanBuild(blockType))
+
+            if (!CheckCanBuild(blockType))
+                return;
+
+            // 清除旧预览
+            ClearSigns();
+
+            if (CurrentBuildMode == BuildMode.Single)
             {
-                _originPos = new Vector2Int(Mathf.FloorToInt(mousePos.x), Mathf.FloorToInt(mousePos.y));
+                // 单格建造无需进入拖动状态
+                
+                GameManager.I.CurrentAgent.Citizen.Family.Actions.Add(new CraftBuildingItemAction((BlueprintItem)_sign));
+                StopBuildingMode();
+                GameManager.I.GameItemManager.SwitchType(_sign, GameItemType.Static);
+                _sign = null;
+                return;
+            }
+            else
+            {
+                // Line / Area 模式进入拖动
+                _originPos = MapManager.I.WorldPosToCellPos(UIManager.I.MousePosToWorldPos());
                 _isBuilding = true;
             }
         }
 
-        // 正在建造时，根据鼠标位置实时更新预览的 sign 连线
         if (_isBuilding)
         {
-            // 获取当前鼠标在世界中的位置，并转换为格子坐标
             Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Input.mousePosition);
             mouseWorld.z = 0;
             Vector2Int currentGrid = new Vector2Int(Mathf.FloorToInt(mouseWorld.x), Mathf.FloorToInt(mouseWorld.y));
 
-            // 锁定移动方向：比较水平和垂直差值，取较大的方向
-            int deltaX = currentGrid.x - _originPos.x;
-            int deltaY = currentGrid.y - _originPos.y;
-            if (Mathf.Abs(deltaX) >= Mathf.Abs(deltaY))
-            {
-                // 水平移动：锁定y坐标
-                currentGrid.y = _originPos.y;
-            }
-            else
-            {
-                // 垂直移动：锁定x坐标
-                currentGrid.x = _originPos.x;
-            }
+            // 清除旧预览以便重新生成
+            ClearSigns();
 
-            // 根据起始点与当前格子位置，生成两点之间的连续 sign
-            if (_originPos.x == currentGrid.x)
+            if (CurrentBuildMode == BuildMode.Line)
             {
-                // 垂直方向：遍历y轴
-                int startY = Mathf.Min(_originPos.y, currentGrid.y);
-                int endY = Mathf.Max(_originPos.y, currentGrid.y);
-                for (int y = startY; y <= endY; y++)
+                // 线性（水平或垂直）拖动
+                int deltaX = currentGrid.x - _originPos.x;
+                int deltaY = currentGrid.y - _originPos.y;
+
+                if (Mathf.Abs(deltaX) >= Mathf.Abs(deltaY))
+                    currentGrid.y = _originPos.y;     // 锁 y，水平线
+                else
+                    currentGrid.x = _originPos.x;     // 锁 x，垂直线
+
+                if (_originPos.x == currentGrid.x)
                 {
-                    if (_blueprints.ContainsKey(new Vector2Int(_originPos.x, y)))
+                    int startY = Mathf.Min(_originPos.y, currentGrid.y);
+                    int endY   = Mathf.Max(_originPos.y, currentGrid.y);
+                    for (int y = startY; y <= endY; y++)
                     {
-                        // 如果已经存在该位置的 sign，则跳过
-                        continue;
+                        Vector2Int cell = new Vector2Int(_originPos.x, y);
+                        Vector2    bpPos = new Vector2(cell.x + 0.5f, cell.y + 0.5f);
+                        var bpGo = Instantiate(blueprintPrefab, bpPos, Quaternion.identity);
+                        var bp = bpGo.GetComponent<Blueprint>();
+                        var sprite = Resources.Load<Sprite>(_currentBuildingConfig.icon);
+                        // bp.Place(cell, sprite);
+                        _signs[cell] = bpGo;
                     }
-                    Vector2 pos = new Vector2(_originPos.x + 0.5f, y + 0.5f);
-                    var blueprintGo = Instantiate(blueprintPrefab, pos, Quaternion.identity);
-                    var blueprint = blueprintGo.GetComponent<Blueprint>();
-
-                    var paths = _currentBuildingConfig.icon.Split(',');
-                    var icons = Resources.LoadAll<Sprite>(paths[0]);
-
-                    foreach (var icon in icons)
+                }
+                else
+                {
+                    int startX = Mathf.Min(_originPos.x, currentGrid.x);
+                    int endX   = Mathf.Max(_originPos.x, currentGrid.x);
+                    for (int x = startX; x <= endX; x++)
                     {
-                        if (icon.name == paths[1])
-                        {
-                            blueprint.Place(new Vector2Int(_originPos.x, y), icon);
-                            break;
-                        }
+                        Vector2Int cell = new Vector2Int(x, _originPos.y);
+                        Vector2    bpPos = new Vector2(cell.x + 0.5f, cell.y + 0.5f);
+                        var bpGo = Instantiate(blueprintPrefab, bpPos, Quaternion.identity);
+                        var bp = bpGo.GetComponent<Blueprint>();
+                        var sprite = Resources.Load<Sprite>(_currentBuildingConfig.icon);
+                        // bp.Place(cell, sprite);
+                        _blueprints[cell] = bpGo;
                     }
-
-                    _blueprints.Add(new Vector2Int(_originPos.x, y), blueprintGo);
                 }
             }
-            else if (_originPos.y == currentGrid.y)
+            else if (CurrentBuildMode == BuildMode.Area)
             {
-                // 水平方向：遍历x轴
+                // 矩形范围拖动
                 int startX = Mathf.Min(_originPos.x, currentGrid.x);
-                int endX = Mathf.Max(_originPos.x, currentGrid.x);
+                int endX   = Mathf.Max(_originPos.x, currentGrid.x);
+                int startY = Mathf.Min(_originPos.y, currentGrid.y);
+                int endY   = Mathf.Max(_originPos.y, currentGrid.y);
+
                 for (int x = startX; x <= endX; x++)
                 {
-                    if (_blueprints.ContainsKey(new Vector2Int(x, _originPos.y)))
+                    for (int y = startY; y <= endY; y++)
                     {
-                        // 如果已经存在该位置的 sign，则跳过
-                        continue;
+                        Vector2Int cell = new Vector2Int(x, y);
+                        Vector2    bpPos = new Vector2(cell.x + 0.5f, cell.y + 0.5f);
+                        var bpGo = Instantiate(blueprintPrefab, bpPos, Quaternion.identity);
+                        var bp = bpGo.GetComponent<Blueprint>();
+                        var sprite = Resources.Load<Sprite>(_currentBuildingConfig.icon);
+                        // bp.Place(cell, sprite);
+                        _signs[cell] = bpGo;
                     }
-                    Vector2 pos = new Vector2(x + 0.5f, _originPos.y + 0.5f);
-                    var blueprintGo = Instantiate(blueprintPrefab, pos, Quaternion.identity);
-                    var blueprint = blueprintGo.GetComponent<Blueprint>();
-                    var paths = _currentBuildingConfig.icon.Split(',');
-                    var icons = Resources.LoadAll<Sprite>(paths[0]);
-                    foreach (var icon in icons)
-                    {
-                        if (icon.name == paths[1])
-                        {
-                            blueprint.Place(new Vector2Int(x, _originPos.y), icon);
-                            break;
-                        }
-                    }
-                    _blueprints.Add(new Vector2Int(x, _originPos.y), blueprintGo);
                 }
             }
         }
 
-        // 鼠标左键抬起后结束建造（也可在此时确认最终建造逻辑）
         if (Input.GetMouseButtonUp(0))
         {
             _isBuilding = false;
-            // 此时 _signs 中保存的就是最终预览的所有 sign，
-            // 你可以根据需要将其转为正式建筑或进一步处理。
+            // TODO: 在此将 _blueprints 中的预览转换为正式建筑
         }
-    }
-
-    internal void CraftBuilding(BuildingConfig config)
-    {
-        _currentBuildingConfig = config;
-        Log.LogInfo("BuildingManager", $"Crafting {config.name}");
     }
 }

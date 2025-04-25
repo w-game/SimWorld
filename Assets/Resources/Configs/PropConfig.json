@@ -15,7 +15,17 @@
             "description": "A piece of wood.",
             "type": "Resource",
             "icon": "Textures/Wood",
+            "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 5
+        },
+        {
+            "id": "PROP_MATERIAL_PLANK",
+            "name": "Plank",
+            "description": "A wooden plank.",
+            "type": "Resource",
+            "icon": "Textures/Wood",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10
         },
         {
             "id": "PROP_FOOD_CARROT",

@@ -28,7 +28,10 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            var farmItem = new FarmItem(_house, GameManager.I.ConfigReader.GetConfig<ResourceConfig>("BUILDING_FARM"), _targetPos + new Vector3(0.5f, 0.5f, 0));
+            var farmItem = GameItemManager.CreateGameItem<FarmItem>(
+                GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FARM"),
+                _targetPos + new Vector3(0.5f, 0.5f, 0),
+                GameItemType.Static);
             farmItem.ShowUI();
         }
     }
@@ -55,7 +58,10 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            PlantItem plantItem = new PlantItem(GameManager.I.ConfigReader.GetConfig<ResourceConfig>(_seedId), _targetPos + new Vector3(0.5f, 0.5f, 0));
+            PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
+                GameManager.I.ConfigReader.GetConfig<ResourceConfig>(_seedId),
+                _targetPos + new Vector3(0.5f, 0.5f, 0),
+                GameItemType.Static);
             plantItem.ShowUI();
         }
     }
@@ -83,7 +89,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _plantItem);
+            CheckMoveToArroundPos(agent, _plantItem.Pos);
         }
 
         protected override void DoExecute(Agent agent)
@@ -91,10 +97,10 @@ namespace AI
             Log.LogInfo("PlantActions", "PrecedingActions count: " + PrecedingActions.Count);
             if (_plantItem is TreeItem treeItem)
             {
-                foreach (var dropItem in treeItem.ConvtertConfig<ResourceConfig>().dropItems)
+                foreach (var dropItem in treeItem.Config.dropItems)
                 {
                     var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
-                    var propItem = new PropGameItem(confg, dropItem.count);
+                    var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, dropItem.count);
                     propItem.ShowUI();
                 }
             }
@@ -103,7 +109,7 @@ namespace AI
 
             }
 
-            _plantItem.Destroy();
+            GameItemManager.DestroyGameItem(_plantItem);
         }
     }
 
@@ -126,7 +132,7 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            var propItem = new PropGameItem(GameManager.I.ConfigReader.GetConfig<PropConfig>("Water"), 1);
+            var propItem = GameItemManager.CreateGameItem<PropGameItem>(GameManager.I.ConfigReader.GetConfig<PropConfig>("Water"), agent.Pos, GameItemType.Static, 1);
             propItem.ShowUI();
             agent.Brain.RegisterAction(new TakeItemInHand(propItem), true);
         }

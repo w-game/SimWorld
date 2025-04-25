@@ -33,7 +33,12 @@ namespace Citizens
         private FamilyMember CreateMember(Family family, House house, bool sex, int age)
         {
             var member = new FamilyMember(sex, age);
-            var agent = new Agent(GameManager.I.ActionSystem.CreateAIController(), house.RandomPos + new Vector2(0.5f, 0.5f));
+            var agent = GameItemManager.CreateGameItem<Agent>(
+                null,
+                house.RandomPos + new Vector2(0.5f, 0.5f),
+                GameItemType.Dynamic,
+                GameManager.I.ActionSystem.CreateAIController()
+            );
             agent.Init(member);
             family.AddMember(member);
 
@@ -215,6 +220,8 @@ namespace Citizens
         public FamilyMember CreatePlayer()
         {
             var player = new FamilyMember(true, 18);
+            Family family = new Family();
+            family.AddMember(player);
             return player;
         }
 

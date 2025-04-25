@@ -1,19 +1,52 @@
 using System.Collections.Generic;
+using System.Drawing;
 using AI;
 using Map;
+using UI.Models;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace GameItem
 {
-    public class BuildingItem : StaticGameItem
+    public class BlueprintItem : GameItemBase<BuildingConfig>
+    {
+        public override bool Walkable => true;
+
+        public BlueprintItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+            Size = new Vector2Int(config.size[0], config.size[1]);
+        }
+
+        public override void ShowUI()
+        {
+            base.ShowUI();
+            UI.SetRenderer(Config.icon, 0.4f);
+        }
+
+        public override List<IAction> ItemActions()
+        {
+            return new List<IAction>
+            {
+                new CraftBuildingItemAction(this)
+            };
+        }
+
+        public void Place()
+        {
+
+        }
+    }
+
+    public class BuildingItem : GameItemBase<BuildingConfig>
     {
         public override bool Walkable => true;
         public House House { get; private set; }
         public List<TileBase> Tiles { get; protected set; }
-        public BuildingItem(House house, ConfigBase config, Vector3 pos) : base(config, pos)
+        public BuildingItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos)
         {
             House = house;
+
+            Size = new Vector2Int(config.size[0], config.size[1]);
         }
 
         public override void ShowUI()
@@ -33,21 +66,24 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                new ViewHouseDetailsAction(House)
+                new SystemAction("View Room Details", a =>
+                {
+                    var model = IModel.GetModel<PopHouseDetailsModel>(House);
+                    model.ShowUI();
+                })
             };
         }
 
         public override void Destroy()
         {
             MapManager.I.SetMapTile(Pos, MapLayer.Building, null);
-            GameManager.I.GameItemManager.UnregisterGameItem(this);
         }
     }
 
     public class WallItem : BuildingItem
     {
         public override bool Walkable => false;
-        public WallItem(House house, ConfigBase config, Vector3 pos) : base(house, config, pos)
+        public WallItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.wallTiles;
         }
@@ -55,7 +91,7 @@ namespace GameItem
 
     public class FloorItem : BuildingItem
     {
-        public FloorItem(House house, ConfigBase config, Vector3 pos) : base(house, config, pos)
+        public FloorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.floorTiles;
         }
@@ -63,7 +99,7 @@ namespace GameItem
 
     public class DoorItem : BuildingItem
     {
-        public DoorItem(House house, ConfigBase config, Vector3 pos) : base(house, config, pos)
+        public DoorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = new List<TileBase> { MapManager.I.doorTile };
         }
@@ -71,15 +107,15 @@ namespace GameItem
 
     public class CommercialItem : BuildingItem
     {
-        public CommercialItem(House house, ConfigBase config, Vector3 pos) : base(house, config, pos)
+        public CommercialItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.floorTiles;
         }
     }
-    
+
     public class FarmItem : BuildingItem
     {
-        public FarmItem(House house, ConfigBase config, Vector3 pos) : base(house, config, pos)
+        public FarmItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.farmTiles;
         }

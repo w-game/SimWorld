@@ -318,14 +318,14 @@ public class MapManager : MonoSingleton<MapManager>
         return true;
     }
 
-    public Vector3 GetItemArroundPos(Agent agent, IGameItem item)
+    public Vector3 GetItemArroundPos(Agent agent, Vector3 targetPos)
     {
         var arroundPos = new List<Vector3>()
         {
-            item.Pos + new Vector3(1, 0, 0),
-            item.Pos + new Vector3(-1, 0, 0),
-            item.Pos + new Vector3(0, 1, 0),
-            item.Pos + new Vector3(0, -1, 0),
+            targetPos + new Vector3(1, 0, 0),
+            targetPos + new Vector3(-1, 0, 0),
+            targetPos + new Vector3(0, 1, 0),
+            targetPos + new Vector3(0, -1, 0),
         };
         
         var walkablePos = new List<Vector3>();

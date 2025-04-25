@@ -23,7 +23,6 @@ public class BuildingElement : MonoBehaviour
     {
         // Handle the button click event here
         Debug.Log("Building Element selected");
-        BuildingManager.I.CraftBuilding(_config);
-        BuildingManager.I.CraftMode = true;
+        BuildingManager.I.StartBuildingMode(_config);
     }
 }

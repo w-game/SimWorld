@@ -10,6 +10,7 @@ namespace Citizens
         public List<House> Houses { get; } = new List<House>(); // 房屋
 
         public List<FamilyMember> Members { get; } = new List<FamilyMember>();
+        public List<IAction> Actions { get; } = new List<IAction>(); // 行为
 
         public void AddMember(FamilyMember member)
         {

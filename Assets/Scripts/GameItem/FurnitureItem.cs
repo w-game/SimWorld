@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using AI;
 using Citizens;
+using UI.Models;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace GameItem
 {
-    public class FurnitureItem : StaticGameItem
+    public class FurnitureItem : GameItemBase<BuildingConfig>
     {
         public override bool Walkable => true;
         public Agent Using { get; internal set; }
 
-        public FurnitureItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public FurnitureItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
+            Size = new Vector2Int(config.size[0], config.size[1]);
         }
 
         public override List<IAction> ItemActions()
@@ -28,8 +30,7 @@ namespace GameItem
         {
             base.ShowUI();
 
-            var resourceConfig = ConvtertConfig<BuildingConfig>();
-            UI.SetRenderer(resourceConfig.icon);
+            UI.SetRenderer(Config.icon);
         }
 
         public override void Update()
@@ -40,14 +41,14 @@ namespace GameItem
 
     public class ToiletItem : FurnitureItem
     {
-        public ToiletItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public ToiletItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
     }
 
     public class BedItem : FurnitureItem
     {
-        public BedItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public BedItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
 
@@ -65,7 +66,7 @@ namespace GameItem
         public override bool Walkable => false;
         public List<ChairItem> Chairs { get; } = new List<ChairItem>();
 
-        public TableItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public TableItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
 
@@ -85,7 +86,7 @@ namespace GameItem
     public class ChairItem : FurnitureItem
     {
         public event UnityAction<Agent> OnSit;
-        public ChairItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public ChairItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
 
@@ -107,7 +108,7 @@ namespace GameItem
     public class WellItem : FurnitureItem
     {
         public override bool Walkable => false;
-        public WellItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public WellItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
 
@@ -123,7 +124,7 @@ namespace GameItem
     public class StoveItem : FurnitureItem
     {
         public override bool Walkable => false;
-        public StoveItem(ConfigBase config, Vector3 pos = default) : base(config, pos)
+        public StoveItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
 
@@ -131,6 +132,50 @@ namespace GameItem
         public void SetUsing(Agent agent)
         {
             Using = agent;
+        }
+    }
+
+    public class WorkbenchItem : FurnitureItem
+    {
+        public override bool Walkable => false;
+        public WorkbenchItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+
+        }
+
+        protected override List<IAction> ActionsOnClick()
+        {
+            return new List<IAction>()
+            {
+                new SystemAction("Craft Item", a =>
+                {
+                    List<Vector3> availablePos = new List<Vector3>();
+                    Vector3 centerPos = Vector3.zero;
+                    foreach (var pos in OccupiedPositions)
+                    {
+                        var checkPos = new Vector3(pos.x, pos.y - 1) + Pos;
+                        var items = GameManager.I.GameItemManager.GetItemsAtPos(checkPos);
+                        if (items.Count == 0)
+                        {
+                            availablePos.Add(checkPos);
+                            centerPos += checkPos;
+                        }
+                    }
+
+                    if (availablePos.Count != 0)
+                    {
+                        centerPos /= availablePos.Count;
+
+                        var action = new CheckMoveToTarget(centerPos);
+                        action.OnCompleted += (a) =>
+                        {
+                            var model = new PopCraftModel();
+                            model.ShowUI();
+                        };
+                        GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
+                    }
+                })
+            };
         }
     }
 }

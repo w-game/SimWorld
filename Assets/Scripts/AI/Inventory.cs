@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using GameItem;
+using UnityEngine.Events;
 
 public class PropItem
 {
@@ -11,12 +12,19 @@ public class PropItem
         Config = config;
         Quantity = quantity;
     }
+
+    public void AddQuantity(int quantity)
+    {
+        Quantity += quantity;
+    }
 }
 
 public class Inventory
 {
     public List<PropItem> Items { get; private set; } = new List<PropItem>();
     public int MaxSize { get; private set; } = 20;
+
+    public event UnityAction OnInventoryChanged;
 
     public Inventory(int maxSize)
     {
@@ -27,8 +35,17 @@ public class Inventory
     {
         if (Items.Count < MaxSize)
         {
-            PropItem propItem = new PropItem(item.ConvtertConfig<PropConfig>(), item.Count);
+            var propItem = Items.Find(i => i.Config == item.Config);
+            if (propItem != null && propItem.Quantity + item.Count <= item.Config.maxStackSize)
+            {
+                propItem.AddQuantity(item.Count);
+                OnInventoryChanged?.Invoke();
+                return true;
+            }
+    
+            propItem = new PropItem(item.Config, item.Count);
             Items.Add(propItem);
+            OnInventoryChanged?.Invoke();
             return true;
         }
 

@@ -7,8 +7,8 @@ using UnityEngine;
 
 public class GameItemManager
 {
-    private Dictionary<Vector2Int, List<IGameItem>> _staticGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
-    private List<IGameItem> _dynamicGameItems = new List<IGameItem>();
+    private static Dictionary<Vector2Int, List<IGameItem>> _staticGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
+    private static List<IGameItem> _dynamicGameItems = new List<IGameItem>();
 
     public static event Func<Vector3, Vector2Int> ItemPosToMapPosConverter;
 
@@ -20,63 +20,86 @@ public class GameItemManager
         ItemUIPool = new ObjectPool<GameItemUI>(128);
     }
 
-    public void RegisterGameItem(IGameItem gameItem)
+    public static T CreateGameItem<T>(ConfigBase config, Vector3 pos, GameItemType itemType, params object[] otherObjs) where T : class, IGameItem
     {
-        if (gameItem is StaticGameItem staticGameItem)
+        return CreateGameItem<T>(typeof(T), config, pos, itemType, otherObjs);
+    }
+
+    public static T CreateGameItem<T>(Type type, ConfigBase config, Vector3 pos, GameItemType itemType, params object[] otherObjs) where T : class, IGameItem
+    {
+        // Build a single argument list: (config, pos, ...otherObjs)
+        object[] ctorArgs = new object[2 + otherObjs.Length];
+        ctorArgs[0] = config;
+        ctorArgs[1] = pos;
+        Array.Copy(otherObjs, 0, ctorArgs, 2, otherObjs.Length);
+
+        var item = Activator.CreateInstance(type, ctorArgs) as T;
+        item.CalcSize();
+        item.ItemType = itemType;
+        switch (itemType)
         {
-            var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-            if (!_staticGameItems.ContainsKey(mapPos))
-            {
-                _staticGameItems.Add(mapPos, new List<IGameItem>() { gameItem });
-            }
-            else
-            {
-                _staticGameItems[mapPos].Add(gameItem);
-            }
-        } else if (gameItem is DynamicGameItem)
+            case GameItemType.Static:
+                RegisterStaticGameItem(item);
+                break;
+            case GameItemType.Dynamic:
+                RegisterDynamicGameItem(item);
+                break;
+        }
+        return item;
+    }
+
+    public static bool DestroyGameItem(IGameItem gameItem)
+    {
+        gameItem.Destroy();
+        switch (gameItem.ItemType)
         {
-            _dynamicGameItems.Add(gameItem);
+            case GameItemType.Static:
+                UnregisterStaticGameItem(gameItem);
+                break;
+            case GameItemType.Dynamic:
+                UnregisterDynamicGameItem(gameItem);
+                break;
+        }
+        return true;
+    }
+
+    private static void RegisterStaticGameItem(IGameItem gameItem)
+    {
+        foreach (var mapPos in gameItem.OccupiedPositions)
+        {
+            var pos = mapPos + ItemPosToMapPosConverter.Invoke(gameItem.Pos);
+            
+            if (!_staticGameItems.ContainsKey(pos))
+                _staticGameItems[pos] = new List<IGameItem>();
+
+            _staticGameItems[pos].Add(gameItem);
         }
     }
 
-    public void UnregisterGameItem(IGameItem gameItem)
+    private static void RegisterDynamicGameItem(IGameItem gameItem)
     {
-        if (gameItem is DynamicGameItem)
-        {
-            _dynamicGameItems.Remove(gameItem);
-            return;
-        }
-
-        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-        if (_staticGameItems.ContainsKey(mapPos))
-        {
-            _staticGameItems[mapPos].Remove(gameItem);
-            if (_staticGameItems[mapPos].Count == 0)
-            {
-                _staticGameItems.Remove(mapPos);
-            }
-        }
+        _dynamicGameItems.Add(gameItem);
     }
 
-    public void RemoveGameItemOnMap(IGameItem gameItem)
+    private static void UnregisterStaticGameItem(IGameItem gameItem)
     {
-        if (gameItem is DynamicGameItem)
+        foreach (var mapPos in gameItem.OccupiedPositions)
         {
-            return;
-        }
-        
-        var mapPos = ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-        if (_staticGameItems.ContainsKey(mapPos))
-        {
-            if (_staticGameItems[mapPos].Contains(gameItem))
+            var pos = mapPos + ItemPosToMapPosConverter.Invoke(gameItem.Pos);
+            if (_staticGameItems.ContainsKey(pos))
             {
-                _staticGameItems[mapPos].Remove(gameItem);
-                if (_staticGameItems[mapPos].Count == 0)
+                _staticGameItems[pos].Remove(gameItem);
+                if (_staticGameItems[pos].Count == 0)
                 {
-                    _staticGameItems.Remove(mapPos);
+                    _staticGameItems.Remove(pos);
                 }
             }
         }
+    }
+
+    private static void UnregisterDynamicGameItem(IGameItem gameItem)
+    {
+        _dynamicGameItems.Remove(gameItem);
     }
 
     public List<IGameItem> GetItemsAtPos(Vector3 pos)
@@ -91,7 +114,8 @@ public class GameItemManager
 
     public void Update()
     {
-        foreach (var gameItem in new List<IGameItem>(_staticGameItems.Values.SelectMany(x => x)))
+        var uniqueStaticItems = new HashSet<IGameItem>(_staticGameItems.Values.SelectMany(x => x));
+        foreach (var gameItem in uniqueStaticItems)
         {
             gameItem.DoUpdate();
             var dis = Vector2.Distance(gameItem.Pos, GameManager.I.CurrentAgent.Pos);
@@ -132,10 +156,32 @@ public class GameItemManager
 
     internal Agent CreateNPC(Vector2Int pos, FamilyMember member)
     {
-        var agent = new Agent(GameManager.I.ActionSystem.CreateAIController(), pos + new Vector2(0.5f, 0.5f));
+        var agent = CreateGameItem<Agent>(
+            null,
+            pos + new Vector2(0.5f, 0.5f),
+            GameItemType.Dynamic,
+            GameManager.I.ActionSystem.CreateAIController()
+        );
         agent.Init(member);
         agent.ShowUI();
 
         return agent;
+    }
+
+    public void SwitchType(IGameItem sign, GameItemType type)
+    {
+        sign.ItemType = type;
+        switch (type)
+        {
+            
+            case GameItemType.Static:
+                UnregisterDynamicGameItem(sign);
+                RegisterStaticGameItem(sign);
+                break;
+            case GameItemType.Dynamic:
+                UnregisterStaticGameItem(sign);
+                RegisterDynamicGameItem(sign);
+                break;
+        }
     }
 }

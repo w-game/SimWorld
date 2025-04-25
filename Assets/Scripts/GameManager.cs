@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AI;
 using Citizens;
+using GameItem;
 using UI.Views;
 using UnityEngine;
 
@@ -47,13 +48,18 @@ public class GameManager : MonoBehaviour
                     29 * 60 * 60,
                     new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
                     new SleepAction(CurrentAgent.State.Sleep),
-                    CurrentAgent.Ciziten));
+                    CurrentAgent.Citizen));
         }
     }
 
     private void CreatePlayer()
     {
-        CurrentAgent = new Agent(ActionSystem.CreateAIController(), Vector2.zero);
+        CurrentAgent = GameItemManager.CreateGameItem<Agent>(
+            null,
+            Vector3.zero,
+            GameItemType.Dynamic,
+            ActionSystem.CreateAIController()
+        );
         CurrentAgent.Init(CitizenManager.CreatePlayer());
         CurrentAgent.ShowUI();
         UIManager.I.cinemachineCamera.Follow = CurrentAgent.UI.transform;
