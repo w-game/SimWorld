@@ -123,7 +123,7 @@ public class Inventory
 
     internal PropItem GetItemHasEffect(string type)
     {
-        var propItems = Items.FindAll(i => i.Config.effects.Any(e => e.type == type));
+        var propItems = Items.FindAll(i => i.Config.effects != null && i.Config.effects.Any(e => e.type == type));
         if (propItems.Count == 0)
         {
             return null;

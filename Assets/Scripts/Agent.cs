@@ -200,40 +200,37 @@ namespace Citizens
         private void Move()
         {
             if (GameManager.I.CurrentAgent != this) return;
-            if (_paths == null || _paths.Count == 0)
+            float moveX = Input.GetAxis("Horizontal");
+            float moveY = Input.GetAxis("Vertical");
+            if (moveX == 0 && moveY == 0)
             {
-                float moveX = Input.GetAxis("Horizontal");
-                float moveY = Input.GetAxis("Vertical");
-                if (moveX == 0 && moveY == 0)
-                {
-                    return;
-                }
-                Vector2 target = PlayerController.Rb.position + new Vector2(moveX, moveY) * MoveSpeed * Time.fixedDeltaTime;
+                return;
+            }
+            Vector2 target = PlayerController.Rb.position + new Vector2(moveX, moveY) * MoveSpeed * Time.fixedDeltaTime;
 
+            if (!MapManager.I.IsWalkable(target))
+            {
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(target);
+
+                foreach (var item in items)
+                {
+                    Debug.Log($"Found item: {item}, walkable: {item.Walkable}, {new Vector2(moveX, moveY)}");
+                }
+
+                target = PlayerController.Rb.position + new Vector2(moveX, 0) * MoveSpeed * Time.fixedDeltaTime;
                 if (!MapManager.I.IsWalkable(target))
                 {
-                    var items = GameManager.I.GameItemManager.GetItemsAtPos(target);
-
-                    foreach (var item in items)
-                    {
-                        Debug.Log($"Found item: {item}, walkable: {item.Walkable}, {new Vector2(moveX, moveY)}");
-                    }
-
-                    target = PlayerController.Rb.position + new Vector2(moveX, 0) * MoveSpeed * Time.fixedDeltaTime;
+                    target = PlayerController.Rb.position + new Vector2(0, moveY) * MoveSpeed * Time.fixedDeltaTime;
                     if (!MapManager.I.IsWalkable(target))
                     {
-                        target = PlayerController.Rb.position + new Vector2(0, moveY) * MoveSpeed * Time.fixedDeltaTime;
-                        if (!MapManager.I.IsWalkable(target))
-                        {
-                            return;
-                        }
+                        return;
                     }
                 }
-
-                _pos = target;
-
-                PlayerController.MoveTo(target);
             }
+
+            _pos = target;
+
+            PlayerController.MoveTo(target);
         }
 
         public void Init(FamilyMember citizen)

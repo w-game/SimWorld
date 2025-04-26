@@ -193,24 +193,31 @@ namespace AI
 
         public Vector3 TargetPos { get; private set; }
 
+        private bool _isMoving = false;
+
         public CheckMoveToTarget(Agent agent, Vector3 targetPos, string targetName = "")
         {
             var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
             TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
             ActionName = targetName;
-
-            agent.MoveToTarget(TargetPos);
-            Condition = () => agent.CheckArriveTargetPos();
+            Condition = () => _isMoving && agent.CheckArriveTargetPos();
         }
 
         public override void OnRegister(Agent agent)
         {
-            
         }
 
         protected override void DoExecute(Agent agent)
         {
-            agent.MoveToTarget();
+            if (_isMoving)
+            {
+                agent.MoveToTarget();
+            }
+            else
+            {
+                _isMoving = true;
+                agent.MoveToTarget(TargetPos);
+            }
         }
     }
 
@@ -327,6 +334,13 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
+            if (agent.Citizen.Family.Houses.Count == 0)
+            {
+                Debug.LogError("没有房子，无法上厕所");
+                Done = true;
+                return;
+            }
+
             if (agent.Citizen.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
             {
                 _toiletItem = toiletItem;
