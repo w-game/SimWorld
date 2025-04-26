@@ -244,32 +244,100 @@ namespace Map
                     }
                     else if (Blocks[i, j] == BlockType.Forest)
                     {
-                        if (noiseValue > 0.7f * frequency)
+                        // --- Forest generation (more natural clusters) ---
+                        //
+                        // 思路：
+                        // 1. 使用 Perlin 值控制宏观密度（高值→密林，低值→稀疏）。
+                        // 2. 在同一密度区块内，加入一层局部随机，避免完全规则的条纹分布。
+                        // 3. 让树木与灌木、草地、岩石按概率共存，形成更真实的混合生态。
+                        //
+                        // 额外随机因子（0‑1）
+                        float localRand = (float)_chunkRand.NextDouble();
+
+                        if (noiseValue > 0.8f * frequency)            // 【密林核心】大量树 + 少量灌木
                         {
-                            GameItemManager.CreateGameItem<TreeItem>(
-                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
-                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                GameItemType.Static
-                            );
+                            if (localRand < 0.75f)                    // 75% 树
+                            {
+                                GameItemManager.CreateGameItem<TreeItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static
+                                );
+                            }
+                            else if (localRand < 0.85f)                                      // 10% 灌木
+                            {
+                                GameItemManager.CreateGameItem<PlantItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_BUSH"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static,
+                                    false
+                                );
+                            }
                         }
-                        else if (noiseValue > 0.5f * frequency)
+                        else if (noiseValue > 0.6f * frequency)       // 【稀疏树林】树与灌木各半
                         {
-                            
+                            if (localRand < 0.5f)                     // 50% 树
+                            {
+                                GameItemManager.CreateGameItem<TreeItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static
+                                );
+                            }
+                            else if (localRand < 0.55f)                                     // 5% 灌木
+                            {
+                                GameItemManager.CreateGameItem<PlantItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_BUSH"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static,
+                                    false
+                                );
+                            }
                         }
-                        else if (noiseValue > 0.3f * frequency)
+                        else if (noiseValue > 0.45f * frequency)      // 【林缘与空地】少量草 + 零星岩石
                         {
+                            if (localRand < 0.3f)                     // 30% 草
+                            {
+                                GameItemManager.CreateGameItem<PlantItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static,
+                                    false
+                                );
+                            }
+                            else if (localRand < 0.35f)               // 5% 岩石
+                            {
+                                GameItemManager.CreateGameItem<SmallRockItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("RESOURCE_ROCK"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static
+                                );
+                            }
+                            // 其余 55% 留空，形成空地
                         }
-                        else if (noiseValue > 0.1f * frequency)
+                        else if (noiseValue > 0.3f * frequency)       // 【过渡带】以草地为主，偶有灌木
                         {
-                            GameItemManager.CreateGameItem<PlantItem>(
-                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
-                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                GameItemType.Static
-                            );
+                            if (localRand < 0.6f)                     // 60% 草
+                            {
+                                GameItemManager.CreateGameItem<PlantItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static,
+                                    false
+                                );
+                            }
+                            else if (localRand < 0.65f)               // 5% 灌木
+                            {
+                                GameItemManager.CreateGameItem<PlantItem>(
+                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_BUSH"),
+                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
+                                    GameItemType.Static,
+                                    false
+                                );
+                            }
+                            // 其余 25% 留空
                         }
-                        else
-                        {
-                        }
+                        // noiseValue ≤ 0.3f * frequency 时留为空地，形成自然空隙
                     }
                     else if (Blocks[i, j] == BlockType.Mountain)
                     {

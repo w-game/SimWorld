@@ -57,7 +57,7 @@ namespace GameItem
         public abstract bool Walkable { get; }
         public virtual List<Vector2Int> OccupiedPositions { get; } = new List<Vector2Int>();
 
-        public GameItemBase(T config, Vector3 pos = default)
+        public GameItemBase(T config, Vector3 pos)
         {
             ConfigBase = config;
             Pos = pos;

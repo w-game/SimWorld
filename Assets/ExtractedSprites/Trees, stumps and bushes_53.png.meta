@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 27451acd3bef34995a78eb495c2e6fe1
+guid: 6c9d52be0cf6e4002bd5c635a7bd6ab2
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8479594511397954701
-    second: Mushrooms, Flowers, Stones_13_0
+      213: -7554990913411716593
+    second: Trees, stumps and bushes_53_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Mushrooms, Flowers, Stones_13_0
+      name: Trees, stumps and bushes_53_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 16
-        height: 14
+        x: 3
+        y: 2
+        width: 10
+        height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 37bd5ccf7bd625a80800000000000000
-      internalID: -8479594511397954701
+      spriteID: f0a6ac4dac7472790800000000000000
+      internalID: -7554990913411716593
       vertices: []
       indices: 
       edges: []

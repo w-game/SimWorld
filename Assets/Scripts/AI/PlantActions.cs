@@ -95,18 +95,11 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             Log.LogInfo("PlantActions", "PrecedingActions count: " + PrecedingActions.Count);
-            if (_plantItem is TreeItem treeItem)
+            foreach (var dropItem in _plantItem.Config.dropItems)
             {
-                foreach (var dropItem in treeItem.Config.dropItems)
-                {
-                    var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
-                    var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, dropItem.count);
-                    propItem.ShowUI();
-                }
-            }
-            else
-            {
-
+                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, dropItem.count);
+                propItem.ShowUI();
             }
 
             GameItemManager.DestroyGameItem(_plantItem);

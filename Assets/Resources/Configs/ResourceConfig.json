@@ -56,6 +56,42 @@
                     "count": 1
                 }
             ]
+        },
+        {
+            "id": "PLANT_BUSH",
+            "name": "Bush",
+            "description": "A bush.",
+            "type": "Material",
+            "icon": "Textures/Bush_0",
+            "prefab": "Prefabs/GameItems/PlantItem",
+            "stages": [
+                "Textures/Bush_0",
+                "Textures/Bush_1"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_MATERIAL_BRANCH",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "RESOURCE_ROCK",
+            "name": "Rock",
+            "description": "A rock.",
+            "type": "Material",
+            "icon": "Textures/Rock_0",
+            "prefab": "Prefabs/GameItems/ResourceItem",
+            "stages": [
+                "Textures/Rock_0",
+                "Textures/Rock_1"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_MATERIAL_STONE",
+                    "count": 2
+                }
+            ]
         }
     ]
 }
