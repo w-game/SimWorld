@@ -27,7 +27,7 @@ namespace GameItem
             UI.SetRenderer(Config.icon);
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
             {
@@ -87,7 +87,7 @@ namespace GameItem
             }
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
             {

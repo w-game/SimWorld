@@ -23,7 +23,7 @@ namespace GameItem
             UI.SetRenderer(Config.icon, 0.4f);
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>
             {
@@ -54,7 +54,7 @@ namespace GameItem
             MapManager.I.SetMapTile(Pos, MapLayer.Building, Tiles);
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>
             {

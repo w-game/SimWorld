@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GameItem;
 using Unity.VisualScripting;
 using UnityEngine.Events;
@@ -118,5 +119,32 @@ public class Inventory
             totalAmount += propItem.Quantity;
         }
         return totalAmount;
+    }
+
+    internal PropItem GetItemHasEffect(string type)
+    {
+        var propItems = Items.FindAll(i => i.Config.effects.Any(e => e.type == type));
+        if (propItems.Count == 0)
+        {
+            return null;
+        }
+
+        float maxValue = float.MinValue;
+        PropItem item = null;
+        foreach (var propItem in propItems)
+        {
+            foreach (var effect in propItem.Config.effects)
+            {
+                if (effect.type == type)
+                {
+                    if (effect.value > maxValue)
+                    {
+                        maxValue = effect.value;
+                        item = propItem;
+                    }
+                }
+            }
+        }
+        return item;
     }
 }

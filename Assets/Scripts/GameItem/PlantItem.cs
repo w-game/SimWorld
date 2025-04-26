@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AI;
+using Citizens;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -102,7 +103,7 @@ namespace GameItem
             }
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             List<IAction> actions = new List<IAction>();
             if (GrowthStage == PlantStage.Harvestable)
@@ -119,9 +120,17 @@ namespace GameItem
                 actions.Add(new WeedingAction(this));
             }
 
-            actions.Add(new RemovePlantAction(this));
+            if (agent is Agent a)
+            {
+                actions.Add(CheckRemovePlant(a));
+            }
 
             return actions;
+        }
+
+        protected virtual RemovePlantAction CheckRemovePlant(Agent agent) 
+        {
+            return new RemovePlantAction(this);
         }
 
         internal void Weeding()
@@ -138,6 +147,22 @@ namespace GameItem
         public override bool Walkable => false;
         public TreeItem(ResourceConfig config, Vector3 pos) : base(config, pos, false)
         {
+        }
+    
+        protected override RemovePlantAction CheckRemovePlant(Agent agent) 
+        {
+            // 这里可以添加树木的特殊逻辑
+            var axe = agent.Bag.GetItemHasEffect("Chop");
+
+            if (axe != null)
+            {
+                return new RemovePlantAction(this, "Chop the tree");
+            } else {
+                // 如果没有斧头，则返回一个默认的 RemovePlantAction
+                var removeAction = new RemovePlantAction(this, "Remove Tree (Need Axe)");
+                removeAction.Enable = false;
+                return removeAction;
+            }
         }
     }
 }

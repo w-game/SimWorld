@@ -43,6 +43,14 @@ public class ConfigList<T>
 public class PropConfig : ConfigBase
 {
     public int maxStackSize;
+    public PropEffectConfig[] effects;
+}
+
+[Serializable]
+public class PropEffectConfig
+{
+    public string type;
+    public float value;
 }
 
 [Serializable]

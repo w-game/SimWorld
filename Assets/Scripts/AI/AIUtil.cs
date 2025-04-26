@@ -11,7 +11,7 @@ public class Behavior
         var actions = new List<IAction>();
         foreach (var item in items)
         {
-            actions.AddRange(item.ItemActions());
+            actions.AddRange(item.ItemActions(agent));
         }
 
         return actions;

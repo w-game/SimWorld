@@ -50,7 +50,7 @@ namespace AI
                 var isWalkable = true;
                 foreach (var item in items)
                 {
-                    actions.AddRange(item.ClickItemActions());
+                    actions.AddRange(item.ClickItemActions(GameManager.I.CurrentAgent));
                     if (!item.Walkable)
                     {
                         isWalkable = false;

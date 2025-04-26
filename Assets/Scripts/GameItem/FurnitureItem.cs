@@ -18,7 +18,7 @@ namespace GameItem
             Size = new Vector2Int(config.size[0], config.size[1]);
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
             {
@@ -75,7 +75,7 @@ namespace GameItem
             return Chairs[0];
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
             {
@@ -90,7 +90,7 @@ namespace GameItem
         {
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
             {
@@ -112,7 +112,7 @@ namespace GameItem
         {
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
             {

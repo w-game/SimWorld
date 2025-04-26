@@ -56,11 +56,13 @@ public class ActionMenu : MonoBehaviour
         {
             GameObject button = Instantiate(actionButtonPrefab, panel.transform);
             button.transform.GetComponentInChildren<TextMeshProUGUI>().text = action.ActionName;
-            button.GetComponent<Button>().onClick.AddListener(() =>
+            var btn = button.GetComponent<Button>();
+            btn.onClick.AddListener(() =>
             {
                 HideEventMenu();
                 GameManager.I.ActionSystem.RegisterAction(action);
             });
+            btn.interactable = action.Enable;
             _actionButtons.Add(button);
         }
     }

@@ -61,7 +61,13 @@
             "type": "Tool",
             "icon": "Textures/Axe",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 1
+            "maxStackSize": 1,
+            "effects": [
+                {
+                    "type": "Chop",
+                    "value": 1
+                }
+            ]
         }
     ]
 }

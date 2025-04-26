@@ -26,8 +26,8 @@ namespace GameItem
         void HideUI();
         void Destroy();
         void DoUpdate();
-        List<IAction> ItemActions();
-        List<IAction> ClickItemActions();
+        List<IAction> ItemActions(IGameItem agent);
+        List<IAction> ClickItemActions(Agent agent);
         List<Vector2Int> OccupiedPositions { get; }
     }
 
@@ -114,10 +114,10 @@ namespace GameItem
             HideUI();
         }
 
-        public abstract List<IAction> ItemActions();
-        public List<IAction> ClickItemActions()
+        public abstract List<IAction> ItemActions(IGameItem agent);
+        public List<IAction> ClickItemActions(Agent agent)
         {
-            var actions = ItemActions();
+            var actions = ItemActions(agent);
             actions.AddRange(ActionsOnClick());
             return actions;
         }

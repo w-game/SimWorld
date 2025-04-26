@@ -38,6 +38,8 @@ namespace AI
         // 后续行为，当前行为完成后替换主行为
         public IAction NextAction { get; set; }
 
+        public bool Enable { get; set; } = true;
+
         protected void OnActionFailedEvent()
         {
             OnActionFailed?.Invoke(this);

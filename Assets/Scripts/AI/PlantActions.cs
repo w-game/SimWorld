@@ -64,15 +64,15 @@ namespace AI
     {
         private PlantItem _plantItem;
 
-        public RemovePlantAction(PlantItem plantItem) : base(50f)
+        public RemovePlantAction(PlantItem plantItem, string actionName = "Remove the plant") : base(50f)
         {
             if (plantItem is TreeItem)
             {
-                ActionName = "Chop the tree";
+                ActionName = actionName;
             }
             else
             {
-                ActionName = "Remove the plant";
+                ActionName = actionName;
             }
 
             _plantItem = plantItem;

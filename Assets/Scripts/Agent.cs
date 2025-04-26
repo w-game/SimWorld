@@ -395,7 +395,7 @@ namespace Citizens
 
         }
 
-        public override List<IAction> ItemActions()
+        public override List<IAction> ItemActions(IGameItem agent)
         {
             throw new NotImplementedException();
         }
