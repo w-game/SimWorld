@@ -1474,6 +1474,7 @@ MonoBehaviour:
   descriptionText: {fileID: 0}
   materialsParent: {fileID: 4811133268825747584}
   materialItemPrefab: {fileID: 281303455309937516, guid: da018555be2df4e5c982fba38c4888a1, type: 3}
+  craftButton: {fileID: 3793622499143523352}
 --- !u!1 &8553156490794948383
 GameObject:
   m_ObjectHideFlags: 0

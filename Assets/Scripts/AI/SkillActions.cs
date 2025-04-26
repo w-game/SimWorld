@@ -2,10 +2,11 @@ using Citizens;
 
 namespace AI
 {
-    public class ReadBookAction : ActionBase
+    public class ReadBookAction : MultiTimesActionBase
     {
-        public override float ProgressSpeed { get => throw new System.NotImplementedException(); protected set => throw new System.NotImplementedException(); }
-        public override int ProgressTimes { get => throw new System.NotImplementedException(); protected set => throw new System.NotImplementedException(); }
+        public ReadBookAction() : base(5, 10f)
+        {
+        }
 
         public override void OnRegister(Agent agent)
         {

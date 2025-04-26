@@ -191,7 +191,7 @@ namespace AI
                     var prob = UnityEngine.Random.Range(0, 100);
                     if (prob < 50)
                     {
-                        RegisterAction(new IdleAction(null), true);
+                        // RegisterAction(new IdleAction(null), true);
                     }
                     else if (prob < 90)
                     {

@@ -62,7 +62,7 @@ namespace AI
 
                 if (isWalkable && blockType != BlockType.Ocean)
                 {
-                    actions.Add(new CheckMoveToTarget(mousePos));
+                    actions.Add(new CheckMoveToTarget(GameManager.I.CurrentAgent, mousePos));
                 }
 
                 OnMouseClick?.Invoke(actions, Input.mousePosition);
@@ -91,12 +91,6 @@ namespace AI
 
         internal void RegisterAction(IAction action)
         {
-            if (action is SystemAction)
-            {
-                action.OnRegister(GameManager.I.CurrentAgent);
-                action.Execute(GameManager.I.CurrentAgent);
-                return;
-            }
             GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
         }
     }

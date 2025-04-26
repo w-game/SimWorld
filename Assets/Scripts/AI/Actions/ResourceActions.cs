@@ -5,11 +5,8 @@ using GameItem;
 namespace AI
 {
     
-    public class CollectResourceAction : ActionBase
+    public class CollectResourceAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 1f;
-        public override int ProgressTimes { get; protected set; } = -1;
-
         private ResourceItem _item;
 
         public CollectResourceAction(ResourceItem item)

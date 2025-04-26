@@ -5,25 +5,21 @@ using UnityEngine;
 
 namespace AI
 {
-    public class IdleAction : ActionBase
+    public class IdleAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 2f;
-        public override int ProgressTimes { get; protected set; } = -1;
-
         private IGameItem _item;
 
         public IdleAction(IGameItem item)
         {
             ActionName = "Idle";
             _item = item;
-            ProgressTimes = -1;
         }
 
         public override void OnRegister(Agent agent)
         {
             if (_item != null)
             {
-                PrecedingActions.Add(new CheckMoveToTarget(_item.Pos));
+                PrecedingActions.Add(new CheckMoveToTarget(agent, _item.Pos));
             }
             else
             {
@@ -41,7 +37,7 @@ namespace AI
                             {
                                 if (item.House == buildingItem.House)
                                 {
-                                    PrecedingActions.Add(new CheckMoveToTarget(targetPos));
+                                    PrecedingActions.Add(new CheckMoveToTarget(agent, targetPos));
                                     break;
                                 }
                             }
@@ -54,16 +50,12 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            ProgressTimes = 1;
-            ProgressSpeed = Random.Range(0.5f, 3f);
         }
     }
 
-    public class HangingAction : ActionBase
+    public class HangingAction : SingleActionBase
     {
 
-        public override float ProgressSpeed { get; protected set; } = 100f;
-        public override int ProgressTimes { get; protected set; } = -1;
         private Vector3 _targetPos;
 
         public HangingAction(Vector3 targetPos)
@@ -74,7 +66,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
         }
 
         protected override void DoExecute(Agent agent)

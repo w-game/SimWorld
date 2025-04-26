@@ -3,15 +3,13 @@ using UnityEngine.Events;
 
 namespace AI
 {
-    public class SystemAction : ActionBase
+    public class SystemAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 0;
-        public override int ProgressTimes { get; protected set; } = -1;
-
-        public SystemAction(string actionName, UnityAction<IAction> action)
+        public SystemAction(string actionName, UnityAction<IAction> callback, IAction action = null) : base(999f)
         {
             ActionName = actionName;
-            OnCompleted += (a) => action?.Invoke(a);
+            OnCompleted += (a) => callback?.Invoke(a);
+            PrecedingActions.Add(action);
         }
 
         public override void OnRegister(Agent agent)
@@ -21,7 +19,6 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            Done = true;
         }
     }
 }

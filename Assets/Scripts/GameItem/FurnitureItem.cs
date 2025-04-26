@@ -145,36 +145,40 @@ namespace GameItem
 
         protected override List<IAction> ActionsOnClick()
         {
+            
+            List<Vector3> availablePos = new List<Vector3>();
+            Vector3 centerPos = Vector3.zero;
+            foreach (var pos in OccupiedPositions)
+            {
+                var checkPos = new Vector3(pos.x, pos.y - 1) + Pos;
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(checkPos);
+                if (items.Count == 0)
+                {
+                    availablePos.Add(checkPos);
+                    centerPos += checkPos;
+                }
+            }
+
+            if (availablePos.Count != 0)
+            {
+                centerPos /= availablePos.Count;
+                var action = new CheckMoveToTarget(GameManager.I.CurrentAgent, centerPos);
+                var system = new SystemAction("Craft Item", a =>
+                {
+                    var model = new PopCraftModel();
+                    model.ShowUI();
+                }, action);
+
+                return new List<IAction>()
+                {
+                    system
+                };
+            }
+
+
             return new List<IAction>()
             {
-                new SystemAction("Craft Item", a =>
-                {
-                    List<Vector3> availablePos = new List<Vector3>();
-                    Vector3 centerPos = Vector3.zero;
-                    foreach (var pos in OccupiedPositions)
-                    {
-                        var checkPos = new Vector3(pos.x, pos.y - 1) + Pos;
-                        var items = GameManager.I.GameItemManager.GetItemsAtPos(checkPos);
-                        if (items.Count == 0)
-                        {
-                            availablePos.Add(checkPos);
-                            centerPos += checkPos;
-                        }
-                    }
-
-                    if (availablePos.Count != 0)
-                    {
-                        centerPos /= availablePos.Count;
-
-                        var action = new CheckMoveToTarget(centerPos);
-                        action.OnCompleted += (a) =>
-                        {
-                            var model = new PopCraftModel();
-                            model.ShowUI();
-                        };
-                        GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
-                    }
-                })
+                
             };
         }
     }

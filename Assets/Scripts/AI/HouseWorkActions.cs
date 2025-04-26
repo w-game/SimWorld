@@ -6,15 +6,12 @@ using UnityEngine;
 
 namespace AI
 {
-    public class CookAction : ActionBase
+    public class CookAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 10f;
-        public override int ProgressTimes { get; protected set; } = 3;
-
         private StoveItem _stoveItem;
         private PropConfig _config;
 
-        public CookAction(StoveItem stoveItem = null, PropConfig config = null)
+        public CookAction(StoveItem stoveItem = null, PropConfig config = null) : base(10f)
         {
             _stoveItem = stoveItem;
             _config = config;
@@ -27,7 +24,7 @@ namespace AI
                 _stoveItem = stoveItem;
             }
 
-            PrecedingActions.Add(new CheckMoveToTarget(_stoveItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _stoveItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -47,11 +44,8 @@ namespace AI
         }
     }
 
-    public class OrderFromRestaurant : ActionBase
+    public class OrderFromRestaurant : ConditionActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 10f;
-        public override int ProgressTimes { get; protected set; } = 3;
-
         private RestaurantProperty _restaurantProperty;
 
         public OrderFromRestaurant(RestaurantProperty restaurantProperty = null)
@@ -79,7 +73,7 @@ namespace AI
             if (availableCommercialPos.Count > 0)
             {
                 var pos = availableCommercialPos[Random.Range(0, availableCommercialPos.Count)];
-                var moveToTarget = new CheckMoveToTarget(new Vector3(pos.x, pos.y), "Restaurant");
+                var moveToTarget = new CheckMoveToTarget(agent, new Vector3(pos.x, pos.y), "Restaurant");
                 PrecedingActions.Add(moveToTarget);
                 PrecedingActions.Add(new WaitForAvailableSitAction(_restaurantProperty));
             }

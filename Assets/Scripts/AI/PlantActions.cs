@@ -6,15 +6,12 @@ using UnityEngine;
 
 namespace AI
 {
-    public class HoeAction : ActionBase
+    public class HoeAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 20;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private Vector3 _targetPos;
         private House _house;
 
-        public HoeAction(Vector3 targetPos, House house)
+        public HoeAction(Vector3 targetPos, House house) : base(20f)
         {
             _targetPos = targetPos;
             _house = house;
@@ -23,7 +20,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -36,15 +33,12 @@ namespace AI
         }
     }
 
-    public class PlantAction : ActionBase
+    public class PlantAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 50;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private Vector3 _targetPos;
         private string _seedId;
 
-        public PlantAction(Vector3 targetPos, string seedId)
+        public PlantAction(Vector3 targetPos, string seedId) : base(50f)
         {
             _targetPos = targetPos;
             ActionName = "Plant the seed";
@@ -53,7 +47,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -66,14 +60,11 @@ namespace AI
         }
     }
 
-    public class RemovePlantAction : ActionBase
+    public class RemovePlantAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 50;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private PlantItem _plantItem;
 
-        public RemovePlantAction(PlantItem plantItem)
+        public RemovePlantAction(PlantItem plantItem) : base(50f)
         {
             if (plantItem is TreeItem)
             {
@@ -106,13 +97,10 @@ namespace AI
         }
     }
 
-    public class DrawWaterAction : ActionBase
+    public class DrawWaterAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 20;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private WellItem _wellItem;
-        public DrawWaterAction(WellItem wellItem)
+        public DrawWaterAction(WellItem wellItem) : base(20f)
         {
             ActionName = "Draw water";
             _wellItem = wellItem;
@@ -120,7 +108,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_wellItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _wellItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -133,15 +121,12 @@ namespace AI
 
     // 驱虫、除草、
     // 施肥、浇水、收获
-    public class WaterPlantAction : ActionBase
+    public class WaterPlantAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 50;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private Vector3 _targetPos;
         private PropGameItem _waterItem;
 
-        public WaterPlantAction(Vector3 _targetPos)
+        public WaterPlantAction(Vector3 _targetPos) : base(50f)
         {
             ActionName = "Water the plant";
             this._targetPos = _targetPos;
@@ -155,7 +140,7 @@ namespace AI
             {
                 PrecedingActions.Add(new DrawWaterAction(agent.GetGameItem<WellItem>()));
             }
-            PrecedingActions.Add(new CheckMoveToTarget(_targetPos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -177,14 +162,11 @@ namespace AI
         }
     }
 
-    public class HarvestAction : ActionBase
+    public class HarvestAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 50;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private PlantItem _plantItem;
 
-        public HarvestAction(PlantItem plantItem)
+        public HarvestAction(PlantItem plantItem) : base(50f)
         {
             ActionName = "Harvest the plant";
             _plantItem = plantItem;
@@ -192,7 +174,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _plantItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -201,14 +183,11 @@ namespace AI
         }
     }
 
-    public class WeedingAction : ActionBase
+    public class WeedingAction : SingleActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 10;
-        public override int ProgressTimes { get; protected set; } = 1;
-
         private PlantItem _plantItem;
 
-        public WeedingAction(PlantItem plantItem)
+        public WeedingAction(PlantItem plantItem) : base(25f)
         {
             ActionName = "Weeding";
             _plantItem = plantItem;
@@ -216,7 +195,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(_plantItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _plantItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)

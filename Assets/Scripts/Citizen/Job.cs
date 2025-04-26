@@ -8,41 +8,32 @@ using UnityEngine.Events;
 
 namespace Citizens
 {
-    public class WorkAction : ActionBase
+    public class WorkAction : ConditionActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 0;
-        public override int ProgressTimes { get; protected set; } = -1;
-
         private Job _job;
         private JobUnit _curJobUnit;
         public WorkAction(Job job)
         {
             _job = job;
             ActionName = "Work";
+
+            Condition = () => GameManager.I.GameTime.CurrentTime < _job.WorkTime[0] || GameManager.I.GameTime.CurrentTime > _job.WorkTime[1];
         }
 
         protected override void DoExecute(Agent agent)
         {
-            // 判断工作时间
-            if (GameManager.I.GameTime.CurrentTime > _job.WorkTime[0] && GameManager.I.GameTime.CurrentTime < _job.WorkTime[1])
+            if (_curJobUnit != null)
             {
-                if (_curJobUnit != null)
-                {
-                    _curJobUnit.Done = true;
-                }
-                _curJobUnit = _job.CheckJobUnit();
-                if (_curJobUnit == null)
-                {
-                    return;
-                }
-                Debug.Log($"开始工作：{_curJobUnit.Action.ActionName}");
-                _curJobUnit.Action.OnRegister(agent);
-                PrecedingActions.Add(_curJobUnit.Action);
+                _curJobUnit.Done = true;
             }
-            else
+            _curJobUnit = _job.CheckJobUnit();
+            if (_curJobUnit == null)
             {
-                Done = true;
+                return;
             }
+            Debug.Log($"开始工作：{_curJobUnit.Action.ActionName}");
+            _curJobUnit.Action.OnRegister(agent);
+            PrecedingActions.Add(_curJobUnit.Action);
         }
 
         public override void OnRegister(Agent agent)

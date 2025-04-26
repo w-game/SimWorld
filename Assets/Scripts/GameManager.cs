@@ -76,4 +76,14 @@ public class GameManager : MonoBehaviour
 
         return obj;
     }
+
+    public void CraftItem(CraftConfig config)
+    {
+        foreach (var item in config.materials)
+        {
+            CurrentAgent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(item.id), item.amount);
+        }
+
+        CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>(config.id), 1);
+    }
 }

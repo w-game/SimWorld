@@ -9,7 +9,6 @@ namespace AI
     {
         List<IAction> PrecedingActions { get; }
         string ActionName { get; }
-        float ProgressSpeed { get; }
         bool Done { get; set; }
         bool CanBeInterrupted { get; }
         IAction NextAction { get; }

@@ -4,13 +4,10 @@ using Citizens;
 using GameItem;
 using UnityEngine;
 
-public class CraftBuildingItemAction : ActionBase
+public class CraftBuildingItemAction : SingleActionBase
 {
-    public override float ProgressSpeed { get; protected set; } = 1;
-    public override int ProgressTimes { get; protected set; } = 1;
-
     private BlueprintItem _item;
-    public CraftBuildingItemAction(BlueprintItem item)
+    public CraftBuildingItemAction(BlueprintItem item) : base(1f)
     {
         ActionName = "Craft Building";
         _item = item;
@@ -43,13 +40,10 @@ public class CraftBuildingItemAction : ActionBase
     }
 }
 
-public class RemoveBuildingItemAction : ActionBase
+public class RemoveBuildingItemAction : SingleActionBase
 {
-    public override float ProgressSpeed { get; protected set; } = 1;
-    public override int ProgressTimes { get; protected set; } = 1;
-
     private BuildingItem _item;
-    public RemoveBuildingItemAction(BuildingItem item)
+    public RemoveBuildingItemAction(BuildingItem item) : base(1f)
     {
         ActionName = "Remove Building";
         _item = item;

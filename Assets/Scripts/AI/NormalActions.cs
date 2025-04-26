@@ -14,12 +14,7 @@ namespace AI
         // 用于保存该动作执行前必须完成的动作
         public List<IAction> PrecedingActions { get; } = new List<IAction>();
         public virtual string ActionName { get; protected set; }
-        public abstract float ProgressSpeed { get; protected set; }
-        public abstract int ProgressTimes { get; protected set; }
         public virtual bool CanBeInterrupted => true;
-
-        protected float CurProgress;
-        protected int CurProgressStage = 0;
 
         private bool _done = false;
 
@@ -66,43 +61,7 @@ namespace AI
         }
 
         // 执行流程：先执行前置动作，前置动作完成后再执行本动作
-        public void Execute(Agent agent)
-        {
-            ExecutePrecedingActions(agent);
-
-            if (PrecedingActions.Count == 0 && !Done)
-            {
-                if (ProgressTimes != -1)
-                {
-                    if (CurProgress <= 100f)
-                    {
-                        float previousProgress = CurProgress;
-                        CurProgress += GameManager.I.GameTime.DeltaTime * ProgressSpeed / 2f;
-                        OnActionProgress?.Invoke(CurProgress);
-
-                        // Debug.Log($"{ActionName} - {CurProgress}, {ProgressTimes}, {ProgressSpeed}");
-
-                        int previousThreshold = (int)(previousProgress / (100f / ProgressTimes));
-                        int currentThreshold = (int)(CurProgress / (100f / ProgressTimes));
-                        int thresholdsPassed = currentThreshold - previousThreshold;
-
-                        if (thresholdsPassed > 0)
-                        {
-                            CurProgressStage++;
-                            DoExecute(agent);
-                        }
-                    }
-                    else
-                    {
-                        Done = true;
-                    }
-                }
-                else
-                {
-                    DoExecute(agent);
-                }
-            }
-        }
+        public virtual void Execute(Agent agent) { }
 
         // 具体动作逻辑，由子类实现
         protected abstract void DoExecute(Agent agent);
@@ -126,7 +85,7 @@ namespace AI
             var pos = MapManager.I.GetItemArroundPos(agent, targetPos);
             if (pos != Vector3.zero)
             {
-                PrecedingActions.Add(new CheckMoveToTarget(pos));
+                PrecedingActions.Add(new CheckMoveToTarget(agent, pos));
             }
             else
             {
@@ -135,20 +94,14 @@ namespace AI
         }
     }
 
-    // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
-    public class CheckMoveToTarget : ActionBase
+    public abstract class SingleActionBase : ActionBase
     {
-        public override string ActionName => "Move to here";
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; } = -1;
+        private float _actionSpeed = 100f;
+        private float _curProgress;
 
-        private bool _isMoving = false;
-        public Vector3 TargetPos { get; private set; }
-        public CheckMoveToTarget(Vector3 targetPos, string targetName = "")
+        public SingleActionBase(float actionSpeed = 100f)
         {
-            var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
-            TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
-            ActionName = targetName;
+            _actionSpeed = actionSpeed;
         }
 
         public override void OnRegister(Agent agent)
@@ -156,38 +109,118 @@ namespace AI
             // 不需要额外配置
         }
 
-        protected override void DoExecute(Agent agent)
+        public override void Execute(Agent agent)
         {
-            if (!_isMoving)
-            {
-                // 如果正在移动，则不执行任何操作
-                if (!agent.MoveToTarget(TargetPos))
-                {
-                    Done = true;
-                }
-                _isMoving = true;
-                return;
-            }
+            ExecutePrecedingActions(agent);
 
-            // 检查是否到达目标位置
-            if (Vector3.Distance(agent.Pos, TargetPos) < 0.1f)
+            if (Done || PrecedingActions.Count != 0) return;
+
+            if (_curProgress < 100f)
             {
+                _curProgress += GameManager.I.GameTime.DeltaTime * _actionSpeed;
+            }
+            else
+            {
+                DoExecute(agent);
                 Done = true;
             }
         }
     }
 
+    public abstract class MultiTimesActionBase : ActionBase
+    {
+        private int _totalTimes;
+        private float _progressSpeed;
+        private int _curTimes = 0;
+        private float _curProgress;
+
+        public MultiTimesActionBase(int totalTimes, float progressSpeed)
+        {
+            _totalTimes = totalTimes;
+            _progressSpeed = progressSpeed;
+        }
+
+        public override void Execute(Agent agent)
+        {
+            ExecutePrecedingActions(agent);
+
+            if (Done || PrecedingActions.Count != 0) return;
+
+            if (_curProgress < 100f)
+            {
+                _curProgress += GameManager.I.GameTime.DeltaTime * _progressSpeed / 2f;
+            }
+            else
+            {
+                DoExecute(agent);
+                _curProgress = 0f;
+                _curTimes++;
+                if (_curTimes >= _totalTimes)
+                {
+                    Done = true;
+                }
+            }
+        }
+    }
+
+    public abstract class ConditionActionBase : ActionBase
+    {
+        protected Func<bool> Condition { get; set; }
+
+        public override void Execute(Agent agent)
+        {
+            ExecutePrecedingActions(agent);
+
+            if (Done || PrecedingActions.Count != 0) return;
+
+            if (Condition != null && Condition.Invoke())
+            {
+                Done = true;
+            }
+            else
+            {
+                DoExecute(agent);
+            }
+        }
+    }
+
+    // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
+    public class CheckMoveToTarget : ConditionActionBase
+    {
+        public override string ActionName => "Move to here";
+
+        public Vector3 TargetPos { get; private set; }
+
+        public CheckMoveToTarget(Agent agent, Vector3 targetPos, string targetName = "")
+        {
+            var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
+            TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
+            ActionName = targetName;
+
+            agent.MoveToTarget(TargetPos);
+            Condition = () => agent.CheckArriveTargetPos();
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            agent.MoveToTarget();
+        }
+    }
+
     // 将物品放到指定位置（例如将食物放到嘴边或桌上）
-    public class PutItemToTarget : ActionBase
+    public class PutItemToTarget : SingleActionBase
     {
         public PutItemToTarget(PropGameItem item, IGameItem targetItem)
         {
-            throw new System.NotImplementedException();
+            
         }
 
         public override string ActionName => "将物品放置到目标点";
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
 
         public override void OnRegister(Agent agent)
         {
@@ -203,29 +236,21 @@ namespace AI
     }
 
     // 捡取物品动作（例如从地上捡取食物）
-    public class TakeItemInHand : ActionBase
+    public class TakeItemInHand : SingleActionBase
     {
         public override string ActionName => "捡取物品";
-        public override float ProgressSpeed { get; protected set; } = 50;
-        public override int ProgressTimes { get; protected set; } = 1;
         private PropGameItem _item;
 
-        public TakeItemInHand(PropGameItem item)
+        public TakeItemInHand(PropGameItem item) : base(50f)
         {
             _item = item;
         }
 
         public override void OnRegister(Agent agent)
         {
-            // 此处可加入检查或移动动作
-            if (Vector3.Distance(agent.Pos, _item.Pos) < 0.001f)
+            if (Vector3.Distance(agent.Pos, _item.Pos) > 0.5f)
             {
-                // TODO Do Take
-                Done = true;
-            }
-            else
-            {
-                PrecedingActions.Add(new CheckMoveToTarget(_item.Pos));
+                PrecedingActions.Add(new CheckMoveToTarget(agent, _item.Pos));
             }
         }
 
@@ -233,8 +258,6 @@ namespace AI
         {
             Debug.Log("执行捡取物品动作");
             agent.TakeItemInHand(_item);
-            // 模拟捡取物品的逻辑
-            Done = true;
         }
     }
 
@@ -248,14 +271,11 @@ namespace AI
     }
 
     // 示例行为：吃东西，根据饥饿值决定效用
-    public class EatAction : NormalAction
+    public class EatAction : MultiTimesActionBase
     {
-        public override float ProgressSpeed { get; protected set; } = 5f;
-        public override int ProgressTimes { get; protected set; }
-
         private FoodItem _foodItem;
 
-        public EatAction(FoodItem foodItem, State state) : base(state)
+        public EatAction(FoodItem foodItem, State state) : base(foodItem.MaxFoodTimes, 5f)
         {
             _foodItem = foodItem;
             ActionName = "Eat";
@@ -275,8 +295,6 @@ namespace AI
                 var putItemToTarget = new PutItemToTarget(_foodItem, tableItem);
                 PrecedingActions.Add(putItemToTarget);
             }
-
-            ProgressTimes = _foodItem.MaxFoodTimes;
         }
 
         protected override void DoExecute(Agent agent)
@@ -295,14 +313,12 @@ namespace AI
     }
 
     // 示例行为：上厕所，需要先移动到厕所位置
-    public class ToiletAction : NormalAction
+    public class ToiletAction : SingleActionBase
     {
         public override string ActionName => "上厕所";
-        public override float ProgressSpeed { get; protected set; } = 20f;
-        public override int ProgressTimes { get; protected set; } = 1;
 
         private ToiletItem _toiletItem;
-        public ToiletAction(State state) : base(state)
+        public ToiletAction(State state) : base(10f)
         {
             ActionName = "Toilet";
         }
@@ -312,7 +328,7 @@ namespace AI
             if (agent.Citizen.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
             {
                 _toiletItem = toiletItem;
-                PrecedingActions.Add(new CheckMoveToTarget(_toiletItem.Pos));
+                PrecedingActions.Add(new CheckMoveToTarget(agent, _toiletItem.Pos));
             }
         }
 
@@ -341,8 +357,6 @@ namespace AI
     public class SocialAction : NormalAction
     {
         public override string ActionName => "社交";
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
 
         public SocialAction(State state) : base(state)
         {
@@ -366,8 +380,6 @@ namespace AI
     public class PlayAction : NormalAction
     {
         public override string ActionName => "游玩";
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
 
         public PlayAction(State state) : base(state)
         {
@@ -388,15 +400,13 @@ namespace AI
     }
 
     // 示例行为：洗澡，需要先移动到浴室位置
-    public class BathAction : NormalAction
+    public class BathAction : SingleActionBase
     {
         public override string ActionName => "洗澡";
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
 
         private IGameItem _bath;
 
-        public BathAction(IGameItem bath, State state) : base(state)
+        public BathAction(IGameItem bath, State state)
         {
             _bath = bath;
             ActionName = "洗澡";
@@ -405,7 +415,7 @@ namespace AI
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到浴室
-            PrecedingActions.Add(new CheckMoveToTarget(_bath.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _bath.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -416,13 +426,10 @@ namespace AI
         }
     }
 
-    public class SleepAction : NormalAction
+    public class SleepAction : MultiTimesActionBase
     {
-        public override float ProgressSpeed { get => 100f / 8f / 60f / 60f; protected set { } }
-        public override int ProgressTimes { get => 100; protected set { } }
-
         private BedItem _bedItem;
-        public SleepAction(State state, BedItem bedItem = null) : base(state)
+        public SleepAction(State state, BedItem bedItem = null) : base(100, 5f)
         {
             ActionName = "Sleep";
             _bedItem = bedItem;
@@ -446,7 +453,7 @@ namespace AI
                 }
             }
 
-            PrecedingActions.Add(new CheckMoveToTarget(_bedItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _bedItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -455,11 +462,8 @@ namespace AI
         }
     }
 
-    public class BackHome : ActionBase
+    public class BackHome : ConditionActionBase
     {
-        public override float ProgressSpeed { get; protected set; }
-        public override int ProgressTimes { get; protected set; }
-
         public BackHome()
         {
             ActionName = "Back Home";
@@ -477,12 +481,9 @@ namespace AI
         }
     }
 
-    public class SitAction : ActionBase
+    public class SitAction : SingleActionBase
     {
         public override string ActionName => "Sit";
-        public override float ProgressSpeed { get; protected set; } = 5f;
-        public override int ProgressTimes { get; protected set; } = -1;
-
         private ChairItem _chairItem;
 
         public SitAction(ChairItem chairItem)
@@ -493,26 +494,23 @@ namespace AI
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到椅子位置
-            PrecedingActions.Add(new CheckMoveToTarget(_chairItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _chairItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行坐下动作");
             _chairItem.SitDown(agent);
-            Done = true;
         }
     }
 
-    public class ReadAction : ActionBase
+    public class ReadAction : MultiTimesActionBase
     {
         public override string ActionName => "Read";
-        public override float ProgressSpeed { get; protected set; } = 5f;
-        public override int ProgressTimes { get; protected set; } = 1;
 
         private BookItem _bookItem;
 
-        public ReadAction(BookItem bookItem)
+        public ReadAction(BookItem bookItem) : base(5, 10f)
         {
             _bookItem = bookItem;
         }
@@ -520,7 +518,7 @@ namespace AI
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到书本位置
-            PrecedingActions.Add(new CheckMoveToTarget(_bookItem.Pos));
+            PrecedingActions.Add(new CheckMoveToTarget(agent, _bookItem.Pos));
             PrecedingActions.Add(new TakeItemInHand(_bookItem));
             PrecedingActions.Add(new SitAction(agent.GetGameItem<ChairItem>()));
         }
@@ -528,7 +526,6 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行阅读动作");
-            Done = true;
         }
     }
 }

@@ -121,7 +121,7 @@ namespace Citizens
         public AgentState State { get; private set; }
         public Personality Personality { get; private set; }
         public AIController Brain { get; private set; } // 大脑
-        private List<Vector2Int> _paths;
+        public List<Vector2Int> _paths;
         public Dictionary<int, List<Schedule>> Schedules = new Dictionary<int, List<Schedule>>()
         {
             { 1, new List<Schedule>() },
@@ -199,63 +199,40 @@ namespace Citizens
 
         private void Move()
         {
+            if (GameManager.I.CurrentAgent != this) return;
             if (_paths == null || _paths.Count == 0)
             {
-                if (GameManager.I.CurrentAgent == this)
+                float moveX = Input.GetAxis("Horizontal");
+                float moveY = Input.GetAxis("Vertical");
+                if (moveX == 0 && moveY == 0)
                 {
-                    // float moveX = Input.GetAxis("Horizontal");
-                    // float moveY = Input.GetAxis("Vertical");
-                    // Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
-                    // var targetPos = Pos + movement;
-                    // MapManager.I.TryGetBuildingItem(targetPos, out var buildingItem);
-                    // if (buildingItem is WallItem)
-                    // {
-                    //     return;
-                    // }
-                    // Pos += movement;
+                    return;
+                }
+                Vector2 target = PlayerController.Rb.position + new Vector2(moveX, moveY) * MoveSpeed * Time.fixedDeltaTime;
 
+                if (!MapManager.I.IsWalkable(target))
+                {
+                    var items = GameManager.I.GameItemManager.GetItemsAtPos(target);
 
-                    float moveX = Input.GetAxis("Horizontal");
-                    float moveY = Input.GetAxis("Vertical");
-                    if (moveX == 0 && moveY == 0)
+                    foreach (var item in items)
                     {
-                        return;
+                        Debug.Log($"Found item: {item}, walkable: {item.Walkable}, {new Vector2(moveX, moveY)}");
                     }
-                    Vector2 target = PlayerController.Rb.position + new Vector2(moveX, moveY) * MoveSpeed * Time.fixedDeltaTime;
-                    
+
+                    target = PlayerController.Rb.position + new Vector2(moveX, 0) * MoveSpeed * Time.fixedDeltaTime;
                     if (!MapManager.I.IsWalkable(target))
                     {
-                        var items = GameManager.I.GameItemManager.GetItemsAtPos(target);
-
-                        foreach (var item in items)
-                        {
-                            Debug.Log($"Found item: {item}, walkable: {item.Walkable}, {new Vector2(moveX, moveY)}");
-                        }
-
-                        target = PlayerController.Rb.position + new Vector2(moveX, 0) * MoveSpeed * Time.fixedDeltaTime;
+                        target = PlayerController.Rb.position + new Vector2(0, moveY) * MoveSpeed * Time.fixedDeltaTime;
                         if (!MapManager.I.IsWalkable(target))
                         {
-                            target = PlayerController.Rb.position + new Vector2(0, moveY) * MoveSpeed * Time.fixedDeltaTime;
-                            if (!MapManager.I.IsWalkable(target))
-                            {
-                                return;
-                            }
+                            return;
                         }
                     }
-
-                    _pos = target;
-
-                    PlayerController.MoveTo(target);
                 }
-                return;
-            }
 
-            var targetPosition = new Vector3(_paths[0].x + 0.5f, _paths[0].y + 0.5f);
-            Pos = Vector3.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
+                _pos = target;
 
-            if (Vector3.Distance(Pos, targetPosition) < 0.1f)
-            {
-                _paths.RemoveAt(0);
+                PlayerController.MoveTo(target);
             }
         }
 
@@ -267,12 +244,9 @@ namespace Citizens
             Bag = new Inventory(16);
         }
 
-        public bool MoveToTarget(Vector2 pos)
+        public void MoveToTarget(Vector2 pos)
         {
-            if (!MapManager.I.IsWalkable(pos))
-            {
-                return false;
-            }
+            if (!MapManager.I.IsWalkable(pos)) return;
 
             var cellPos = MapManager.I.WorldPosToCellPos(Pos);
             var targetCellPos = MapManager.I.WorldPosToCellPos(pos);
@@ -280,8 +254,23 @@ namespace Citizens
             {
                 return MapManager.I.IsWalkable(new Vector3(pos.x, pos.y));
             });
+        }
 
-            return _paths != null && _paths.Count > 0;
+        public void MoveToTarget()
+        {
+            if (_paths == null || _paths.Count == 0) return;
+            var targetPosition = new Vector3(_paths[0].x + 0.5f, _paths[0].y + 0.5f);
+            Pos = Vector3.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
+
+            if (Vector3.Distance(Pos, targetPosition) < 0.1f)
+            {
+                _paths.RemoveAt(0);
+            }
+        }
+
+        public bool CheckArriveTargetPos()
+        {
+            return _paths == null || _paths.Count == 0;
         }
 
         private FoodItem GetFoodItem()
