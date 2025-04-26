@@ -34,18 +34,25 @@ public class Inventory
 
     public bool AddItem(PropGameItem item)
     {
-        if (Items.Count < MaxSize)
+        var propItems = Items.FindAll(i => i.Config == item.Config);
+        if (propItems.Count > 0)
         {
-            var propItem = Items.Find(i => i.Config == item.Config);
-            if (propItem != null && propItem.Quantity + item.Count <= item.Config.maxStackSize)
+            foreach (var propItem in propItems)
             {
+                if (propItem.Quantity + item.Count > item.Config.maxStackSize)
+                {
+                    continue;
+                }
                 propItem.AddQuantity(item.Count);
                 OnInventoryChanged?.Invoke();
                 return true;
             }
-    
-            propItem = new PropItem(item.Config, item.Count);
-            Items.Add(propItem);
+        }
+
+        if (Items.Count < MaxSize)
+        {
+            var newItem = new PropItem(item.Config, item.Count);
+            Items.Add(newItem);
             OnInventoryChanged?.Invoke();
             return true;
         }

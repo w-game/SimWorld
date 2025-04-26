@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 [CreateAssetMenu]
-public class MapTile : RuleTile<MapTile.Neighbor> {
+public class OceanTile : RuleTile<WaterTile.Neighbor> {
     public bool customField;
 
     public class Neighbor : RuleTile.TilingRule.Neighbor {
@@ -13,13 +13,9 @@ public class MapTile : RuleTile<MapTile.Neighbor> {
     }
 
     public override bool RuleMatch(int neighbor, TileBase tile) {
-        if (tile is MapTile)
-        {
-            switch (neighbor)
-            {
-                case TilingRuleOutput.Neighbor.This: return true;
-                case TilingRuleOutput.Neighbor.NotThis: return false;
-            }
+        switch (neighbor) {
+            case TilingRuleOutput.Neighbor.This: return true;
+            case TilingRuleOutput.Neighbor.NotThis: return false;
         }
         return base.RuleMatch(neighbor, tile);
     }

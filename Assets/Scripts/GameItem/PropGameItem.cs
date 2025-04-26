@@ -12,6 +12,10 @@ namespace GameItem
         public override bool Walkable => true;
         public int Count { get; private set; } = 1;
 
+        private Tween _tween;
+
+        private bool _isPicking;
+
         public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
             Count = count;
@@ -34,29 +38,33 @@ namespace GameItem
 
         public void BePickedUp(Agent agent)
         {
+            UI.Col.enabled = false; // Disable collider
+
             var originalPos = Pos;
-            Tween tween = DOTween.To(() => Pos,
+            _tween = DOTween.To(() => Pos,
                                      v =>
                                      {
                                          Pos = v;
-                                         if ((Pos - agent.Pos).sqrMagnitude < 0.5f)
+                                         if ((Pos - agent.Pos).sqrMagnitude < 0.5f && _tween != null)
                                          {
                                              if (agent.Bag.AddItem(this))
                                              {
+                                                 DOTween.Kill(_tween);
+                                                 _tween = null;
                                                  GameItemManager.DestroyGameItem(this);
-                                                 DOTween.Kill(this);
                                              }
                                              else
                                              {
-                                                DOTween.Kill(this);
-                                                Pos = originalPos;
+                                                 DOTween.Kill(_tween);
+                                                _tween = null;
+                                                 Pos = originalPos;
                                              }
                                          }
                                      },
                                      agent.Pos,
                                      0.25f)
-                                 .SetEase(Ease.Linear)
-                                 .SetTarget(this);
+                                 .SetEase(Ease.Linear);
+                                //  .SetTarget(this);
         }
     }
 

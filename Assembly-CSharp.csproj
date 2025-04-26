@@ -100,6 +100,7 @@
     <Compile Include="Assets/Scripts/AI/HouseWorkActions.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopBuildingCraft.cs" />
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
+    <Compile Include="Assets/TIles/OceanTile.cs" />
     <Compile Include="Assets/Scripts/UI/ElementBase.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopHouseDetailsModel.cs" />
     <Compile Include="Assets/Scripts/Map/MapJob.cs" />

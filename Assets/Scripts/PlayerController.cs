@@ -1,9 +1,13 @@
+using System;
 using Citizens;
 using GameItem;
 using UnityEngine;
 
 public class PlayerController : GameItemUI
 {
+    [SerializeField] private Rigidbody2D rb;
+
+    public Rigidbody2D Rb => rb;
     private Agent _agent;
 
     public override void Init(IGameItem gameItem)
@@ -24,5 +28,10 @@ public class PlayerController : GameItemUI
                 }
             }
         }
+    }
+
+    public void MoveTo(Vector2 target)
+    {
+        rb.MovePosition(target);
     }
 }

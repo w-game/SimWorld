@@ -5,6 +5,9 @@ using UnityEngine;
 public class GameItemUI : MonoBehaviour, IPoolable
 {
     [SerializeField] private SpriteRenderer sr;
+    [SerializeField] private Collider2D col;
+
+    public Collider2D Col => col;
     public IGameItem GameItem { get; private set; }
 
     public virtual void Init(IGameItem gameItem)
@@ -20,7 +23,8 @@ public class GameItemUI : MonoBehaviour, IPoolable
     
     public virtual void OnGet()
     {
-
+        if (col != null)
+            col.enabled = true;
     }
 
     public virtual void OnRelease()

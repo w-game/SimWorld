@@ -135,6 +135,8 @@ namespace Citizens
 
         private Schedule _currentSchedule;
 
+        public PlayerController PlayerController { get; private set; }
+
         public Agent(ConfigBase config, Vector3 pos, AIController brain) : base(null, pos)
         {
             Brain = brain;
@@ -151,6 +153,7 @@ namespace Citizens
             {
                 UI = GameManager.I.GameItemManager.ItemUIPool.Get("Prefabs/Player", Pos);
                 UI.Init(this);
+                PlayerController = UI as PlayerController;
             }
         }
 
@@ -196,24 +199,57 @@ namespace Citizens
 
         private void Move()
         {
-            if (GameManager.I.CurrentAgent == this)
-            {
-                float moveX = Input.GetAxis("Horizontal");
-                float moveY = Input.GetAxis("Vertical");
-                Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
-                var targetPos = Pos + movement;
-                MapManager.I.TryGetBuildingItem(targetPos, out var buildingItem);
-                if (buildingItem is WallItem)
-                {
-                    return;
-                }
-                Pos += movement;
-            }
-
             if (_paths == null || _paths.Count == 0)
             {
+                if (GameManager.I.CurrentAgent == this)
+                {
+                    // float moveX = Input.GetAxis("Horizontal");
+                    // float moveY = Input.GetAxis("Vertical");
+                    // Vector3 movement = new Vector2(moveX, moveY) * MoveSpeed * Time.deltaTime;
+                    // var targetPos = Pos + movement;
+                    // MapManager.I.TryGetBuildingItem(targetPos, out var buildingItem);
+                    // if (buildingItem is WallItem)
+                    // {
+                    //     return;
+                    // }
+                    // Pos += movement;
+
+
+                    float moveX = Input.GetAxis("Horizontal");
+                    float moveY = Input.GetAxis("Vertical");
+                    if (moveX == 0 && moveY == 0)
+                    {
+                        return;
+                    }
+                    Vector2 target = PlayerController.Rb.position + new Vector2(moveX, moveY) * MoveSpeed * Time.fixedDeltaTime;
+                    
+                    if (!MapManager.I.IsWalkable(target))
+                    {
+                        var items = GameManager.I.GameItemManager.GetItemsAtPos(target);
+
+                        foreach (var item in items)
+                        {
+                            Debug.Log($"Found item: {item}, walkable: {item.Walkable}, {new Vector2(moveX, moveY)}");
+                        }
+
+                        target = PlayerController.Rb.position + new Vector2(moveX, 0) * MoveSpeed * Time.fixedDeltaTime;
+                        if (!MapManager.I.IsWalkable(target))
+                        {
+                            target = PlayerController.Rb.position + new Vector2(0, moveY) * MoveSpeed * Time.fixedDeltaTime;
+                            if (!MapManager.I.IsWalkable(target))
+                            {
+                                return;
+                            }
+                        }
+                    }
+
+                    _pos = target;
+
+                    PlayerController.MoveTo(target);
+                }
                 return;
             }
+
             var targetPosition = new Vector3(_paths[0].x + 0.5f, _paths[0].y + 0.5f);
             Pos = Vector3.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
 

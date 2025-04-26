@@ -64,6 +64,7 @@ namespace UI.Models
             }
             else if (ViewType == ViewType.Popup)
             {
+                View.OnHide();
                 PopStack.Instance.Pop(this);
             }
             else if (ViewType == ViewType.Element)

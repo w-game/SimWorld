@@ -19,11 +19,14 @@ public class MapManager : MonoSingleton<MapManager>
     public CartonMap CartonMap { get; private set; } // 地图对象
 
     public int seed = 123120;             // 随机种子
+    public Tilemap ocean;
     public Tilemap tilemap;
     public Tilemap floorLayer;
 
     public Tilemap layer1;
-    public TileBase tile;
+    public List<TileBase> tiles;
+    public TileBase oceanTile;
+    public TileBase roadTile;
     public List<TileBase> farmTiles;
     public List<TileBase> farmWateredTiles;
     public List<TileBase> wallTiles;
@@ -164,6 +167,10 @@ public class MapManager : MonoSingleton<MapManager>
                 var pos = new Vector2Int(i, j);
                 var blockWorldPos = pos + chunk.WorldPos;
                 tilemap.SetTile(new Vector3Int(blockWorldPos.x, blockWorldPos.y, 0), null);
+                if (pos.x % 4 == 0)
+                {
+                    ocean.SetTile(new Vector3Int(pos.x, pos.y, 0), null);
+                }
             }
         }
     }
@@ -178,36 +185,43 @@ public class MapManager : MonoSingleton<MapManager>
 
     private void SetBlockType(Vector2Int pos, BlockType type)
     {
-        tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tile);
-
-        Color plainColor = new Color(0.6f, 1f, 0.6f);
-        Color oceanColor = new Color(0.4f, 0.6f, 1f);
-        Color roomColor = new Color(1f, 0.6f, 0.6f);
-        Color roadColor = new Color(1f, 1f, 0.5f);
-        Color defaultColor = new Color(0.8f, 0.8f, 0.8f);
-
+        if (pos.x % 4 == 0)
+        {
+            ocean.SetTile(new Vector3Int(pos.x, pos.y, 0), oceanTile);
+        }
         switch (type)
         {
             case BlockType.Plain:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), plainColor);
+                var prob = UnityEngine.Random.Range(0, 100);
+                if (prob < 50)
+                {
+                    tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tiles[0]);
+                }
+                else if (prob < 75)
+                {
+                    tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tiles[1]);
+                } 
+                else if (prob < 100)
+                {
+                    tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tiles[2]);
+                }
                 break;
             case BlockType.Ocean:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), oceanColor);
                 break;
             case BlockType.Road:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), roadColor);
+                tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), roadTile);
                 break;
             case BlockType.Forest:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(0.4f, 1f, 0.4f));
+                tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), RandomTile(tiles));
                 break;
             case BlockType.Mountain:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(0.6f, 0.4f, 0.4f));
+                tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), RandomTile(tiles));
                 break;
             case BlockType.Desert:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), new Color(1f, 1f, 0.4f));
+                tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), RandomTile(tiles));
                 break;
             default:
-                tilemap.SetColor(new Vector3Int(pos.x, pos.y, 0), defaultColor);
+                tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), RandomTile(tiles));
                 break;
         }
     }

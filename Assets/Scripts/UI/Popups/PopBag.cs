@@ -36,7 +36,13 @@ namespace UI.Popups
 
         private void OnItemClicked(ConfigBase config)
         {
-            
+
+        }
+        
+        public override void OnHide()
+        {
+            base.OnHide();
+            GameManager.I.CurrentAgent.Bag.OnInventoryChanged -= UpdateBag;
         }
     }
 }

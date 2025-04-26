@@ -33,7 +33,7 @@ namespace GameItem
 
     public abstract class GameItemBase<T> : IGameItem where T : ConfigBase
     {
-        private Vector3 _pos;
+        protected Vector3 _pos;
         public Vector3 Pos
         {
             get => _pos;
