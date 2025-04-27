@@ -66,11 +66,15 @@ namespace UI.Models
             {
                 View.OnHide();
                 PopStack.Instance.Pop(this);
+
+                OnHideUI();
             }
             else if (ViewType == ViewType.Element)
             {
             }
         }
+
+        protected virtual void OnHideUI() { }
 
         public void SetView(ViewBase view)
         {

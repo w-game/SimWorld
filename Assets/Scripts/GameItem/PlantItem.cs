@@ -54,16 +54,57 @@ namespace GameItem
             UI.SetRenderer(Config.stages[(int)GrowthStage]);
         }
 
-        public PlantItem(ResourceConfig config, Vector3 pos, bool randomStage) : base(config, pos)
+        public PlantItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos)
         {
-            if (randomStage)
+            if (random)
             {
-                GrowthStage = (PlantStage)Random.Range(0, System.Enum.GetValues(typeof(PlantStage)).Length);
+                GrowthStage = (PlantStage)Random.Range(0, config.stages.Length);
             }
             else
             {
                 GrowthStage = PlantStage.Seed;
             }
+        }
+
+        private void OnGrowth()
+        {
+            // 处理植物生长
+            if (GrowthStage == PlantStage.Harvestable)
+            {
+                return;
+            }
+
+            GrowthTime += GameTime.DeltaTime * GrowthRate;
+
+            if (GrowthTime >= 100)
+            {
+                GrowthTime = 0;
+                GrowthStage++;
+                UI.SetRenderer(Config.stages[(int)GrowthStage]);
+            }
+
+            if (GrowthStage == PlantStage.Harvestable)
+            {
+                // 触发成熟事件
+                OnEventInvoked?.Invoke(this);
+            }
+        }
+
+        public List<(PropConfig, int)> CheckDropItems()
+        {
+            if (GrowthStage != PlantStage.Harvestable)
+            {
+                return new List<(PropConfig, int)>();
+            }
+            
+            List<(PropConfig, int)> dropItems = new List<(PropConfig, int)>();
+            foreach (var dropItem in Config.dropItems)
+            {
+                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                dropItems.Add((confg, dropItem.count));
+            }
+
+            return dropItems;
         }
 
         public override void Update()
@@ -88,28 +129,12 @@ namespace GameItem
                 State = PlantState.Weeds;
             }
 
-            GrowthTime += Time.deltaTime * GrowthRate;
-
-            if (GrowthTime >= 100)
-            {
-                GrowthTime = 0;
-                GrowthStage++;
-            }
-
-            if (GrowthStage == PlantStage.Harvestable)
-            {
-                // 触发成熟事件
-                OnEventInvoked?.Invoke(this);
-            }
+            OnGrowth();
         }
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
             List<IAction> actions = new List<IAction>();
-            if (GrowthStage == PlantStage.Harvestable)
-            {
-                actions.Add(new HarvestAction(this));
-            }
 
             if (State == PlantState.Drought)
             {
@@ -128,8 +153,12 @@ namespace GameItem
             return actions;
         }
 
-        protected virtual RemovePlantAction CheckRemovePlant(Agent agent) 
+        protected virtual IAction CheckRemovePlant(Agent agent) 
         {
+            if (GrowthStage == PlantStage.Harvestable)
+            {
+                return new HarvestAction(this);
+            }
             return new RemovePlantAction(this);
         }
 
@@ -141,15 +170,15 @@ namespace GameItem
             }
         }
     }
-
+    
     public class TreeItem : PlantItem
     {
         public override bool Walkable => false;
-        public TreeItem(ResourceConfig config, Vector3 pos) : base(config, pos, false)
+        public TreeItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos, random)
         {
         }
-    
-        protected override RemovePlantAction CheckRemovePlant(Agent agent) 
+
+        protected override IAction CheckRemovePlant(Agent agent)
         {
             // 这里可以添加树木的特殊逻辑
             var axe = agent.Bag.GetItemHasEffect("Chop");
@@ -157,7 +186,9 @@ namespace GameItem
             if (axe != null)
             {
                 return new RemovePlantAction(this, "Chop the tree");
-            } else {
+            }
+            else
+            {
                 // 如果没有斧头，则返回一个默认的 RemovePlantAction
                 var removeAction = new RemovePlantAction(this, "Remove Tree (Need Axe)");
                 removeAction.Enable = false;

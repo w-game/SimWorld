@@ -42,102 +42,109 @@ namespace Citizens
         }
     }
 
-    public abstract class PropertyToJobActions
-    {
-        public event UnityAction<JobUnit> OnJobUnitCreated;
-        public House House { get; private set; }
-        public PropertyToJobActions(House house, UnityAction<JobUnit> onJobUnitCreated)
-        {
-            OnJobUnitCreated += onJobUnitCreated;
-            House = house;
-        }
-    }
+    // public abstract class PropertyToJobActions
+    // {
+    //     public event UnityAction<JobUnit> OnJobUnitCreated;
+    //     public IHouse House { get; private set; }
+    //     public PropertyToJobActions(IHouse house, UnityAction<JobUnit> onJobUnitCreated)
+    //     {
+    //         OnJobUnitCreated += onJobUnitCreated;
+    //         House = house;
+    //     }
+    // }
 
-    public class FarmJobActions : PropertyToJobActions
-    {
-        private Dictionary<Vector2Int, PlantItem> _plantItems = new Dictionary<Vector2Int, PlantItem>();
+    // public class FarmJobActions : PropertyToJobActions
+    // {
+    //     private List<PlantItem> _plantItems = new List<PlantItem>();
 
-        public FarmJobActions(House house, UnityAction<JobUnit> onJobUnitCreated) : base(house, onJobUnitCreated)
-        {
-            foreach (var block in house.Blocks)
-            {
-                if (StepOne(block, onJobUnitCreated))
-                {
-                    continue;
-                }
+    //     public FarmJobActions(IHouse house, UnityAction<JobUnit> onJobUnitCreated) : base(house, onJobUnitCreated)
+    //     {
+    //         foreach (var pos in house.Blocks)
+    //         {
+    //             var block = new Vector3(pos.x, pos.y, 0);
+    //             if (StepOne(block, onJobUnitCreated))
+    //             {
+    //                 continue;
+    //             }
 
-                if (StepTwo(block, onJobUnitCreated))
-                {
-                    continue;
-                }
+    //             if (StepTwo(block, onJobUnitCreated))
+    //             {
+    //                 continue;
+    //             }
 
-                StepThree(block, onJobUnitCreated);
-            }
+    //             StepThree(block, onJobUnitCreated);
+    //         }
 
-            GameManager.I.GameTime.Register(6 * 60 * 60, () =>
-            {
-                foreach (var block in house.Blocks)
-                {
-                    var jobUnit = new JobUnit(new WaterPlantAction(new Vector3(block.x, block.y, 0)), onJobUnitFailed: jobUnit =>
-                    {
-                        jobUnit.Refresh();
-                        onJobUnitCreated?.Invoke(jobUnit);
-                    });
-                    onJobUnitCreated?.Invoke(jobUnit);
-                }
-            });
-        }
+    //         GameManager.I.GameTime.Register(6 * 60 * 60, () =>
+    //         {
+    //             foreach (var block in house.Blocks)
+    //             {
+    //                 var jobUnit = new JobUnit(new WaterPlantAction(new Vector3(block.x, block.y, 0)), onJobUnitFailed: jobUnit =>
+    //                 {
+    //                     jobUnit.Refresh();
+    //                     onJobUnitCreated?.Invoke(jobUnit);
+    //                 });
+    //                 onJobUnitCreated?.Invoke(jobUnit);
+    //             }
+    //         });
+    //     }
 
-        private bool StepOne(Vector2Int block, UnityAction<JobUnit> onJobUnitCreated)
-        {
-            MapManager.I.TryGetBuildingItem(new Vector3(block.x, block.y, 0), out var buildingItem);
-            if (buildingItem == null || buildingItem.House.HouseType != HouseType.Farm)
-            {
-                var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0), House), jobUnit =>
-                {
-                    StepTwo(block, onJobUnitCreated);
-                });
-                onJobUnitCreated?.Invoke(jobUnit);
+    //     private bool StepOne(Vector3 block, UnityAction<JobUnit> onJobUnitCreated)
+    //     {
+    //         MapManager.I.TryGetBuildingItem(new Vector3(block.x, block.y, 0), out var buildingItem);
+    //         if (buildingItem == null || buildingItem.House.HouseType != HouseType.Farm)
+    //         {
+    //             var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0), House), jobUnit =>
+    //             {
+    //                 StepTwo(block, onJobUnitCreated);
+    //             });
+    //             onJobUnitCreated?.Invoke(jobUnit);
 
-                return true;
-            }
+    //             return true;
+    //         }
 
-            return false;
-        }
+    //         return false;
+    //     }
 
-        private bool StepTwo(Vector2Int block, UnityAction<JobUnit> onJobUnitCreated)
-        {
-            var items = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(block.x, block.y, 0));
-            if (items.Count == 0)
-            {
-                var jobUnit = new JobUnit(new PlantAction(new Vector3(block.x, block.y, 0), "PLANT_WHEAT"), jobUnit =>
-                {
-                    StepThree(block, onJobUnitCreated);
-                });
-                onJobUnitCreated?.Invoke(jobUnit);
-                return true;
-            }
+    //     private bool StepTwo(Vector3 block, UnityAction<JobUnit> onJobUnitCreated)
+    //     {
+    //         var items = GameManager.I.GameItemManager.GetItemsAtPos(block);
+    //         if (items.Count == 0)
+    //         {
+    //             if (MapManager.I.TryGetBuildingItem(block, out var item))
+    //             {
+    //                 if (item is FarmItem farmItem)
+    //                 {
+    //                     var jobUnit = new JobUnit(new PlantAction(farmItem, "PLANT_WHEAT"), jobUnit =>
+    //                     {
+    //                         StepThree(farmItem.Pos, onJobUnitCreated);
+    //                     });
+    //                     onJobUnitCreated?.Invoke(jobUnit);
+    //                 }
+    //             }
+    //             return true;
+    //         }
 
-            return false;
-        }
+    //         return false;
+    //     }
 
-        private void StepThree(Vector2Int block, UnityAction<JobUnit> onJobUnitCreated)
-        {
-            var items = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(block.x, block.y, 0));
-            foreach (var item in items)
-            {
-                if (item is PlantItem plantItem)
-                {
-                    plantItem.OnEventInvoked += plantItem =>
-                    {
-                        // var jobUnit = new JobUnit(new HarvestAction(plantItem));
-                        // onJobUnitCreated?.Invoke(jobUnit);
-                    };
-                    _plantItems.Add(block, plantItem);
-                }
-            }
-        }
-    }
+    //     private void StepThree(Vector3 block, UnityAction<JobUnit> onJobUnitCreated)
+    //     {
+    //         var items = GameManager.I.GameItemManager.GetItemsAtPos(block);
+    //         foreach (var item in items)
+    //         {
+    //             if (item is PlantItem plantItem)
+    //             {
+    //                 plantItem.OnEventInvoked += plantItem =>
+    //                 {
+    //                     // var jobUnit = new JobUnit(new HarvestAction(plantItem));
+    //                     // onJobUnitCreated?.Invoke(jobUnit);
+    //                 };
+    //                 _plantItems.Add(plantItem);
+    //             }
+    //         }
+    //     }
+    // }
 
     public class JobUnit
     {

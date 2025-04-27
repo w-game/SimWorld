@@ -68,6 +68,15 @@
                     "value": 1
                 }
             ]
+        },
+        {
+            "id": "PROP_MATERIAL_GRASS",
+            "name": "Grass",
+            "description": "A piece of grass.",
+            "type": "Material",
+            "icon": "Textures/Grass",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 50
         }
     ]
 }

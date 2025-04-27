@@ -28,10 +28,10 @@ namespace UI
 
         public virtual void OnHide()
         {
-            closeBtn.onClick.RemoveListener(Close);
+            closeBtn?.onClick.RemoveListener(Close);
         }
 
-        private void Close()
+        protected void Close()
         {
             Model.HideUI();
         }

@@ -18,7 +18,7 @@ public class GameTime
 {
     public float TimeScale { get; set; } = 72f;
     public float CurrentTime { get; private set; } = 8 * 60f * 60f; // 初始时间为8点
-    public float DeltaTime { get; private set; } = 0f;
+    public static float DeltaTime { get; private set; } = 0f;
     public int Day { get; private set; } = 1;
     public float TimeInHours => CurrentTime / 60f / 60f; // 转换为小时
 

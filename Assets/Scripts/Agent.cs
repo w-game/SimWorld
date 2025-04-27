@@ -23,7 +23,7 @@ namespace Citizens
 
         public void Update()
         {
-            Value -= Speed * GameManager.I.GameTime.DeltaTime;
+            Value -= Speed * GameTime.DeltaTime;
             if (Value < 0)
             {
                 Value = 0;
@@ -385,11 +385,6 @@ namespace Citizens
         internal PropGameItem GetItemInHand()
         {
             return null;
-        }
-
-        internal void HarvestItem(PlantItem plantItem)
-        {
-
         }
 
         public override List<IAction> ItemActions(IGameItem agent)

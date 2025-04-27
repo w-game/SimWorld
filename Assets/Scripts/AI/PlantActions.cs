@@ -2,6 +2,7 @@
 using Citizens;
 using GameItem;
 using Map;
+using UI.Models;
 using UnityEngine;
 
 namespace AI
@@ -9,9 +10,9 @@ namespace AI
     public class HoeAction : SingleActionBase
     {
         private Vector3 _targetPos;
-        private House _house;
+        private IHouse _house;
 
-        public HoeAction(Vector3 targetPos, House house) : base(20f)
+        public HoeAction(Vector3 targetPos, IHouse house) : base(20f)
         {
             _targetPos = targetPos;
             _house = house;
@@ -20,41 +21,42 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
+            CheckMoveToArroundPos(agent, _targetPos);
         }
 
         protected override void DoExecute(Agent agent)
         {
             var farmItem = GameItemManager.CreateGameItem<FarmItem>(
                 GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FARM"),
-                _targetPos + new Vector3(0.5f, 0.5f, 0),
-                GameItemType.Static);
+                _targetPos,
+                GameItemType.Static,
+                _house);
             farmItem.ShowUI();
         }
     }
 
     public class PlantAction : SingleActionBase
     {
-        private Vector3 _targetPos;
+        private FarmItem _farmItem;
         private string _seedId;
 
-        public PlantAction(Vector3 targetPos, string seedId) : base(50f)
+        public PlantAction(FarmItem farmItem, string seedId = "") : base(50f)
         {
-            _targetPos = targetPos;
-            ActionName = "Plant the seed";
+            ActionName = "Plant seed";
+            _farmItem = farmItem;
             _seedId = seedId;
         }
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
+            CheckMoveToArroundPos(agent, _farmItem.Pos);
         }
 
         protected override void DoExecute(Agent agent)
         {
             PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
                 GameManager.I.ConfigReader.GetConfig<ResourceConfig>(_seedId),
-                _targetPos + new Vector3(0.5f, 0.5f, 0),
+                _farmItem.Pos + new Vector3(0.5f, 0.5f, 0),
                 GameItemType.Static);
             plantItem.ShowUI();
         }
@@ -86,10 +88,11 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             Log.LogInfo("PlantActions", "PrecedingActions count: " + PrecedingActions.Count);
-            foreach (var dropItem in _plantItem.Config.dropItems)
+            var dropItems = _plantItem.CheckDropItems();
+            foreach (var (dropItem, count) in dropItems)
             {
                 var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
-                var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, dropItem.count);
+                var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
                 propItem.ShowUI();
             }
 
@@ -174,12 +177,21 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _plantItem.Pos));
+            CheckMoveToArroundPos(agent, _plantItem.Pos);
         }
 
         protected override void DoExecute(Agent agent)
         {
-            agent.HarvestItem(_plantItem);
+            Log.LogInfo("PlantActions", "PrecedingActions count: " + PrecedingActions.Count);
+            var dropItems = _plantItem.CheckDropItems();
+            foreach (var (dropItem, count) in dropItems)
+            {
+                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
+                propItem.ShowUI();
+            }
+
+            GameItemManager.DestroyGameItem(_plantItem);
         }
     }
 

@@ -39,6 +39,7 @@ namespace AI
         public IAction NextAction { get; set; }
 
         public bool Enable { get; set; } = true;
+        public bool Pause { get; set; } = false;
 
         protected void OnActionFailedEvent()
         {
@@ -115,11 +116,11 @@ namespace AI
         {
             ExecutePrecedingActions(agent);
 
-            if (Done || PrecedingActions.Count != 0) return;
+            if (Done || PrecedingActions.Count != 0 || Pause) return;
 
             if (_curProgress < 100f)
             {
-                _curProgress += GameManager.I.GameTime.DeltaTime * _actionSpeed;
+                _curProgress += GameTime.DeltaTime * _actionSpeed;
             }
             else
             {
@@ -146,11 +147,11 @@ namespace AI
         {
             ExecutePrecedingActions(agent);
 
-            if (Done || PrecedingActions.Count != 0) return;
+            if (Done || PrecedingActions.Count != 0 || Pause) return;
 
             if (_curProgress < 100f)
             {
-                _curProgress += GameManager.I.GameTime.DeltaTime * _progressSpeed / 2f;
+                _curProgress += GameTime.DeltaTime * _progressSpeed / 2f;
             }
             else
             {
@@ -173,7 +174,7 @@ namespace AI
         {
             ExecutePrecedingActions(agent);
 
-            if (Done || PrecedingActions.Count != 0) return;
+            if (Done || PrecedingActions.Count != 0 || Pause) return;
 
             if (Condition != null && Condition.Invoke())
             {

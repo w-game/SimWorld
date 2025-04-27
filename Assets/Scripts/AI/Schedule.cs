@@ -36,7 +36,7 @@ namespace AI
 
         public void Update(UnityAction callback)
         {
-            _elapsedTime += GameManager.I.GameTime.DeltaTime;
+            _elapsedTime += GameTime.DeltaTime;
             if (_elapsedTime >= _duration)
             {
                 TargetMember.Agent.Brain.RegisterAction(Action, false);

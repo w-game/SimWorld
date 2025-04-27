@@ -22,11 +22,13 @@ namespace UI.Elements
             {
                 itemIcon.gameObject.SetActive(false);
                 itemCountText.gameObject.SetActive(false);
+                itemButton.interactable = false;
                 return;
             }
 
             itemIcon.sprite = Resources.Load<Sprite>(newConfig.icon);
             itemIcon.gameObject.SetActive(true);
+            itemButton.interactable = true;
             if (count > 0)
             {
                 itemCountText.text = count.ToString();

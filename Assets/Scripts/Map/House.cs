@@ -20,7 +20,19 @@ namespace Map
         Park
     }
 
-    public class House
+    public interface IHouse
+    {
+        List<Vector2Int> Blocks { get; }
+        Vector2Int Size { get; }
+        HouseType HouseType { get; }
+        Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; }
+        Vector2Int MinPos { get; }
+
+        bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem;
+        bool TryGetFurnitures<T>(out List<T> furnitureItems) where T : FurnitureItem;
+    }
+
+    public class CartonHouse : IHouse
     {
         public List<Vector2Int> Blocks { get; private set; } // 房屋的所有块
         public Vector2Int Size { get; private set; } // 房屋大小，影响房屋半径
@@ -38,7 +50,7 @@ namespace Map
         public Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; private set; } = new Dictionary<Vector2Int, FurnitureItem>(); // 家具物品
         public List<Vector2Int> CommercialPos { get; private set; } = new List<Vector2Int>(); // 商业位置
 
-        public House(List<Vector2Int> blocks, RoomConfig config, Vector2Int minPos, City city, System.Random chunkRand)
+        public CartonHouse(List<Vector2Int> blocks, RoomConfig config, Vector2Int minPos, City city, System.Random chunkRand)
         {
             Blocks = blocks; // 转换为全局坐标
             RoomConfig = config;
@@ -113,7 +125,7 @@ namespace Map
                     config,
                     new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
                     GameItemType.Static);
-                
+
                 FurnitureItems.Add(pos, furnitureItem);
             }
         }

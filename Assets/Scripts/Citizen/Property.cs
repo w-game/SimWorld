@@ -9,15 +9,15 @@ namespace Citizens
 {
     public class Property
     {
-        public static Dictionary<House, Property> Properties { get; } = new Dictionary<House, Property>();
-        public House House { get; private set; }
+        public static Dictionary<IHouse, Property> Properties { get; } = new Dictionary<IHouse, Property>();
+        public IHouse House { get; private set; }
         public Family Owner { get; private set; }
         public List<Employee> Employees { get; } = new List<Employee>();
         public List<JobUnit> JobUnits { get; } = new List<JobUnit>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 18 * 60 * 60 };
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
 
-        public Property(House house, Family owner)
+        public Property(IHouse house, Family owner)
         {
             House = house;
             Owner = owner;
@@ -95,21 +95,29 @@ namespace Citizens
 
     public class FarmProperty : Property
     {
-        public FarmProperty(House house, Family owner) : base(house, owner)
+        public FarmProperty(IHouse house, Family owner) : base(house, owner)
         {
             CheckFarmHoed();
         }
 
         private void CheckFarmHoed()
         {
-            foreach (var block in House.Blocks)
-            {
-                MapManager.I.TryGetBuildingItem(new Vector3(block.x, block.y, 0), out var buildingItem);
+            foreach (var pos in House.Blocks)
+            { 
+                var block = new Vector3(pos.x, pos.y);
+                MapManager.I.TryGetBuildingItem(block, out var buildingItem);
                 if (buildingItem == null)
                 {
-                    var jobUnit = new JobUnit(new HoeAction(new Vector3(block.x, block.y, 0), House), jobUnit =>
+                    var jobUnit = new JobUnit(new HoeAction(block, House), jobUnit =>
                     {
-                        CheckPlantToFarm(block);
+                        if (MapManager.I.TryGetBuildingItem(block, out var item))
+                        {
+                            if (item is FarmItem farmItem)
+                            {
+                                CheckPlantToFarm(farmItem);
+                            }
+                        }
+                        
                     });
                     AddJobUnit<Farmer>(jobUnit);
                 }
@@ -118,26 +126,15 @@ namespace Citizens
             JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_FARMER"), 1);
         }
 
-        private void CheckPlantToFarm(Vector2Int block)
+        private void CheckPlantToFarm(FarmItem farmItem)
         {
-
-            var items = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(block.x, block.y, 0));
-            if (items.Count == 0)
+            if (farmItem.PlantItem == null)
             {
-                var jobUnit = new JobUnit(new PlantAction(new Vector3(block.x, block.y, 0), "PLANT_WHEAT"), jobUnit =>
+                var jobUnit = new JobUnit(new PlantAction(farmItem, "PLANT_WHEAT"), jobUnit =>
                 {
-                    CheckPlantToFarm(block);
+                    farmItem.PlantItem.OnEventInvoked += OnCropItemEventInvoked;
                 });
                 AddJobUnit<Farmer>(jobUnit);
-                return;
-            }
-
-            foreach (var item in items)
-            {
-                if (item is PlantItem plantItem)
-                {
-                    plantItem.OnEventInvoked += OnCropItemEventInvoked;
-                }
             }
         }
 
@@ -168,7 +165,7 @@ namespace Citizens
     public class RestaurantProperty : Property
     {
         private List<StoveItem> _stoveItems = new List<StoveItem>();
-        public RestaurantProperty(House house, Family owner) : base(house, owner)
+        public RestaurantProperty(IHouse house, Family owner) : base(house, owner)
         {
             foreach (var furniture in House.FurnitureItems)
             {
@@ -201,13 +198,13 @@ namespace Citizens
         {
             List<Vector2Int> availablePositions = new List<Vector2Int>();
             // 计算可用的商业位置，避开家具
-            foreach (var pos in House.CommercialPos)
-            {
-                if (!House.FurnitureItems.ContainsKey(pos))
-                {
-                    availablePositions.Add(pos);
-                }
-            }
+            // foreach (var pos in House.CommercialPos)
+            // {
+            //     if (!House.FurnitureItems.ContainsKey(pos))
+            //     {
+            //         availablePositions.Add(pos);
+            //     }
+            // }
             return availablePositions;
         }
 
@@ -243,7 +240,7 @@ namespace Citizens
 
     public class TeahouseProperty : RestaurantProperty
     {
-        public TeahouseProperty(House house, Family owner) : base(house, owner)
+        public TeahouseProperty(IHouse house, Family owner) : base(house, owner)
         {
         }
     }

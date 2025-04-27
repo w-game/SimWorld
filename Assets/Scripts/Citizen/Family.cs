@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using AI;
 using Map;
+using UnityEngine;
 
 namespace Citizens
 {
     public class Family
     {
-        public List<House> Houses { get; } = new List<House>(); // 房屋
+        public List<IHouse> Houses { get; } = new List<IHouse>(); // 房屋
 
         public List<FamilyMember> Members { get; } = new List<FamilyMember>();
         public List<IAction> Actions { get; } = new List<IAction>(); // 行为
@@ -23,9 +24,25 @@ namespace Citizens
             Members.Remove(member);
         }
 
-        internal void AddHouse(House house)
+        internal void AddHouse(IHouse house)
         {
             Houses.Add(house);
+        }
+
+        internal IHouse GetHouse(HouseType houseType)
+        {
+            var house = Houses.Find(h => h.HouseType == houseType);
+
+            if (house != null)
+            {
+                return house;
+            }
+            else
+            {
+                house = new House(new List<Vector2Int>(), houseType);
+                Houses.Add(house);
+                return house;
+            }
         }
     }
 

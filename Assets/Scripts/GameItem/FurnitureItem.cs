@@ -52,7 +52,7 @@ namespace GameItem
         {
         }
 
-        protected override List<IAction> ActionsOnClick()
+        public override List<IAction> ActionsOnClick(Agent agent)
         {
             return new List<IAction>()
             {
@@ -143,9 +143,8 @@ namespace GameItem
 
         }
 
-        protected override List<IAction> ActionsOnClick()
+        public override List<IAction> ActionsOnClick(Agent agent)
         {
-            
             List<Vector3> availablePos = new List<Vector3>();
             Vector3 centerPos = Vector3.zero;
             foreach (var pos in OccupiedPositions)
@@ -178,7 +177,7 @@ namespace GameItem
 
             return new List<IAction>()
             {
-                
+
             };
         }
     }

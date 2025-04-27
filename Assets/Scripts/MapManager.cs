@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Citizens;
 using GameItem;
 using Map;
@@ -11,6 +13,36 @@ public enum MapLayer
     Ground,
     Floor,
     Building,
+}
+
+public class House : IHouse
+{
+    public List<Vector2Int> Blocks { get; private set; }
+    public Vector2Int Size { get; private set; }
+
+    public HouseType HouseType { get; private set; }
+
+    public Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; private set; } = new Dictionary<Vector2Int, FurnitureItem>();
+
+    public Vector2Int MinPos => new Vector2Int(Blocks[0].x, Blocks[0].y);
+
+    public House(List<Vector2Int> blocks, HouseType houseType)
+    {
+        Blocks = blocks;
+        HouseType = houseType;
+    }
+
+    public bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem
+    {
+        furnitureItem = null;
+        return false;
+    }
+
+    public bool TryGetFurnitures<T>(out List<T> furnitureItems) where T : FurnitureItem
+    {
+        furnitureItems = new List<T>();
+        return false;
+    }
 }
 
 public class MapManager : MonoSingleton<MapManager>
@@ -67,7 +99,7 @@ public class MapManager : MonoSingleton<MapManager>
 
     void Update()
     {
-        UpdateChunk();
+        StartCoroutine(UpdateChunkCoroutine());
     }
 
     private void GenerateChunk(Vector2Int pos)
@@ -76,6 +108,7 @@ public class MapManager : MonoSingleton<MapManager>
         if (chunk != null)
         {
             chunk.CalcBlocks();
+            chunk.CheckCityItems();
             chunk.CalcMapItems();
             VisualChunk(chunk);
             if (!_chunkActive.ContainsKey(pos))
@@ -85,7 +118,7 @@ public class MapManager : MonoSingleton<MapManager>
         }
     }
 
-    private void UpdateChunk()
+    private IEnumerator UpdateChunkCoroutine()
     {
         var playerChunkPos = new Vector2Int(
             Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
@@ -103,6 +136,7 @@ public class MapManager : MonoSingleton<MapManager>
                 }
 
                 GenerateChunk(pos);
+                yield return null;
             }
         }
 
@@ -200,7 +234,7 @@ public class MapManager : MonoSingleton<MapManager>
                 else if (prob < 75)
                 {
                     tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tiles[1]);
-                } 
+                }
                 else if (prob < 100)
                 {
                     tilemap.SetTile(new Vector3Int(pos.x, pos.y, 0), tiles[2]);
@@ -341,7 +375,7 @@ public class MapManager : MonoSingleton<MapManager>
             targetPos + new Vector3(0, 1, 0),
             targetPos + new Vector3(0, -1, 0),
         };
-        
+
         var walkablePos = new List<Vector3>();
         foreach (var pos in arroundPos)
         {

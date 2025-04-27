@@ -30,12 +30,15 @@ namespace Citizens
             new string[] { "Senior", "Senior", "Adult", "Adult", "Child", "Child", "Child" }
         };
 
-        private FamilyMember CreateMember(Family family, House house, bool sex, int age)
+        private FamilyMember CreateMember(Family family, IHouse house, bool sex, int age)
         {
             var member = new FamilyMember(sex, age);
+    
+            var randomPos = new Vector2(Random.Range(house.MinPos.x + 1, house.MinPos.x + house.Size.x - 2), Random.Range(house.MinPos.y + 1, house.MinPos.y + house.Size.y - 2));
+
             var agent = GameItemManager.CreateGameItem<Agent>(
                 null,
-                house.RandomPos + new Vector2(0.5f, 0.5f),
+                randomPos + new Vector2(0.5f, 0.5f),
                 GameItemType.Dynamic,
                 GameManager.I.ActionSystem.CreateAIController()
             );
@@ -60,14 +63,14 @@ namespace Citizens
                 return; // 如果城市已经有家庭，则不再生成
             }
 
-            List<House> cityProperties = new List<House>();
+            List<IHouse> cityProperties = new List<IHouse>();
             List<Family> families = new List<Family>();
 
             foreach (var house in city.Houses)
             {
                 if (house.HouseType == HouseType.House)
                 {
-                    house.TryGetFurnitures<BedItem>(out var beds);
+                    house.TryGetFurnitures(out List<BedItem> beds);
                     if (beds.Count == 0)
                     {
                         continue; // 如果没有床，则跳过
@@ -186,7 +189,7 @@ namespace Citizens
             Families.Add(city, families);
         }
 
-        private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, House house)
+        private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, IHouse house)
         {
             Property property = null;
             switch (house.HouseType)

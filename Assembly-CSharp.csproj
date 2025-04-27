@@ -74,6 +74,7 @@
     <Compile Include="Assets/Scripts/Localization/ActionLocalization.cs" />
     <Compile Include="Assets/Scripts/AI/AStar.cs" />
     <Compile Include="Assets/Scripts/AI/InventoryAction.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopInventoryType.cs" />
     <Compile Include="Assets/Scripts/Config/ConfigReader.cs" />
     <Compile Include="Assets/Scripts/AI/PlantActions.cs" />
     <Compile Include="Assets/Scripts/UI/PopStack.cs" />
@@ -141,12 +142,14 @@
     <Compile Include="Assets/Scripts/UI/Popups/PopSchdule.cs" />
     <Compile Include="Assets/Scripts/GameManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/MaterialElement.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopSelectSeed.cs" />
     <Compile Include="Assets/Scripts/MapManager.cs" />
     <Compile Include="Assets/Scripts/GameTime.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopHouseDetails.cs" />
     <Compile Include="Assets/Scripts/Util/Singleton.cs" />
     <Compile Include="Assets/Scripts/Util/Log.cs" />
     <Compile Include="Assets/Scripts/Test.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopSelectSeedModel.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/BuildingElement.cs" />
   </ItemGroup>
   <ItemGroup>

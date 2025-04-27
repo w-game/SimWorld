@@ -2,24 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameItem;
-using Unity.VisualScripting;
 using UnityEngine.Events;
 
 public class PropItem
 {
     public PropConfig Config { get; private set; }
     public int Quantity { get; private set; }
+    public PropType Type { get; private set; }
 
     public PropItem(PropConfig config, int quantity = 1)
     {
         Config = config;
         Quantity = quantity;
+        Type = Enum.Parse<PropType>(config.type);
     }
 
     public void AddQuantity(int quantity)
     {
         Quantity += quantity;
     }
+}
+
+public enum PropType
+{
+    None,
+    Food,
+    Seed,
+    Material,
+    Tool,
+    Equipment,
+    Weapon
 }
 
 public class Inventory

@@ -31,6 +31,7 @@ public class ConfigReader
         { typeof(RoomConfig)       , "Configs/RoomConfig"        },
         { typeof(JobConfig)        , "Configs/JobConfig"         },
         { typeof(CraftConfig)      , "Configs/CraftConfig"       },
+        { typeof(BiomeConfig)      , "Configs/BiomeConfig"       }
     };
 
     /// <summary>Load/refresh every registered config file.</summary>
@@ -68,11 +69,11 @@ public class ConfigReader
     public T GetConfig<T>(string id) where T : ConfigBase
     {
         if (!_configs.TryGetValue(typeof(T), out var list))
-            throw new Exception($"{typeof(T).Name} not loaded. Did you call LoadConfigs()?");
-
+            return null;
+            
         var cfg = list.Find(c => c.id == id) as T;
         if (cfg == null)
-            throw new Exception($"{typeof(T).Name} with id '{id}' not found.");
+            return null;
 
         return cfg;
     }

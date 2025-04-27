@@ -50,7 +50,7 @@ namespace AI
                 var isWalkable = true;
                 foreach (var item in items)
                 {
-                    actions.AddRange(item.ClickItemActions(GameManager.I.CurrentAgent));
+                    actions.AddRange(item.ActionsOnClick(GameManager.I.CurrentAgent));
                     if (!item.Walkable)
                     {
                         isWalkable = false;
@@ -75,7 +75,11 @@ namespace AI
             switch (blockType)
             {
                 case BlockType.Plain:
-                    // actions.Add(new HoeAction());
+                    if (!MapManager.I.TryGetBuildingItem(pos, out var buildingItem))
+                    {
+                        IHouse house = GameManager.I.CurrentAgent.Citizen.Family.GetHouse(HouseType.Farm);
+                        actions.Add(new HoeAction(pos, house));
+                    }
                     break;
                 case BlockType.Road:
                 case BlockType.Forest:

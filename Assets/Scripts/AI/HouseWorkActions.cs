@@ -60,10 +60,10 @@ namespace AI
                 var city = MapManager.I.CartonMap.GetCity(agent.Pos);
                 if (city != null)
                 {
-                    var houses = city.GetHouses(Map.HouseType.Restaurant);
+                    var houses = city.GetHouses(HouseType.Restaurant);
                     if (houses.Count > 0)
                     {
-                        var restaurant = houses.OrderBy(a => a.DistanceTo(agent.Pos)).First();
+                        var restaurant = houses.OrderBy(a => Vector2.Distance(new Vector2(agent.Pos.x, agent.Pos.y), new Vector2(a.MinPos.x, a.MinPos.y))).First();
                         _restaurantProperty = Property.Properties[restaurant] as RestaurantProperty;
                     }
                 }

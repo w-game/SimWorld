@@ -27,7 +27,7 @@ namespace GameItem
         void Destroy();
         void DoUpdate();
         List<IAction> ItemActions(IGameItem agent);
-        List<IAction> ClickItemActions(Agent agent);
+        List<IAction> ActionsOnClick(Agent agent);
         List<Vector2Int> OccupiedPositions { get; }
     }
 
@@ -60,7 +60,7 @@ namespace GameItem
         public GameItemBase(T config, Vector3 pos)
         {
             ConfigBase = config;
-            Pos = pos;
+            _pos = pos;
         }
 
         public void CalcSize()
@@ -115,13 +115,10 @@ namespace GameItem
         }
 
         public abstract List<IAction> ItemActions(IGameItem agent);
-        public List<IAction> ClickItemActions(Agent agent)
-        {
-            var actions = ItemActions(agent);
-            actions.AddRange(ActionsOnClick());
-            return actions;
-        }
 
-        protected virtual List<IAction> ActionsOnClick() { return new List<IAction>(); }
+        public virtual List<IAction> ActionsOnClick(Agent agent)
+        {
+            return ItemActions(agent);
+        }
     }
 }

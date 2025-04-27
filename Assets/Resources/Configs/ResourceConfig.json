@@ -32,7 +32,7 @@
             ],
             "dropItems": [
                 {
-                    "id": "PROP_RESOURCE_GRASS",
+                    "id": "PROP_MATERIAL_GRASS",
                     "count": 1
                 }
             ]
@@ -61,7 +61,7 @@
             "id": "PLANT_BUSH",
             "name": "Bush",
             "description": "A bush.",
-            "type": "Material",
+            "type": "Plant",
             "icon": "Textures/Bush_0",
             "prefab": "Prefabs/GameItems/PlantItem",
             "stages": [
@@ -79,7 +79,7 @@
             "id": "RESOURCE_ROCK",
             "name": "Rock",
             "description": "A rock.",
-            "type": "Material",
+            "type": "Resource",
             "icon": "Textures/Rock_0",
             "prefab": "Prefabs/GameItems/ResourceItem",
             "stages": [
@@ -90,6 +90,26 @@
                 {
                     "id": "PROP_MATERIAL_STONE",
                     "count": 2
+                }
+            ]
+        },
+        {
+            "id": "PLANT_FLOWER",
+            "name": "Flower",
+            "description": "A flower.",
+            "type": "Plant",
+            "icon": "Textures/Flower_0",
+            "prefab": "Prefabs/GameItems/PlantItem",
+            "stages": [
+                "Textures/Flower_0",
+                "Textures/Flower_1",
+                "Textures/Flower_2",
+                "Textures/Flower_3"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_MATERIAL_FLOWER",
+                    "count": 1
                 }
             ]
         }

@@ -14,6 +14,7 @@ namespace AI
         public IAction CurAction { get; private set; }
 
         public event Action<IAction> OnActionRegister;
+        public event Action<IAction> OnActionUnregister;
 
         private Dictionary<State, float> _actionCooldowns = new();
         private float _actionCooldownTime = 10f;
@@ -27,34 +28,39 @@ namespace AI
 
         public void RegisterAction(IAction action, bool force)
         {
-            action.OnRegister(_agent);
-            OnActionRegister?.Invoke(action);
-
-            if (force && CurAction != null)
+            if (force)
             {
-                CurAction.OnCompleted -= OnActionCompleted;
-                CurAction.OnActionProgress -= OnActionProgress;
-                CurAction = null;
-
                 ChangeCurAction(action);
-                return;
             }
+            else
+            {
+                ActiveActions.Enqueue(action);
+            }
+        }
 
-            ActiveActions.Enqueue(action);
+        private void UnregisterAction(IAction action)
+        {
+            action.OnCompleted -= UnregisterAction;
+            action.OnActionProgress -= OnActionProgress;
+            action.OnActionFailed -= UnregisterAction;
+            CurAction = null;
+
+            OnActionUnregister?.Invoke(action);
         }
 
         private void ChangeCurAction(IAction action)
         {
             if (CurAction != null)
             {
-                CurAction.OnCompleted -= OnActionCompleted;
-                CurAction.OnActionProgress -= OnActionProgress;
-                CurAction = null;
+                UnregisterAction(CurAction);
             }
 
             CurAction = action;
-            CurAction.OnCompleted += OnActionCompleted;
+            CurAction.OnCompleted += UnregisterAction;
             CurAction.OnActionProgress += OnActionProgress;
+            CurAction.OnActionFailed += UnregisterAction;
+
+            action.OnRegister(_agent);
             OnActionRegister?.Invoke(action);
         }
 
@@ -208,23 +214,6 @@ namespace AI
                     //     RegisterAction(new HangingAction(targetPos), true);
                     // }
                 }
-            }
-        }
-
-        private void OnActionCompleted(IAction action)
-        {
-            action.OnCompleted -= OnActionCompleted;
-            action.OnActionProgress -= OnActionProgress;
-
-            if (CurAction.NextAction != null)
-            {
-                CurAction = CurAction.NextAction;
-                CurAction.OnCompleted += OnActionCompleted;
-                CurAction.OnActionProgress += OnActionProgress;
-            }
-            else
-            {
-                CurAction = null;
             }
         }
     }

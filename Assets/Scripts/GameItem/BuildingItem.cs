@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using AI;
+using Citizens;
 using Map;
 using UI.Models;
 using UnityEngine;
@@ -40,9 +42,9 @@ namespace GameItem
     public class BuildingItem : GameItemBase<BuildingConfig>
     {
         public override bool Walkable => true;
-        public House House { get; private set; }
+        public IHouse House { get; private set; }
         public List<TileBase> Tiles { get; protected set; }
-        public BuildingItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos)
+        public BuildingItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos)
         {
             House = house;
 
@@ -62,16 +64,15 @@ namespace GameItem
             };
         }
 
-        protected override List<IAction> ActionsOnClick()
+        public override List<IAction> ActionsOnClick(Agent agent)
         {
-            return new List<IAction>()
+            var actions = base.ActionsOnClick(agent);
+            actions.Add(new SystemAction("View Room Details", a =>
             {
-                new SystemAction("View Room Details", a =>
-                {
-                    var model = IModel.GetModel<PopHouseDetailsModel>(House);
-                    model.ShowUI();
-                })
-            };
+                var model = IModel.GetModel<PopHouseDetailsModel>(House);
+                model.ShowUI();
+            }));
+            return actions;
         }
 
         public override void Destroy()
@@ -83,7 +84,7 @@ namespace GameItem
     public class WallItem : BuildingItem
     {
         public override bool Walkable => false;
-        public WallItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public WallItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.wallTiles;
         }
@@ -91,7 +92,7 @@ namespace GameItem
 
     public class FloorItem : BuildingItem
     {
-        public FloorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public FloorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.floorTiles;
         }
@@ -99,7 +100,7 @@ namespace GameItem
 
     public class DoorItem : BuildingItem
     {
-        public DoorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public DoorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = new List<TileBase> { MapManager.I.doorTile };
         }
@@ -107,7 +108,7 @@ namespace GameItem
 
     public class CommercialItem : BuildingItem
     {
-        public CommercialItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public CommercialItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.floorTiles;
         }
@@ -115,7 +116,8 @@ namespace GameItem
 
     public class FarmItem : BuildingItem
     {
-        public FarmItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public PlantItem PlantItem { get; private set; }
+        public FarmItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.farmTiles;
         }
@@ -126,6 +128,32 @@ namespace GameItem
             {
                 MapManager.I.SetMapTile(Pos, MapLayer.Building, MapManager.I.farmWateredTiles);
             }
+        }
+
+        public override List<IAction> ItemActions(IGameItem agent)
+        {
+            var action = new PlantAction(this);
+            return base.ItemActions(agent).Concat(new List<IAction> { action }).ToList();
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return new List<IAction>()
+            {
+                new SystemAction("Plant Seed", a =>
+                {
+                    var model = new PopSelectSeedModel(selectedSeedId =>
+                    {
+                        if (string.IsNullOrEmpty(selectedSeedId))
+                        {
+                            return;
+                        }
+
+                        new PlantAction(this, selectedSeedId);
+                    });
+                    model.ShowUI();
+                })
+            };
         }
     }
 }

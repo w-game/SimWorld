@@ -45,6 +45,8 @@ public class GameItemManager
                 RegisterDynamicGameItem(item);
                 break;
         }
+
+        Debug.Log($"Create {item.GetType()} at {pos}");
         return item;
     }
 

@@ -12,7 +12,7 @@ namespace Map
         public Chunk OriginChunk { get; private set; } // 城市起源的Chunk
 
         public List<List<Vector2Int>> Roads { get; } = new List<List<Vector2Int>>(); // 存储城市的道路
-        public List<House> Houses { get; } = new List<House>(); // 存储城市的房屋
+        public List<IHouse> Houses { get; } = new List<IHouse>(); // 存储城市的房屋
 
         public System.Random ChunkRand { get; private set; } // 随机数生成器
 
@@ -180,7 +180,7 @@ namespace Map
             }
         }
 
-        private House PlaceBuilding(Vector2Int roadPoint, int direction = -1)
+        private IHouse PlaceBuilding(Vector2Int roadPoint, int direction = -1)
         {
             if (direction == -1)
             {
@@ -274,10 +274,10 @@ namespace Map
                 }
             }
 
-            return new House(buildingBlocks, roomConfig, minPos, this, ChunkRand);
+            return new CartonHouse(buildingBlocks, roomConfig, minPos, this, ChunkRand);
         }
 
-        public List<House> GetHouses(HouseType houseType)
+        public List<IHouse> GetHouses(HouseType houseType)
         {
             return Houses.Where(h => h.HouseType == houseType).ToList();
         }

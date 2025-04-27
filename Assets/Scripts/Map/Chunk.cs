@@ -1,6 +1,8 @@
-using System.Collections.Generic;
-using GameItem;
+using System;
+using System.Linq;
 using UnityEngine;
+using GameItem;
+using System.Collections.Generic;
 
 namespace Map
 {
@@ -16,7 +18,7 @@ namespace Map
         public City City { get; private set; }
         public int Size { get; private set; }
         public int Layer { get; private set; }
-        public BlockType Type { get; private set; }
+        public BlockType ChunkType { get; private set; }
 
         private System.Random _chunkRand;
 
@@ -89,7 +91,7 @@ namespace Map
 
                     var nearestChunk = GetNearestChunk(blockWorldPos, true, Layer);
 
-                    Blocks[i, j] = nearestChunk != null ? nearestChunk.Type : BlockType.Plain;
+                    Blocks[i, j] = nearestChunk != null ? nearestChunk.ChunkType : BlockType.Plain;
                 }
             }
 
@@ -130,11 +132,11 @@ namespace Map
 
                 if (pro < 50)
                 {
-                    Type = BlockType.Ocean;
+                    ChunkType = BlockType.Ocean;
                 }
                 else
                 {
-                    Type = BlockType.Plain;
+                    ChunkType = BlockType.Plain;
                 }
 
                 return;
@@ -146,32 +148,32 @@ namespace Map
 
             if (nearestChunk != null)
             {
-                Type = nearestChunk.Type;
-                if (Layer == CartonMap.LAYER_NUM - 2 && Type == BlockType.Plain)
+                ChunkType = nearestChunk.ChunkType;
+                if (Layer == CartonMap.LAYER_NUM - 2 && ChunkType == BlockType.Plain)
                 {
                     var pro = _chunkRand.Next(0, 100);
 
                     if (pro < 10)
                     {
-                        Type = BlockType.Forest;
+                        ChunkType = BlockType.Forest;
                     }
                     else if (pro < 30)
                     {
-                        Type = BlockType.Mountain;
+                        ChunkType = BlockType.Mountain;
                     }
                     else if (pro < 50)
                     {
-                        Type = BlockType.Desert;
+                        ChunkType = BlockType.Desert;
                     }
                     else
                     {
-                        Type = BlockType.Plain;
+                        ChunkType = BlockType.Plain;
                     }
                 }
             }
             else
             {
-                Type = BlockType.Plain;
+                ChunkType = BlockType.Plain;
             }
 
             if (Layer == CityLayer)
@@ -182,8 +184,8 @@ namespace Map
 
         public void CheckCreateCity()
         {
-            Debug.Log($"CheckCreateCity {Pos} Layer {Layer} Type {Type}");
-            if (Type == BlockType.Plain)
+            Debug.Log($"CheckCreateCity {Pos} Layer {Layer} ChunkType {ChunkType}");
+            if (ChunkType == BlockType.Plain)
             {
 
                 if (_chunkRand.Next(0, 100) < 20)
@@ -194,167 +196,62 @@ namespace Map
             }
         }
 
+        public void CheckCityItems()
+        {
+
+        }
+
         public void CalcMapItems()
         {
+            
+
+            List<(string id, Vector3 pos, string mode)> spawnList = new();
+
             for (int i = 0; i < Size; i++)
             {
                 for (int j = 0; j < Size; j++)
                 {
-                    var pos = new Vector2Int(i, j);
-                    var blockWorldPos = pos + WorldPos;
+                    var pos2 = new Vector2Int(i, j);
+                    var worldPos = new Vector3(pos2.x + WorldPos.x + 0.5f, pos2.y + WorldPos.y + 0.5f, 0);
+                    if (MapManager.I.TryGetBuildingItem(worldPos, out _)) continue;
 
-                    MapManager.I.TryGetBuildingItem(new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0), out var buildingItem);
-                    if (buildingItem != null)
-                    {
-                        continue;
-                    }
+                    var biomeConfig = GameManager.I.ConfigReader.GetConfig<BiomeConfig>(Blocks[i, j].ToString().ToUpper());
+                    if (biomeConfig == null) continue;
 
-                    float scale = 0.9f;
-                    float frequency = 20f;
-                    float noiseValue = frequency * Mathf.PerlinNoise(blockWorldPos.x * scale, blockWorldPos.y * scale);
+                    float noise = biomeConfig.frequency * Mathf.PerlinNoise((WorldPos.x + i) * biomeConfig.scale, (WorldPos.y + j) * biomeConfig.scale);
+                    var layerList = biomeConfig.layers.OrderByDescending(l => l.threshold).ToArray();
 
-                    if (Blocks[i, j] == BlockType.Plain)
-                    {
-                        if (noiseValue > 0.9f * frequency)
-                        {
-                            GameItemManager.CreateGameItem<TreeItem>(
-                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
-                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                GameItemType.Static
-                            );
-                        }
-                        else if (noiseValue > 0.8f * frequency)
-                        {
-                        }
-                        else if (noiseValue > 0.6f * frequency)
-                        {
-                            GameItemManager.CreateGameItem<PlantItem>(
-                                GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
-                                new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                GameItemType.Static,
-                                false
-                            );
-                        }
-                        else if (noiseValue > 0.4f * frequency)
-                        {
-                        }
-                        else
-                        {
-                        }
-                    }
-                    else if (Blocks[i, j] == BlockType.Forest)
-                    {
-                        // --- Forest generation (more natural clusters) ---
-                        //
-                        // 思路：
-                        // 1. 使用 Perlin 值控制宏观密度（高值→密林，低值→稀疏）。
-                        // 2. 在同一密度区块内，加入一层局部随机，避免完全规则的条纹分布。
-                        // 3. 让树木与灌木、草地、岩石按概率共存，形成更真实的混合生态。
-                        //
-                        // 额外随机因子（0‑1）
-                        float localRand = (float)_chunkRand.NextDouble();
+                    var layer = layerList.FirstOrDefault(l => noise >= l.threshold);
+                    if (layer == null) continue;
 
-                        if (noiseValue > 0.8f * frequency)            // 【密林核心】大量树 + 少量灌木
-                        {
-                            if (localRand < 0.75f)                    // 75% 树
-                            {
-                                GameItemManager.CreateGameItem<TreeItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static
-                                );
-                            }
-                            else if (localRand < 0.85f)                                      // 10% 灌木
-                            {
-                                GameItemManager.CreateGameItem<PlantItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_BUSH"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static,
-                                    false
-                                );
-                            }
-                        }
-                        else if (noiseValue > 0.6f * frequency)       // 【稀疏树林】树与灌木各半
-                        {
-                            if (localRand < 0.5f)                     // 50% 树
-                            {
-                                GameItemManager.CreateGameItem<TreeItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_TREE"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static
-                                );
-                            }
-                            else if (localRand < 0.55f)                                     // 5% 灌木
-                            {
-                                GameItemManager.CreateGameItem<PlantItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_BUSH"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static,
-                                    false
-                                );
-                            }
-                        }
-                        else if (noiseValue > 0.45f * frequency)      // 【林缘与空地】少量草 + 零星岩石
-                        {
-                            if (localRand < 0.3f)                     // 30% 草
-                            {
-                                GameItemManager.CreateGameItem<PlantItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static,
-                                    false
-                                );
-                            }
-                            else if (localRand < 0.35f)               // 5% 岩石
-                            {
-                                GameItemManager.CreateGameItem<SmallRockItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("RESOURCE_ROCK"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static
-                                );
-                            }
-                            // 其余 55% 留空，形成空地
-                        }
-                        else if (noiseValue > 0.3f * frequency)       // 【过渡带】以草地为主，偶有灌木
-                        {
-                            if (localRand < 0.6f)                     // 60% 草
-                            {
-                                GameItemManager.CreateGameItem<PlantItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_GRASS"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static,
-                                    false
-                                );
-                            }
-                            else if (localRand < 0.65f)               // 5% 灌木
-                            {
-                                GameItemManager.CreateGameItem<PlantItem>(
-                                    GameManager.I.ConfigReader.GetConfig<ResourceConfig>("PLANT_BUSH"),
-                                    new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0),
-                                    GameItemType.Static,
-                                    false
-                                );
-                            }
-                            // 其余 25% 留空
-                        }
-                        // noiseValue ≤ 0.3f * frequency 时留为空地，形成自然空隙
-                    }
-                    else if (Blocks[i, j] == BlockType.Mountain)
+                    // weighted selection
+                    float total = layer.items.Sum(it => it.weight);
+                    float r = (float)_chunkRand.NextDouble() * total;
+                    foreach (var it in layer.items)
                     {
-                        if (noiseValue > 0.9f * frequency)
+                        if (r <= it.weight)
                         {
+                            if (it.id != "NONE")
+                                spawnList.Add((it.id, worldPos, layer.mode));
+                            break;
                         }
-                        else if (noiseValue > 0.5f * frequency)
-                        {
-                        }
-                        else
-                        {
-                        }
-                    }
-                    else
-                    {
+                        r -= it.weight;
                     }
                 }
+            }
+
+            // cluster mode using Poisson disc (optional: implement elsewhere)
+            foreach (var spawn in spawnList)
+            {
+                if (spawn.mode == "cluster")
+                {
+                }
+                var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>(spawn.id);
+                var type = Type.GetType($"GameItem.{config.type}Item");
+                GameItemManager.CreateGameItem<IGameItem>(
+                  type,
+                  config, spawn.pos, GameItemType.Static, true
+                );
             }
         }
     }

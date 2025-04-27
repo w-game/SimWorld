@@ -7,6 +7,7 @@ public class ConfigBase
     public string id;
     public string name;
     public string description;
+    public string type;
     public string icon;
     public string prefab;
 }
@@ -21,7 +22,6 @@ public class PosConfig
 [Serializable]
 public class BuildingConfig : ConfigBase
 {
-    public string type;
     public int[] size;    
     public BuildingRequiredItem[] requiredItems;
 }
@@ -31,12 +31,6 @@ public class BuildingRequiredItem
 {
     public int id;
     public int count;
-}
-
-[Serializable]
-public class ConfigList<T>
-{
-    public T[] items;
 }
 
 [Serializable]
@@ -76,7 +70,6 @@ public class GameItemToActions : ConfigBase
 [Serializable]
 public class RoomConfig : ConfigBase
 {
-    public string type;
     public int[] layout;
     public int width;
     public int height;
@@ -107,4 +100,25 @@ public class CraftMaterialConfig
 {
     public string id;
     public int amount;
+}
+
+[Serializable]
+public class BiomeConfig : ConfigBase
+{
+    public float scale;
+    public float frequency;
+    public LayerConfig[] layers;
+}
+[Serializable]
+public class LayerConfig
+{
+    public float threshold;
+    public string mode; // "cluster" or "scatter"
+    public ItemWeight[] items;
+}
+[Serializable]
+public class ItemWeight
+{
+    public string id;
+    public float weight;
 }

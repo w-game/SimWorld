@@ -11,10 +11,11 @@ namespace UI.Views
         [SerializeField] private List<TextMeshProUGUI> actionItems;
 
         private IAction CurAction => GameManager.I.CurrentAgent.Brain.CurAction;
-        
+
         public void Init()
         {
             GameManager.I.CurrentAgent.Brain.OnActionRegister += OnActionRegister;
+            
         }
 
         private void OnDisable()
@@ -25,6 +26,7 @@ namespace UI.Views
         private void OnActionRegister(IAction action)
         {
             action.OnCompleted += OnActionCompleted;
+            action.OnActionFailed += OnActionCompleted;
             UpdateUI();
         }
 
@@ -32,6 +34,7 @@ namespace UI.Views
         private void OnActionCompleted(IAction action)
         {
             action.OnCompleted -= OnActionCompleted;
+            action.OnActionFailed -= OnActionCompleted;
             UpdateUI();
         }
 

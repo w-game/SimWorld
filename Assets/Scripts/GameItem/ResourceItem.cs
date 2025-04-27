@@ -9,7 +9,7 @@ namespace GameItem
     {
         public override bool Walkable => true;
 
-        public ResourceItem(ResourceConfig config, Vector3 pos) : base(config, pos)
+        public ResourceItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos)
         {
         }
 
@@ -21,7 +21,7 @@ namespace GameItem
 
     public class SmallRockItem : ResourceItem
     {
-        public SmallRockItem(ResourceConfig config, Vector3 pos) : base(config, pos)
+        public SmallRockItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos, random)
         {
 
         }

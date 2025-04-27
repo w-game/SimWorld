@@ -9,7 +9,10 @@ namespace AI
         {
             ActionName = actionName;
             OnCompleted += (a) => callback?.Invoke(a);
-            PrecedingActions.Add(action);
+            if (action != null)
+            {
+                PrecedingActions.Add(action);
+            }
         }
 
         public override void OnRegister(Agent agent)
