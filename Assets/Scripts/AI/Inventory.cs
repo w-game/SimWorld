@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameItem;
+using UnityEngine;
 using UnityEngine.Events;
 
-public class PropItem
+public class PropItemBase
 {
-    public PropConfig Config { get; private set; }
+    public ConfigBase Config { get; private set; }
     public int Quantity { get; private set; }
     public PropType Type { get; private set; }
 
-    public PropItem(PropConfig config, int quantity = 1)
+    public PropItemBase(ConfigBase config, int quantity = 1)
     {
         Config = config;
         Quantity = quantity;
@@ -23,6 +24,22 @@ public class PropItem
     }
 }
 
+public class PropItem : PropItemBase
+{
+    public new PropConfig Config => base.Config as PropConfig;
+    public PropItem(ConfigBase config, int quantity = 1) : base(config, quantity)
+    {
+    }
+}
+
+public class CraftPropItem : PropItemBase
+{
+    public new CraftConfig Config => base.Config as CraftConfig;
+    public CraftPropItem(ConfigBase config, int quantity = 1) : base(config, quantity)
+    {
+    }
+}
+
 public enum PropType
 {
     None,
@@ -31,7 +48,8 @@ public enum PropType
     Material,
     Tool,
     Equipment,
-    Weapon
+    Weapon,
+    Crop
 }
 
 public class Inventory
@@ -49,6 +67,11 @@ public class Inventory
     public bool AddItem(PropGameItem item)
     {
         return AddItem(item.Config, item.Count);
+    }
+
+    public bool AddItem(PropItem item)
+    {
+        return AddItem(item.Config as PropConfig, item.Quantity);
     }
 
     public bool AddItem(PropConfig config, int quantity = 1)

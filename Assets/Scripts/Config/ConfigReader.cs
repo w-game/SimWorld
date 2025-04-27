@@ -31,7 +31,8 @@ public class ConfigReader
         { typeof(RoomConfig)       , "Configs/RoomConfig"        },
         { typeof(JobConfig)        , "Configs/JobConfig"         },
         { typeof(CraftConfig)      , "Configs/CraftConfig"       },
-        { typeof(BiomeConfig)      , "Configs/BiomeConfig"       }
+        { typeof(BiomeConfig)      , "Configs/BiomeConfig"       },
+        { typeof(CropSeedConfig)   , "Configs/CropSeedConfig"    },
     };
 
     /// <summary>Load/refresh every registered config file.</summary>

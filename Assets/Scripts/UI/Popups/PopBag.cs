@@ -9,7 +9,7 @@ namespace UI.Popups
             
         protected override PropType PropType => PropType.None;
 
-        protected override void OnItemClicked(ConfigBase config)
+        protected override void OnItemClicked(PropItem propItem)
         {
             // if (config is PropConfig propConfig)
             // {

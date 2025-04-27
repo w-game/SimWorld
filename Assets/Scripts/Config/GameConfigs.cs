@@ -122,3 +122,9 @@ public class ItemWeight
     public string id;
     public float weight;
 }
+
+[Serializable]
+public class CropSeedConfig : ConfigBase
+{
+    public string target;
+}

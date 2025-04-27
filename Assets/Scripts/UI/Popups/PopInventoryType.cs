@@ -22,7 +22,7 @@ namespace UI.Popups
                 ItemSlotElement slot = Instantiate(itemSlotPrefab, itemSlotParent);
                 inventorySlots.Add(slot);
 
-                slot.Init(null, OnItemClicked);
+                slot.Init(null, propItem => OnItemClicked(propItem as PropItem));
             }
 
             UpdateBag();
@@ -32,22 +32,27 @@ namespace UI.Popups
         private void UpdateBag()
         {
             int inventoryIdx = 0;
+            for (int i = 0; i < inventorySlots.Count; i++)
+            {
+                inventorySlots[i].Clear();
+            }
+            
             for (int i = 0; i < Inventory.Items.Count; i++)
             {
                 var item = Inventory.Items[i];
                 if (PropType == PropType.None)
                 {
-                    inventorySlots[i].UpdateItemSlot(item.Config, item.Quantity);
+                    inventorySlots[i].UpdateItemSlot(item, item.Quantity);
                 }
                 else if (item.Type == PropType)
                 {
-                    inventorySlots[inventoryIdx].UpdateItemSlot(item.Config, item.Quantity);
+                    inventorySlots[inventoryIdx].UpdateItemSlot(item, item.Quantity);
                     inventoryIdx++;
                 }
             }
         }
 
-        protected abstract void OnItemClicked(ConfigBase config);
+        protected abstract void OnItemClicked(PropItem propItem);
 
         public override void OnHide()
         {

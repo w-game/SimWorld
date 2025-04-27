@@ -78,7 +78,8 @@ namespace AI
                     if (!MapManager.I.TryGetBuildingItem(pos, out var buildingItem))
                     {
                         IHouse house = GameManager.I.CurrentAgent.Citizen.Family.GetHouse(HouseType.Farm);
-                        actions.Add(new HoeAction(pos, house));
+                        var cellPos = MapManager.I.WorldPosToCellPos(pos);
+                        actions.Add(new HoeAction(new Vector3(cellPos.x, cellPos.y, 0), house));
                     }
                     break;
                 case BlockType.Road:

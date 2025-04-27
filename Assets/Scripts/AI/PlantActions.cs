@@ -54,11 +54,8 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
-                GameManager.I.ConfigReader.GetConfig<ResourceConfig>(_seedId),
-                _farmItem.Pos + new Vector3(0.5f, 0.5f, 0),
-                GameItemType.Static);
-            plantItem.ShowUI();
+            _farmItem.Plant(_seedId);
+            agent.Bag.RemoveItem(GameManager.I.ConfigReader.GetConfig<PropConfig>(_seedId), 1);
         }
     }
 

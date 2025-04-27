@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
@@ -10,15 +11,17 @@ namespace UI.Elements
         [SerializeField] private Image itemIcon;
         [SerializeField] private Button itemButton;
         [SerializeField] private TextMeshProUGUI itemCountText;
-        public void Init(ConfigBase config, UnityAction<ConfigBase> onClick)
+
+        public PropItemBase PropItem { get; private set; }
+        public void Init(PropItemBase propItem, UnityAction<PropItemBase> onClick)
         {
-            UpdateItemSlot(config, -1);
-            itemButton.onClick.AddListener(() => onClick(config));
+            UpdateItemSlot(propItem, -1);
+            itemButton.onClick.AddListener(() => onClick(PropItem));
         }
         
-        public void UpdateItemSlot(ConfigBase newConfig, int count = -1)
+        public void UpdateItemSlot(PropItemBase propItem, int count = -1)
         {
-            if (newConfig == null)
+            if (propItem == null)
             {
                 itemIcon.gameObject.SetActive(false);
                 itemCountText.gameObject.SetActive(false);
@@ -26,7 +29,9 @@ namespace UI.Elements
                 return;
             }
 
-            itemIcon.sprite = Resources.Load<Sprite>(newConfig.icon);
+            PropItem = propItem;
+
+            itemIcon.sprite = Resources.Load<Sprite>(propItem.Config.icon);
             itemIcon.gameObject.SetActive(true);
             itemButton.interactable = true;
             if (count > 0)
@@ -38,6 +43,14 @@ namespace UI.Elements
             {
                 itemCountText.gameObject.SetActive(false);
             }
+        }
+
+        internal void Clear()
+        {
+            PropItem = null;
+            itemIcon.gameObject.SetActive(false);
+            itemCountText.gameObject.SetActive(false);
+            itemButton.interactable = false;
         }
     }
 }

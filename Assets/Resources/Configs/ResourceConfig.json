@@ -52,7 +52,7 @@
             ],
             "dropItems": [
                 {
-                    "id": "PROP_RESOURCE_WHEAT",
+                    "id": "PROP_MATERIAL_WHEAT",
                     "count": 1
                 }
             ]

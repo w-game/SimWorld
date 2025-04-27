@@ -77,6 +77,24 @@
             "icon": "Textures/Grass",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 50
+        },
+        {
+            "id": "PROP_MATERIAL_WHEAT",
+            "name": "Wheat",
+            "description": "A piece of wheat.",
+            "type": "Crop",
+            "icon": "Textures/Wheats",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 30
+        },
+        {
+            "id": "PROP_SEED_WHEAT",
+            "name": "Wheat Seed",
+            "description": "A seed for planting wheat.",
+            "type": "Seed",
+            "icon": "Textures/WheatSeed",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10
         }
     ]
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -116,7 +117,7 @@ namespace GameItem
 
     public class FarmItem : BuildingItem
     {
-        public PlantItem PlantItem { get; private set; }
+        public PlantItem PlantItem => GameManager.I.GameItemManager.TryGetItemAtPos<PlantItem>(Pos);
         public FarmItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.farmTiles;
@@ -138,6 +139,11 @@ namespace GameItem
 
         public override List<IAction> ActionsOnClick(Agent agent)
         {
+            if (PlantItem != null)
+            {
+                return new List<IAction>();
+            }
+
             return new List<IAction>()
             {
                 new SystemAction("Plant Seed", a =>
@@ -149,11 +155,23 @@ namespace GameItem
                             return;
                         }
 
-                        new PlantAction(this, selectedSeedId);
+                        GameManager.I.CurrentAgent.Brain.RegisterAction(new PlantAction(this, selectedSeedId), true);
                     });
                     model.ShowUI();
                 })
             };
+        }
+
+        public void Plant(string seedId)
+        {
+            var cropSeedConfig = GameManager.I.ConfigReader.GetConfig<CropSeedConfig>(seedId);
+            PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
+                GameManager.I.ConfigReader.GetConfig<ResourceConfig>(cropSeedConfig.target),
+                Pos + new Vector3(0.5f, 0.5f, 0),
+                GameItemType.Static,
+                false);
+
+            plantItem.ShowUI();
         }
     }
 }

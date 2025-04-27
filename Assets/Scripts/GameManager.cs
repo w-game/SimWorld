@@ -42,13 +42,15 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            CurrentAgent.RegisterSchedule(
-                new Schedule(
-                    20 * 60 * 60,
-                    29 * 60 * 60,
-                    new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
-                    new SleepAction(CurrentAgent.State.Sleep),
-                    CurrentAgent.Citizen));
+            // CurrentAgent.RegisterSchedule(
+            //     new Schedule(
+            //         20 * 60 * 60,
+            //         29 * 60 * 60,
+            //         new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
+            //         new SleepAction(CurrentAgent.State.Sleep),
+            //         CurrentAgent.Citizen));
+
+            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_SEED_WHEAT"), 1);
         }
     }
 

@@ -1,0 +1,13 @@
+{
+    "items": [
+        {
+            "id": "PROP_MATERIAL_WHEAT",
+            "target": "PROP_SEED_WHEAT"
+        },
+        {
+
+            "id": "PROP_SEED_WHEAT",
+            "target": "PLANT_WHEAT"
+        }
+    ]
+}

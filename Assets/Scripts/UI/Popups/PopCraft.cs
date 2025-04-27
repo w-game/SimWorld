@@ -23,7 +23,7 @@ namespace UI.Popups
 
         private List<ItemSlotElement> craftItemSlots = new List<ItemSlotElement>();
 
-        private CraftConfig _selectedConfig;
+        private CraftPropItem _selectedItem;
         public override void OnShow()
         {
             base.OnShow();
@@ -35,10 +35,10 @@ namespace UI.Popups
                 ItemSlotElement slot = Instantiate(craftItemPrefab, craftItemParent);
                 craftItemSlots.Add(slot);
                 config.icon = GameManager.I.ConfigReader.GetConfig<PropConfig>(config.id).icon;
-                slot.Init(config, OnItemClicked);
+                slot.Init(new CraftPropItem(config, 1), OnItemClicked);
             }
 
-            OnItemClicked(configs[0]);
+            OnItemClicked(craftItemSlots[0].PropItem);
 
             craftButton.onClick.AddListener(OnCraftButtonClicked);
             GameManager.I.CurrentAgent.Bag.OnInventoryChanged += UpdateCraftButton;
@@ -46,15 +46,15 @@ namespace UI.Popups
 
         private void UpdateCraftButton()
         {
-            if (_selectedConfig == null)
+            if (_selectedItem == null)
                 return;
 
-            OnItemClicked(_selectedConfig);
+            OnItemClicked(_selectedItem);
         }
 
-        private void OnItemClicked(ConfigBase config)
+        private void OnItemClicked(PropItemBase propItem)
         {
-            _selectedConfig = (CraftConfig)config;
+            _selectedItem = propItem as CraftPropItem;
 
             foreach (var slot in materialItemSlots)
             {
@@ -62,13 +62,13 @@ namespace UI.Popups
             }
             materialItemSlots.Clear();
 
-            var propConfig = GameManager.I.ConfigReader.GetConfig<PropConfig>(_selectedConfig.id);
+            var propConfig = GameManager.I.ConfigReader.GetConfig<PropConfig>(_selectedItem.Config.id);
             icon.sprite = Resources.Load<Sprite>(propConfig.icon);
             nameText.text = propConfig.name;
             // descriptionText.text = propConfig.description;
 
             var canCraft = true;
-            foreach (var material in _selectedConfig.materials)
+            foreach (var material in _selectedItem.Config.materials)
             {
                 MaterialElement materialSlot = Instantiate(materialItemPrefab, materialsParent);
                 materialItemSlots.Add(materialSlot);
@@ -86,9 +86,9 @@ namespace UI.Popups
 
         private void OnCraftButtonClicked()
         {
-            if (_selectedConfig != null)
+            if (_selectedItem != null)
             {
-                GameManager.I.CraftItem(_selectedConfig);
+                GameManager.I.CraftItem(_selectedItem.Config as CraftConfig);
             }
         }
 

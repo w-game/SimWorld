@@ -164,6 +164,20 @@
                 "PROP_MATERIAL_PLANK": 8
             },
             "buildSpeed": 6
+        },
+        {
+            "id": "BUILDING_SEED_INCUBATOR",
+            "name": "Seed Incubator",
+            "description": "An incubator for seeds.",
+            "type": "SeedIncubator",
+            "icon": "Textures/SeedIncubator",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "wood": 5,
+                "stone": 2
+            },
+            "buildSpeed": 20
         }
     ]
 }

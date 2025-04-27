@@ -102,6 +102,7 @@
     <Compile Include="Assets/Scripts/AI/HouseWorkActions.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopBuildingCraft.cs" />
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopSeedIncubatorModel.cs" />
     <Compile Include="Assets/TIles/OceanTile.cs" />
     <Compile Include="Assets/Scripts/UI/ElementBase.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopHouseDetailsModel.cs" />
@@ -136,6 +137,7 @@
     <Compile Include="Assets/Scripts/UI/MainView.cs" />
     <Compile Include="Assets/Scripts/Map/House.cs" />
     <Compile Include="Assets/Scripts/Map/Chunk.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopSeedIncubator.cs" />
     <Compile Include="Assets/Scripts/Map/CartonMap.cs" />
     <Compile Include="Assets/Scripts/Map/City.cs" />
     <Compile Include="Assets/Textures/Sprout Lands - Sprites - premium pack/Tilesets/ground tiles/water frames/WaterTile.cs" />
