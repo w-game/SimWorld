@@ -178,6 +178,19 @@
                 "stone": 2
             },
             "buildSpeed": 20
+        },
+        {
+            "id": "BUILDING_SHOP_SHELF",
+            "name": "Shop Shelf",
+            "description": "A shelf for displaying items.",
+            "type": "Furniture",
+            "icon": "Textures/ShopShelf",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "wood": 3,
+                "metal": 1
+            }
         }
     ]
 }
