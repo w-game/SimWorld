@@ -40,9 +40,9 @@ namespace Citizens
                 null,
                 randomPos + new Vector2(0.5f, 0.5f),
                 GameItemType.Dynamic,
-                GameManager.I.ActionSystem.CreateAIController()
+                GameManager.I.ActionSystem.CreateAIController(),
+                member
             );
-            agent.Init(member);
             family.AddMember(member);
 
             agent.RegisterSchedule(

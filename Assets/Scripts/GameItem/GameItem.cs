@@ -14,6 +14,7 @@ namespace GameItem
 
     public interface IGameItem
     {
+        public bool Active { get; set; }
         Vector3 Pos { get; set; }
         GameItemType ItemType { get; set; }
         Vector2Int Size { get; }
@@ -56,6 +57,7 @@ namespace GameItem
         public Family Owner { get; set; }
         public abstract bool Walkable { get; }
         public virtual List<Vector2Int> OccupiedPositions { get; } = new List<Vector2Int>();
+        public bool Active { get; set; } = true;
 
         public GameItemBase(T config, Vector3 pos)
         {

@@ -12,10 +12,8 @@ namespace GameItem
         public override bool Walkable => true;
         public int Count { get; private set; } = 1;
 
-        private Tween _tween;
-
-        private float _pickColdownTime = 0.05f;
         private Agent _agent;
+        private bool _isPickedUp = false;
 
         public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
@@ -38,24 +36,22 @@ namespace GameItem
             };
         }
 
-        public override void Update()
-        {
-            _pickColdownTime -= Time.deltaTime;
-            if (_agent != null && _pickColdownTime <= 0)
-            {
-                if (_agent.Bag.AddItem(this))
-                {
-                    GameItemManager.DestroyGameItem(this);
-                }
-            }
-        }
-
         public void BePickedUp(Agent agent)
         {
-            if (Owner != agent.Citizen.Family || _agent != null)
+            if (Owner != agent.Citizen.Family || _isPickedUp)
                 return;
 
-            _agent = agent;
+            _isPickedUp = true;
+            DOTween.Sequence()
+                .AppendInterval(0.1f)
+                .AppendCallback(() =>
+                {
+                    if (agent.Bag.AddItem(this))
+                    {
+                        _agent = agent;
+                        GameItemManager.DestroyGameItem(this);
+                    }
+                });
         }
 
         public override void Destroy()

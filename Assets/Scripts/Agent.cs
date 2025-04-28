@@ -134,18 +134,20 @@ namespace Citizens
         };
 
         private Schedule _currentSchedule;
-
         public PlayerController PlayerController { get; private set; }
+        public Inventory Bag { get; private set; }
+        public override bool Walkable => false;
 
-        public Agent(ConfigBase config, Vector3 pos, AIController brain) : base(null, pos)
+        public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
         {
             Brain = brain;
             Brain.SetAgent(this);
+            Citizen = citizen;
+            Citizen.SetAgent(this);
+            Owner = Citizen.Family;
+            State = new AgentState(this);
+            Bag = new Inventory(16);
         }
-
-        public Inventory Bag { get; private set; }
-
-        public override bool Walkable => false;
 
         public override void ShowUI()
         {
@@ -224,15 +226,6 @@ namespace Citizens
             _pos = target;
 
             PlayerController.MoveTo(target);
-        }
-
-        public void Init(FamilyMember citizen)
-        {
-            Citizen = citizen;
-            Citizen.SetAgent(this);
-            Owner = Citizen.Family;
-            State = new AgentState(this);
-            Bag = new Inventory(16);
         }
 
         public void MoveToTarget(Vector2 pos)

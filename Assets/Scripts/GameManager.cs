@@ -59,9 +59,9 @@ public class GameManager : MonoBehaviour
             null,
             Vector3.zero,
             GameItemType.Dynamic,
-            ActionSystem.CreateAIController()
+            ActionSystem.CreateAIController(),
+            CitizenManager.CreatePlayer()
         );
-        CurrentAgent.Init(CitizenManager.CreatePlayer());
         CurrentAgent.ShowUI();
         UIManager.I.cinemachineCamera.Follow = CurrentAgent.UI.transform;
     }

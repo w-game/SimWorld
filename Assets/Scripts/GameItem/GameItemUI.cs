@@ -37,11 +37,13 @@ public class GameItemUI : MonoBehaviour, IPoolable
     {
         if (col != null)
             col.enabled = true;
+        
     }
 
     public virtual void OnRelease()
     {
-
+        _animationTarget = null;
+        _animationCallback = null;
     }
 
     public void PlayAnimation(IGameItem target, Action value)
