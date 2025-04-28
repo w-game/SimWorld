@@ -36,7 +36,7 @@ public class GameItemManager
         // Build a single argument list: (config, pos, ...otherObjs)
         object[] ctorArgs = new object[2 + otherObjs.Length];
         ctorArgs[0] = config;
-        ctorArgs[1] = pos;
+        ctorArgs[1] = ItemPosToMapPosConverter.Invoke(pos).ToVector3();
         Array.Copy(otherObjs, 0, ctorArgs, 2, otherObjs.Length);
 
         var item = Activator.CreateInstance(type, ctorArgs) as T;

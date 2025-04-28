@@ -110,6 +110,14 @@ namespace Map
                             this
                         );
                         CommercialPos.Add(pos);
+                    } else if (RoomConfig.layout[i + j * RoomConfig.width] == -2)
+                    {
+                        GameItemManager.CreateGameItem<FarmItem>(
+                            ConfigReader.GetConfig<BuildingConfig>("BUILDING_FARM"),
+                            new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                            GameItemType.Static,
+                            this
+                        );
                     }
                 }
             }

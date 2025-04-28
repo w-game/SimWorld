@@ -45,6 +45,7 @@ namespace GameItem
         public override bool Walkable => true;
         public IHouse House { get; private set; }
         public List<TileBase> Tiles { get; protected set; }
+        private bool _isPlaced;
         public BuildingItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos)
         {
             House = house;
@@ -54,7 +55,12 @@ namespace GameItem
 
         public override void ShowUI()
         {
+            if (_isPlaced)
+            {
+                return;
+            }
             MapManager.I.SetMapTile(Pos, MapLayer.Building, Tiles);
+            _isPlaced = true;
         }
 
         public override List<IAction> ItemActions(IGameItem agent)
@@ -79,11 +85,12 @@ namespace GameItem
         public override void HideUI()
         {
             MapManager.I.SetMapTile(Pos, MapLayer.Building, null);
+            _isPlaced = false;
         }
 
         public override void Destroy()
         {
-            MapManager.I.SetMapTile(Pos, MapLayer.Building, null);
+            HideUI();
         }
     }
 
