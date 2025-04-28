@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using AI;
+using Citizens;
 using UnityEngine;
 
 namespace GameItem

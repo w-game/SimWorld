@@ -79,7 +79,7 @@
             "id": "RESOURCE_ROCK",
             "name": "Rock",
             "description": "A rock.",
-            "type": "Resource",
+            "type": "SmallRock",
             "icon": "Textures/Rock_0",
             "prefab": "Prefabs/GameItems/ResourceItem",
             "stages": [

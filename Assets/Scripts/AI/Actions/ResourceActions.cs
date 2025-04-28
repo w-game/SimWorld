@@ -9,11 +9,6 @@ namespace AI
     {
         private ResourceItem _item;
 
-        public void Execute()
-        {
-
-        }
-
         public override void OnGet(params object[] args)
         {
             _item = args[0] as ResourceItem;
@@ -36,7 +31,6 @@ namespace AI
             }
 
             GameItemManager.DestroyGameItem(_item);
-            Done = true;
         }
     }
 }
