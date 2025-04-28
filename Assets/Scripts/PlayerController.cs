@@ -6,9 +6,12 @@ using UnityEngine;
 public class PlayerController : GameItemUI
 {
     [SerializeField] private Rigidbody2D rb;
+    [SerializeField] private Animator animator;
 
     public Rigidbody2D Rb => rb;
     private Agent _agent;
+
+    private Vector3 _lastPos;
 
     public override void Init(IGameItem gameItem)
     {
@@ -33,5 +36,19 @@ public class PlayerController : GameItemUI
     public void MoveTo(Vector2 target)
     {
         rb.MovePosition(target);
+    }
+
+    public void FixedUpdate()
+    {
+        var curPos = transform.position;
+        var dir = curPos - _lastPos;
+        var moved = dir.magnitude > 0.01f;
+
+        animator.SetBool("MoveRight", moved && dir.x > 0f);
+        animator.SetBool("MoveLeft", moved && dir.x < 0f);
+        animator.SetBool("MoveUp", moved && dir.y > 0f);
+        animator.SetBool("MoveDown", moved && dir.y < 0f);
+
+        _lastPos = curPos;
     }
 }

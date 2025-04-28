@@ -50,8 +50,8 @@
             "name": "Carrot",
             "description": "A fresh carrot.",
             "type": "Food",
-            "icon": "wall_icon.png",
-            "prefab": "Prefab/Wall",
+            "icon": "Textures/Carrot",
+            "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1
         },
         {

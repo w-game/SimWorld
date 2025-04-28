@@ -347,7 +347,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sr: {fileID: 0}
+  col: {fileID: 0}
+  itemNameText: {fileID: 0}
   rb: {fileID: 927521976815728567}
+  animator: {fileID: 2911523480166893942}
 --- !u!95 &2911523480166893942
 Animator:
   serializedVersion: 7

@@ -13,12 +13,12 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            if (_stoveItem == null && agent.Citizen.Family.Houses[0].TryGetFurniture<StoveItem>(out var stoveItem))
-            {
-                _stoveItem = stoveItem;
-            }
+            // if (_stoveItem == null && agent.Citizen.Family.Houses[0].TryGetFurniture<StoveItem>(out var stoveItem))
+            // {
+            //     _stoveItem = stoveItem;
+            // }
 
-            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _stoveItem.Pos));
+            // PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _stoveItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
