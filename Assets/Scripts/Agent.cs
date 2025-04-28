@@ -210,13 +210,6 @@ namespace Citizens
 
             if (!MapManager.I.IsWalkable(target))
             {
-                var items = GameManager.I.GameItemManager.GetItemsAtPos(target);
-
-                foreach (var item in items)
-                {
-                    Debug.Log($"Found item: {item}, walkable: {item.Walkable}, {new Vector2(moveX, moveY)}");
-                }
-
                 target = PlayerController.Rb.position + new Vector2(moveX, 0) * MoveSpeed * Time.fixedDeltaTime;
                 if (!MapManager.I.IsWalkable(target))
                 {

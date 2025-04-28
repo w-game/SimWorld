@@ -138,11 +138,11 @@ namespace GameItem
 
             if (State == PlantState.Drought)
             {
-                actions.Add(new WaterPlantAction(Pos));
+                actions.Add(ActionPool.Get<WaterPlantAction>(Pos));
             }
             else if (State == PlantState.Weeds)
             {
-                actions.Add(new WeedingAction(this));
+                actions.Add(ActionPool.Get<WeedingAction>(this));
             }
 
             if (agent is Agent a)
@@ -157,9 +157,9 @@ namespace GameItem
         {
             if (GrowthStage == PlantStage.Harvestable)
             {
-                return new HarvestAction(this);
+                return ActionPool.Get<HarvestAction>(this);
             }
-            return new RemovePlantAction(this);
+            return ActionPool.Get<RemovePlantAction>(this);
         }
 
         internal void Weeding()
@@ -185,12 +185,13 @@ namespace GameItem
 
             if (axe != null)
             {
-                return new RemovePlantAction(this, "Chop the tree");
+                return ActionPool.Get<RemovePlantAction>(this, "Chop the tree");
+                
             }
             else
             {
                 // 如果没有斧头，则返回一个默认的 RemovePlantAction
-                var removeAction = new RemovePlantAction(this, "Remove Tree (Need Axe)");
+                var removeAction = ActionPool.Get<RemovePlantAction>(this, "Remove Tree (Need Axe)");
                 removeAction.Enable = false;
                 return removeAction;
             }

@@ -9,7 +9,7 @@ using UnityEngine.Events;
 namespace AI
 {
     // 抽象基类，封装前置动作执行逻辑
-    public abstract class ActionBase : IAction
+    public abstract class ActionBase : IAction, IActionPool
     {
         // 用于保存该动作执行前必须完成的动作
         public List<IAction> PrecedingActions { get; } = new List<IAction>();
@@ -76,6 +76,9 @@ namespace AI
         {
             Done = false;
             PrecedingActions.Clear();
+            NextAction = null;
+            Enable = true;
+            Pause = false;
         }
 
         public virtual float Evaluate(Agent agent, HouseType houseType)
@@ -88,24 +91,26 @@ namespace AI
             var pos = MapManager.I.GetItemArroundPos(agent, targetPos);
             if (pos != Vector3.zero)
             {
-                PrecedingActions.Add(new CheckMoveToTarget(agent, pos));
+                PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, pos));
             }
             else
             {
                 Done = true;
             }
         }
+
+        public abstract void OnGet(params object[] args);
+
+        public virtual void OnRelease()
+        {
+            Reset();
+        }
     }
 
     public abstract class SingleActionBase : ActionBase
     {
-        private float _actionSpeed = 100f;
+        protected float ActionSpeed { get; set; } = 100f;
         private float _curProgress;
-
-        public SingleActionBase(float actionSpeed = 100f)
-        {
-            _actionSpeed = actionSpeed;
-        }
 
         public override void OnRegister(Agent agent)
         {
@@ -120,7 +125,7 @@ namespace AI
 
             if (_curProgress < 100f)
             {
-                _curProgress += GameTime.DeltaTime * _actionSpeed;
+                _curProgress += GameTime.DeltaTime * ActionSpeed;
             }
             else
             {
@@ -132,16 +137,10 @@ namespace AI
 
     public abstract class MultiTimesActionBase : ActionBase
     {
-        private int _totalTimes;
-        private float _progressSpeed;
+        protected int TotalTimes { get; set; }
+        protected float ProgressSpeed { get; set; }
         private int _curTimes = 0;
         private float _curProgress;
-
-        public MultiTimesActionBase(int totalTimes, float progressSpeed)
-        {
-            _totalTimes = totalTimes;
-            _progressSpeed = progressSpeed;
-        }
 
         public override void Execute(Agent agent)
         {
@@ -151,14 +150,14 @@ namespace AI
 
             if (_curProgress < 100f)
             {
-                _curProgress += GameTime.DeltaTime * _progressSpeed / 2f;
+                _curProgress += GameTime.DeltaTime * ProgressSpeed / 2f;
             }
             else
             {
                 DoExecute(agent);
                 _curProgress = 0f;
                 _curTimes++;
-                if (_curTimes >= _totalTimes)
+                if (_curTimes >= TotalTimes)
                 {
                     Done = true;
                 }
@@ -196,14 +195,6 @@ namespace AI
 
         private bool _isMoving = false;
 
-        public CheckMoveToTarget(Agent agent, Vector3 targetPos, string targetName = "")
-        {
-            var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
-            TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
-            ActionName = targetName;
-            Condition = () => _isMoving && agent.CheckArriveTargetPos();
-        }
-
         public override void OnRegister(Agent agent)
         {
         }
@@ -220,17 +211,28 @@ namespace AI
                 agent.MoveToTarget(TargetPos);
             }
         }
+
+        public override void OnGet(params object[] args)
+        {
+            var agent = args[0] as Agent;
+            var targetPos = (Vector3)args[1];
+            var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
+            TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
+            ActionName = "Move to";
+            Condition = () => _isMoving && agent.CheckArriveTargetPos();
+            _isMoving = false;
+        }
     }
 
     // 将物品放到指定位置（例如将食物放到嘴边或桌上）
     public class PutItemToTarget : SingleActionBase
     {
-        public PutItemToTarget(PropGameItem item, IGameItem targetItem)
-        {
-            
-        }
-
         public override string ActionName => "将物品放置到目标点";
+
+        public override void OnGet(params object[] args)
+        {
+            throw new NotImplementedException();
+        }
 
         public override void OnRegister(Agent agent)
         {
@@ -251,16 +253,11 @@ namespace AI
         public override string ActionName => "捡取物品";
         private PropGameItem _item;
 
-        public TakeItemInHand(PropGameItem item) : base(50f)
-        {
-            _item = item;
-        }
-
         public override void OnRegister(Agent agent)
         {
             if (Vector3.Distance(agent.Pos, _item.Pos) > 0.5f)
             {
-                PrecedingActions.Add(new CheckMoveToTarget(agent, _item.Pos));
+                PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _item.Pos));
             }
         }
 
@@ -268,6 +265,12 @@ namespace AI
         {
             Debug.Log("执行捡取物品动作");
             agent.TakeItemInHand(_item);
+            ActionSpeed = 0f;
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            _item = args[0] as PropGameItem;
         }
     }
 
@@ -285,24 +288,18 @@ namespace AI
     {
         private FoodItem _foodItem;
 
-        public EatAction(FoodItem foodItem, State state) : base(foodItem.MaxFoodTimes, 5f)
-        {
-            _foodItem = foodItem;
-            ActionName = "Eat";
-        }
-
         public override void OnRegister(Agent agent)
         {
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
             TableItem tableItem = agent.FindNearestTableItem();
 
-            var takeItem = new TakeItemInHand(_foodItem);
+            var takeItem = ActionPool.Get<TakeItemInHand>(_foodItem);
             takeItem.OnRegister(agent);
             PrecedingActions.Add(takeItem);
 
             if (tableItem != null)
             {
-                var putItemToTarget = new PutItemToTarget(_foodItem, tableItem);
+                var putItemToTarget = ActionPool.Get<PutItemToTarget>(_foodItem, tableItem);
                 PrecedingActions.Add(putItemToTarget);
             }
         }
@@ -320,6 +317,15 @@ namespace AI
         {
             return base.Evaluate(agent, houseType);
         }
+
+        public override void OnGet(params object[] args)
+        {
+            _foodItem = args[0] as FoodItem;
+            ActionName = "Eat";
+
+            ProgressSpeed = _foodItem.MaxFoodTimes;
+            TotalTimes = 5;
+        }
     }
 
     // 示例行为：上厕所，需要先移动到厕所位置
@@ -328,10 +334,6 @@ namespace AI
         public override string ActionName => "上厕所";
 
         private ToiletItem _toiletItem;
-        public ToiletAction(State state) : base(10f)
-        {
-            ActionName = "Toilet";
-        }
 
         public override void OnRegister(Agent agent)
         {
@@ -345,7 +347,7 @@ namespace AI
             if (agent.Citizen.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
             {
                 _toiletItem = toiletItem;
-                PrecedingActions.Add(new CheckMoveToTarget(agent, _toiletItem.Pos));
+                PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _toiletItem.Pos));
             }
         }
 
@@ -368,16 +370,22 @@ namespace AI
                 Done = true;
             }
         }
+
+        public override void OnGet(params object[] args)
+        {
+            ActionName = "Toilet";
+            ActionSpeed = 10f;
+        }
     }
 
     // 示例行为：社交，不需要额外移动
-    public class SocialAction : NormalAction
+    public class SocialAction : SingleActionBase
     {
         public override string ActionName => "社交";
 
-        public SocialAction(State state) : base(state)
+        public SocialAction() : base()
         {
-            ActionName = "社交";
+            
         }
 
         public override void OnRegister(Agent agent)
@@ -391,14 +399,19 @@ namespace AI
             agent.State.Social.Increase(10);
             Done = true;
         }
+
+        public override void OnGet(params object[] args)
+        {
+            ActionName = "社交";
+        }
     }
 
     // 示例行为：游玩，需要先移动到游玩区域
-    public class PlayAction : NormalAction
+    public class PlayAction : SingleActionBase
     {
         public override string ActionName => "游玩";
 
-        public PlayAction(State state) : base(state)
+        public PlayAction() : base()
         {
         }
 
@@ -414,6 +427,11 @@ namespace AI
             agent.State.Mood.Increase(10);
             Done = true;
         }
+
+        public override void OnGet(params object[] args)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     // 示例行为：洗澡，需要先移动到浴室位置
@@ -423,16 +441,14 @@ namespace AI
 
         private IGameItem _bath;
 
-        public BathAction(IGameItem bath, State state)
+        public BathAction() : base()
         {
-            _bath = bath;
-            ActionName = "洗澡";
         }
 
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到浴室
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _bath.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _bath.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -441,15 +457,24 @@ namespace AI
             agent.State.Hygiene.Increase(100);
             Done = true;
         }
+
+        public override void OnGet(params object[] args)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SleepAction : MultiTimesActionBase
     {
         private BedItem _bedItem;
-        public SleepAction(State state, BedItem bedItem = null) : base(100, 5f)
+
+        public override void OnGet(params object[] args)
         {
             ActionName = "Sleep";
-            _bedItem = bedItem;
+            _bedItem = args[0] as BedItem;
+
+            ProgressSpeed = 100f;
+            TotalTimes = 5;
         }
 
         public override void OnRegister(Agent agent)
@@ -470,7 +495,7 @@ namespace AI
                 }
             }
 
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _bedItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _bedItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -484,6 +509,11 @@ namespace AI
         public BackHome()
         {
             ActionName = "Back Home";
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            throw new NotImplementedException();
         }
 
         public override void OnRegister(Agent agent)
@@ -503,21 +533,26 @@ namespace AI
         public override string ActionName => "Sit";
         private ChairItem _chairItem;
 
-        public SitAction(ChairItem chairItem)
+        public SitAction()
         {
-            _chairItem = chairItem;
         }
 
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到椅子位置
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _chairItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _chairItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行坐下动作");
             _chairItem.SitDown(agent);
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            _chairItem = args[0] as ChairItem;
+            ActionName = "Sit";
         }
     }
 
@@ -527,22 +562,26 @@ namespace AI
 
         private BookItem _bookItem;
 
-        public ReadAction(BookItem bookItem) : base(5, 10f)
-        {
-            _bookItem = bookItem;
-        }
-
         public override void OnRegister(Agent agent)
         {
             // 加入前置动作：移动到书本位置
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _bookItem.Pos));
-            PrecedingActions.Add(new TakeItemInHand(_bookItem));
-            PrecedingActions.Add(new SitAction(agent.GetGameItem<ChairItem>()));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _bookItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<TakeItemInHand>(_bookItem));
+            PrecedingActions.Add(ActionPool.Get<SitAction>(agent.GetGameItem<ChairItem>()));
         }
 
         protected override void DoExecute(Agent agent)
         {
             Debug.Log("执行阅读动作");
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            _bookItem = args[0] as BookItem;
+            ActionName = "Read";
+
+            ProgressSpeed = 10f;
+            TotalTimes = 5;
         }
     }
 }

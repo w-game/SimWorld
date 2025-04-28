@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
 using AI;
-using GameItem;
-using Map;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,13 +9,6 @@ namespace Citizens
     {
         private Job _job;
         private JobUnit _curJobUnit;
-        public WorkAction(Job job)
-        {
-            _job = job;
-            ActionName = "Work";
-
-            Condition = () => GameManager.I.GameTime.CurrentTime < _job.WorkTime[0] || GameManager.I.GameTime.CurrentTime > _job.WorkTime[1];
-        }
 
         protected override void DoExecute(Agent agent)
         {
@@ -39,6 +29,14 @@ namespace Citizens
         public override void OnRegister(Agent agent)
         {
 
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            _job = args[0] as Job;
+            ActionName = "Work";
+
+            Condition = () => GameManager.I.GameTime.CurrentTime < _job.WorkTime[0] || GameManager.I.GameTime.CurrentTime > _job.WorkTime[1];
         }
     }
 

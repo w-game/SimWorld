@@ -13,9 +13,17 @@ namespace AI
             _consumer = consumer;
         }
 
+        public override void OnGet(params object[] args)
+        {
+            _chairItem = args[0] as ChairItem;
+            _consumer = args[1] as Agent;
+            ActionName = "Order";
+            ActionSpeed = 999f;
+        }
+
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _chairItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _chairItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -28,12 +36,12 @@ namespace AI
     {
         private RestaurantProperty _property;
         private Job _self;
-        public WaitForOrderAction(RestaurantProperty property, Job self)
-        {
-            _property = property;
-            _self = self;
 
-            Condition = () => _self.JobUnits.Count > 0;
+        public override void OnGet(params object[] args)
+        {
+            _property = args[0] as RestaurantProperty;
+            _self = args[1] as Job;
+            ActionName = "Wait For Order";
         }
 
         public override void OnRegister(Agent agent)
@@ -51,15 +59,18 @@ namespace AI
     {
         private Agent _consumer;
         private RestaurantProperty _property;
-        public GetOrderAction(RestaurantProperty property, Agent consumer) : base(20f)
+
+        public override void OnGet(params object[] args)
         {
-            _property = property;
-            _consumer = consumer;
+            _property = args[0] as RestaurantProperty;
+            _consumer = args[1] as Agent;
+            ActionName = "Get Order";
+            ActionSpeed = 20f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _consumer.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _consumer.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -73,9 +84,10 @@ namespace AI
     {
         private RestaurantProperty _property;
         private ChairItem _chairItem;
-        public WaitForAvailableSitAction(RestaurantProperty property)
+
+        public override void OnGet(params object[] args)
         {
-            _property = property;
+            _property = args[0] as RestaurantProperty;
             Condition = () =>
             {
                 _chairItem = _property.GetAvailableSit();

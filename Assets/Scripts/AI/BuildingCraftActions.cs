@@ -7,10 +7,13 @@ using UnityEngine;
 public class CraftBuildingItemAction : SingleActionBase
 {
     private BlueprintItem _item;
-    public CraftBuildingItemAction(BlueprintItem item) : base(1f)
+
+    public override void OnGet(params object[] args)
     {
+        _item = args[0] as BlueprintItem;
         ActionName = "Craft Building";
-        _item = item;
+
+        ActionSpeed = 1f;
     }
 
     public override void OnRegister(Agent agent)
@@ -22,7 +25,7 @@ public class CraftBuildingItemAction : SingleActionBase
             {
                 if (item is PlantItem plantItem)
                 {
-                    var action = new RemovePlantAction(plantItem);
+                    var action = ActionPool.Get<RemovePlantAction>(plantItem);
                     action.OnRegister(agent);
                     PrecedingActions.Add(action);
                 }
@@ -43,10 +46,13 @@ public class CraftBuildingItemAction : SingleActionBase
 public class RemoveBuildingItemAction : SingleActionBase
 {
     private BuildingItem _item;
-    public RemoveBuildingItemAction(BuildingItem item) : base(1f)
+
+    public override void OnGet(params object[] args)
     {
+        _item = args[0] as BuildingItem;
         ActionName = "Remove Building";
-        _item = item;
+
+        ActionSpeed = 1f;
     }
 
     public override void OnRegister(Agent agent)

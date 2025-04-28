@@ -130,7 +130,7 @@ namespace AI
                     ResolveHungerBehavior();
                     break;
                 case "Toilet":
-                    RegisterAction(new ToiletAction(_agent.State.Toilet), true);
+                    RegisterAction(ActionPool.Get<ToiletAction>(_agent.State.Toilet), true);
                     break;
                 case "Social":
                     // RegisterAction(new SocialAction(_agent.State.Social), true);
@@ -139,7 +139,7 @@ namespace AI
                     // RegisterAction(new PlayAction(_agent.State.Mood), true);
                     break;
                 case "Sleep":
-                    RegisterAction(new SleepAction(_agent.State.Sleep), true);
+                    RegisterAction(ActionPool.Get<SleepAction>(_agent.State.Sleep), true);
                     break;
                 case "Hygiene":
                     // RegisterAction(new BathAction(null, _agent.State.Hygiene), true);
@@ -154,7 +154,7 @@ namespace AI
             var foodItem = _agent.GetGameItem<FoodItem>();
             if (foodItem != null && foodItem.Owner == _agent.Citizen.Family)
             {
-                RegisterAction(new EatAction(foodItem, _agent.State.Hunger), true);
+                RegisterAction(ActionPool.Get<EatAction>(foodItem, _agent.State.Hunger), true);
                 return;
             }
 

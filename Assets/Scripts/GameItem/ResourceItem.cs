@@ -30,7 +30,7 @@ namespace GameItem
         {
             return new List<IAction>
             {
-                new CollectResourceAction(this)
+                ActionPool.Get<CollectResourceAction>(this),
             };
         }
     }

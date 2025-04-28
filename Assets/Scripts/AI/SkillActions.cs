@@ -4,8 +4,11 @@ namespace AI
 {
     public class ReadBookAction : MultiTimesActionBase
     {
-        public ReadBookAction() : base(5, 10f)
+        public override void OnGet(params object[] args)
         {
+            ActionName = "Read Book";
+            ProgressSpeed = 10f;
+            TotalTimes = 5;
         }
 
         public override void OnRegister(Agent agent)

@@ -30,7 +30,7 @@ namespace GameItem
         {
             return new List<IAction>
             {
-                new CraftBuildingItemAction(this)
+                ActionPool.Get<CraftBuildingItemAction>(this),
             };
         }
 
@@ -61,7 +61,7 @@ namespace GameItem
         {
             return new List<IAction>
             {
-                new RemoveBuildingItemAction(this),
+                ActionPool.Get<RemoveBuildingItemAction>(this),
             };
         }
 
@@ -138,7 +138,7 @@ namespace GameItem
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
-            var action = new PlantAction(this);
+            var action = ActionPool.Get<PlantAction>(this, "");
             return base.ItemActions(agent).Concat(new List<IAction> { action }).ToList();
         }
 
@@ -160,7 +160,7 @@ namespace GameItem
                             return;
                         }
 
-                        GameManager.I.CurrentAgent.Brain.RegisterAction(new PlantAction(this, selectedSeedId), true);
+                        GameManager.I.CurrentAgent.Brain.RegisterAction(ActionPool.Get<PlantAction>(this, selectedSeedId), true);
                     });
                     model.ShowUI();
                 })

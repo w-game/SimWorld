@@ -31,8 +31,8 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                new TakeItemInHand(this),
-                new PutIntoBag(this),
+                ActionPool.Get<TakeItemInHand>(this),
+                ActionPool.Get<PutIntoBag>(this),
             };
         }
 
@@ -91,9 +91,9 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                new TakeItemInHand(this),
-                new PutIntoBag(this),
-                new EatAction(this, GameManager.I.CurrentAgent.State.Hunger),
+                ActionPool.Get<TakeItemInHand>(this),
+                ActionPool.Get<PutIntoBag>(this),
+                ActionPool.Get<EatAction>(this, GameManager.I.CurrentAgent.State.Hunger)
             };
         }
     }

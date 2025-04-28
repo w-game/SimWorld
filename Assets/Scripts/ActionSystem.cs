@@ -8,11 +8,45 @@ using UnityEngine.EventSystems;
 
 namespace AI
 {
-    public interface IActionDetector
+    public interface IActionPool
     {
-        List<IAction> DetectActions();
+        void OnGet(params object[] args);
+        void OnRelease();
     }
 
+    public static class ActionPool
+    {
+        // Pool storage per action type
+        private static readonly Dictionary<Type, Stack<IActionPool>> _pools = new Dictionary<Type, Stack<IActionPool>>();
+
+        public static T Get<T>(params object[] args) where T : class, IActionPool
+        {
+            var type = typeof(T);
+            IActionPool action;
+            if (_pools.TryGetValue(type, out var stack) && stack.Count > 0)
+            {
+                action = stack.Pop();
+            }
+            else
+            {
+                action = Activator.CreateInstance(type) as IActionPool;
+            }
+            action.OnGet(args);
+            return action as T;
+        }
+
+        public static void Release(IActionPool action)
+        {
+            action.OnRelease(); // default resets state
+            var type = action.GetType();
+            if (!_pools.TryGetValue(type, out var stack))
+            {
+                stack = new Stack<IActionPool>();
+                _pools[type] = stack;
+            }
+            stack.Push(action);
+        }
+    }
     public class ActionSystem
     {
         public event Action<List<IAction>, Vector3> OnMouseClick;
@@ -62,7 +96,7 @@ namespace AI
 
                 if (isWalkable && blockType != BlockType.Ocean)
                 {
-                    actions.Add(new CheckMoveToTarget(GameManager.I.CurrentAgent, mousePos));
+                    actions.Add(ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, mousePos));
                 }
 
                 OnMouseClick?.Invoke(actions, Input.mousePosition);
@@ -79,7 +113,7 @@ namespace AI
                     {
                         IHouse house = GameManager.I.CurrentAgent.Citizen.Family.GetHouse(HouseType.Farm);
                         var cellPos = MapManager.I.WorldPosToCellPos(pos);
-                        actions.Add(new HoeAction(new Vector3(cellPos.x, cellPos.y, 0), house));
+                        actions.Add(ActionPool.Get<HoeAction>(new Vector3(cellPos.x, cellPos.y, 0), house));
                     }
                     break;
                 case BlockType.Road:

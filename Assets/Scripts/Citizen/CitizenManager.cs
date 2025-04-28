@@ -50,7 +50,7 @@ namespace Citizens
                     20 * 60 * 60,
                     5 * 60 * 60,
                     new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
-                    new SleepAction(agent.State.Sleep),
+                    ActionPool.Get<SleepAction>(agent.State.Sleep),
                     member));
 
             return member;

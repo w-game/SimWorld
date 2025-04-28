@@ -34,7 +34,7 @@ namespace Citizens
                     Schedule schedule = new Schedule(
                         _workTime[0], _workTime[1],
                         new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                        new WorkAction(member.Job), member,
+                        ActionPool.Get<WorkAction>(member.Job), member,
                         SchedulePriority.High
                         );
 
@@ -50,7 +50,7 @@ namespace Citizens
             Schedule schedule = new Schedule(
                 _workTime[0], _workTime[1],
                 new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                new WorkAction(employee), employee.Member
+                ActionPool.Get<WorkAction>(employee), employee.Member
                 );
             employee.Member.Agent.RegisterSchedule(schedule);
         }
@@ -108,7 +108,7 @@ namespace Citizens
                 MapManager.I.TryGetBuildingItem(block, out var buildingItem);
                 if (buildingItem == null)
                 {
-                    var jobUnit = new JobUnit(new HoeAction(block, House), jobUnit =>
+                    var jobUnit = new JobUnit(ActionPool.Get<HoeAction>(block, House), jobUnit =>
                     {
                         if (MapManager.I.TryGetBuildingItem(block, out var item))
                         {
@@ -130,7 +130,7 @@ namespace Citizens
         {
             if (farmItem.PlantItem == null)
             {
-                var jobUnit = new JobUnit(new PlantAction(farmItem, "PLANT_WHEAT"), jobUnit =>
+                var jobUnit = new JobUnit(ActionPool.Get<PlantAction>(farmItem, "PLANT_WHEAT"), jobUnit =>
                 {
                     farmItem.PlantItem.OnEventInvoked += OnCropItemEventInvoked;
                 });
@@ -143,11 +143,11 @@ namespace Citizens
             switch (plantItem.State)
             {
                 case PlantState.Drought:
-                    var jobUnit = new JobUnit(new WaterPlantAction(plantItem.Pos));
+                    var jobUnit = new JobUnit(ActionPool.Get<WaterPlantAction>(plantItem.Pos));
                     AddJobUnit<Farmer>(jobUnit);
                     break;
                 case PlantState.Weeds:
-                    var weedingJobUnit = new JobUnit(new WeedingAction(plantItem));
+                    var weedingJobUnit = new JobUnit(ActionPool.Get<WeedingAction>(plantItem));
                     AddJobUnit<Farmer>(weedingJobUnit);
                     break;
                 default:
@@ -156,7 +156,7 @@ namespace Citizens
 
             if (plantItem.GrowthStage == PlantStage.Harvestable)
             {
-                var jobUnit = new JobUnit(new HarvestAction(plantItem));
+                var jobUnit = new JobUnit(ActionPool.Get<HarvestAction>(plantItem));
                 AddJobUnit<Farmer>(jobUnit);
             }
         }
@@ -173,7 +173,7 @@ namespace Citizens
                 {
                     chairItem.OnSit += (agent) =>
                     {
-                        var jobUnit = new JobUnit(new GetOrderAction(this, agent));
+                        var jobUnit = new JobUnit(ActionPool.Get<GetOrderAction>(this, agent));
                         AddJobUnit<Waiter>(jobUnit);
                     };
                 }
@@ -190,7 +190,7 @@ namespace Citizens
         public void AddOrder(PropConfig propConfig)
         {
             var stove = _stoveItems.Find(stove => stove.Using == null);
-            var jobUnit = new JobUnit(new CookAction(stove, propConfig));
+            var jobUnit = new JobUnit(ActionPool.Get<CookAction>(stove, propConfig));
             AddJobUnit<Cooker>(jobUnit);
         }
 

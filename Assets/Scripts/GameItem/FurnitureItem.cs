@@ -56,7 +56,7 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                new SleepAction(GameManager.I.CurrentAgent.State.Sleep, this)
+                ActionPool.Get<SleepAction>(GameManager.I.CurrentAgent.State.Sleep, this),
             };
         }
     }
@@ -116,7 +116,7 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                new DrawWaterAction(this)
+                ActionPool.Get<DrawWaterAction>(this),
             };
         }
     }
@@ -161,7 +161,7 @@ namespace GameItem
             if (availablePos.Count != 0)
             {
                 centerPos /= availablePos.Count;
-                var action = new CheckMoveToTarget(GameManager.I.CurrentAgent, centerPos);
+                var action = ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, centerPos);
                 var system = new SystemAction("Craft Item", a =>
                 {
                     var model = new PopCraftModel();
@@ -203,7 +203,7 @@ namespace GameItem
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             var centerPos = Pos - new Vector3(0, 1);
-            var action = new CheckMoveToTarget(GameManager.I.CurrentAgent, centerPos);
+            var action = ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, centerPos);
             var system = new SystemAction("Craft Item", a =>
             {
                 var model = IModel.GetModel<PopSeedIncubatorModel>(this);

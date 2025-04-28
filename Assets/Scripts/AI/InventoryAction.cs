@@ -6,15 +6,17 @@ public class PutIntoBag : SingleActionBase
 {
     private PropGameItem _gameItem;
 
-    public PutIntoBag(PropGameItem gameItem)
+    public override void OnGet(params object[] args)
     {
-        _gameItem = gameItem;
+        _gameItem = args[0] as PropGameItem;
         ActionName = "Put into Bag";
+
+        ActionSpeed = 10f;
     }
 
     public override void OnRegister(Agent agent)
     {
-        PrecedingActions.Add(new CheckMoveToTarget(agent, _gameItem.Pos));
+        PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _gameItem.Pos));
     }
 
     protected override void DoExecute(Agent agent)

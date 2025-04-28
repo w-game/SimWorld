@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AI;
 using GameItem;
 using Map;
 using UnityEngine;
@@ -141,7 +142,7 @@ public class BuildingManager : MonoSingleton<BuildingManager>
             {
                 // 单格建造无需进入拖动状态
                 
-                GameManager.I.CurrentAgent.Citizen.Family.Actions.Add(new CraftBuildingItemAction((BlueprintItem)_sign));
+                GameManager.I.CurrentAgent.Citizen.Family.Actions.Add(ActionPool.Get<CraftBuildingItemAction>(_sign));
                 StopBuildingMode();
                 GameManager.I.GameItemManager.SwitchType(_sign, GameItemType.Static);
                 _sign = null;

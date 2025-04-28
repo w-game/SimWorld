@@ -9,17 +9,18 @@ namespace AI
     {
         private IGameItem _item;
 
-        public IdleAction(IGameItem item)
+        public override void OnGet(params object[] args)
         {
+            _item = args[0] as IGameItem;
             ActionName = "Idle";
-            _item = item;
+            ActionSpeed = 50f;
         }
 
         public override void OnRegister(Agent agent)
         {
             if (_item != null)
             {
-                PrecedingActions.Add(new CheckMoveToTarget(agent, _item.Pos));
+                PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _item.Pos));
             }
             else
             {
@@ -37,7 +38,7 @@ namespace AI
                             {
                                 if (item.House == buildingItem.House)
                                 {
-                                    PrecedingActions.Add(new CheckMoveToTarget(agent, targetPos));
+                                    PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, targetPos));
                                     break;
                                 }
                             }
@@ -58,15 +59,16 @@ namespace AI
 
         private Vector3 _targetPos;
 
-        public HangingAction(Vector3 targetPos)
+        public override void OnGet(params object[] args)
         {
+            _targetPos = (Vector3)args[0];
             ActionName = "Hanging";
-            _targetPos = targetPos;
+            ActionSpeed = 50f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _targetPos));
         }
 
         protected override void DoExecute(Agent agent)

@@ -11,12 +11,6 @@ namespace AI
         private StoveItem _stoveItem;
         private PropConfig _config;
 
-        public CookAction(StoveItem stoveItem = null, PropConfig config = null) : base(10f)
-        {
-            _stoveItem = stoveItem;
-            _config = config;
-        }
-
         public override void OnRegister(Agent agent)
         {
             if (_stoveItem == null && agent.Citizen.Family.Houses[0].TryGetFurniture<StoveItem>(out var stoveItem))
@@ -24,7 +18,7 @@ namespace AI
                 _stoveItem = stoveItem;
             }
 
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _stoveItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _stoveItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -42,16 +36,19 @@ namespace AI
 
             return base.Evaluate(agent, houseType);
         }
+
+        public override void OnGet(params object[] args)
+        {
+            _stoveItem = args[0] as StoveItem;
+            _config = args[1] as PropConfig;
+
+            ActionSpeed = 10f;
+        }
     }
 
     public class OrderFromRestaurant : ConditionActionBase
     {
         private RestaurantProperty _restaurantProperty;
-
-        public OrderFromRestaurant(RestaurantProperty restaurantProperty = null)
-        {
-            _restaurantProperty = restaurantProperty;
-        }
 
         public override void OnRegister(Agent agent)
         {
@@ -73,9 +70,9 @@ namespace AI
             if (availableCommercialPos.Count > 0)
             {
                 var pos = availableCommercialPos[Random.Range(0, availableCommercialPos.Count)];
-                var moveToTarget = new CheckMoveToTarget(agent, new Vector3(pos.x, pos.y), "Restaurant");
+                var moveToTarget = ActionPool.Get<CheckMoveToTarget>(agent, new Vector3(pos.x, pos.y), "Restaurant");
                 PrecedingActions.Add(moveToTarget);
-                PrecedingActions.Add(new WaitForAvailableSitAction(_restaurantProperty));
+                PrecedingActions.Add(ActionPool.Get<WaitForAvailableSitAction>(_restaurantProperty));
             }
         }
 
@@ -95,6 +92,11 @@ namespace AI
             }
 
             return base.Evaluate(agent, houseType);
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            _restaurantProperty = args[0] as RestaurantProperty;
         }
     }
 }

@@ -12,11 +12,12 @@ namespace AI
         private Vector3 _targetPos;
         private IHouse _house;
 
-        public HoeAction(Vector3 targetPos, IHouse house) : base(20f)
+        public override void OnGet(params object[] args)
         {
-            _targetPos = targetPos;
-            _house = house;
+            _targetPos = (Vector3)args[0];
+            _house = args[1] as IHouse;
             ActionName = "Hoe the ground";
+            ActionSpeed = 20f;
         }
 
         public override void OnRegister(Agent agent)
@@ -40,11 +41,12 @@ namespace AI
         private FarmItem _farmItem;
         private string _seedId;
 
-        public PlantAction(FarmItem farmItem, string seedId = "") : base(50f)
+        public override void OnGet(params object[] args)
         {
+            _farmItem = args[0] as FarmItem;
+            _seedId = args[1] as string;
             ActionName = "Plant seed";
-            _farmItem = farmItem;
-            _seedId = seedId;
+            ActionSpeed = 50f;
         }
 
         public override void OnRegister(Agent agent)
@@ -63,18 +65,11 @@ namespace AI
     {
         private PlantItem _plantItem;
 
-        public RemovePlantAction(PlantItem plantItem, string actionName = "Remove the plant") : base(50f)
+        public override void OnGet(params object[] args)
         {
-            if (plantItem is TreeItem)
-            {
-                ActionName = actionName;
-            }
-            else
-            {
-                ActionName = actionName;
-            }
-
-            _plantItem = plantItem;
+            _plantItem = args[0] as PlantItem;
+            ActionName = "Remove the plant";
+            ActionSpeed = 50f;
         }
 
         public override void OnRegister(Agent agent)
@@ -100,22 +95,24 @@ namespace AI
     public class DrawWaterAction : SingleActionBase
     {
         private WellItem _wellItem;
-        public DrawWaterAction(WellItem wellItem) : base(20f)
+
+        public override void OnGet(params object[] args)
         {
+            _wellItem = args[0] as WellItem;
             ActionName = "Draw water";
-            _wellItem = wellItem;
+            ActionSpeed = 20f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _wellItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _wellItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
         {
             var propItem = GameItemManager.CreateGameItem<PropGameItem>(GameManager.I.ConfigReader.GetConfig<PropConfig>("Water"), agent.Pos, GameItemType.Static, 1);
             propItem.ShowUI();
-            agent.Brain.RegisterAction(new TakeItemInHand(propItem), true);
+            agent.Brain.RegisterAction(ActionPool.Get<TakeItemInHand>(propItem), true);
         }
     }
 
@@ -126,10 +123,11 @@ namespace AI
         private Vector3 _targetPos;
         private PropGameItem _waterItem;
 
-        public WaterPlantAction(Vector3 _targetPos) : base(50f)
+        public override void OnGet(params object[] args)
         {
+            _targetPos = (Vector3)args[0];
             ActionName = "Water the plant";
-            this._targetPos = _targetPos;
+            ActionSpeed = 50f;
         }
 
         public override void OnRegister(Agent agent)
@@ -138,9 +136,9 @@ namespace AI
             var itemInHand = agent.GetItemInHand();
             if (itemInHand == null)
             {
-                PrecedingActions.Add(new DrawWaterAction(agent.GetGameItem<WellItem>()));
+                PrecedingActions.Add(ActionPool.Get<DrawWaterAction>(agent.GetGameItem<WellItem>()));
             }
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _targetPos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _targetPos));
         }
 
         protected override void DoExecute(Agent agent)
@@ -166,10 +164,12 @@ namespace AI
     {
         private PlantItem _plantItem;
 
-        public HarvestAction(PlantItem plantItem) : base(50f)
+        public override void OnGet(params object[] args)
         {
+            _plantItem = args[0] as PlantItem;
             ActionName = "Harvest the plant";
-            _plantItem = plantItem;
+
+            ActionSpeed = 50f;
         }
 
         public override void OnRegister(Agent agent)
@@ -196,15 +196,17 @@ namespace AI
     {
         private PlantItem _plantItem;
 
-        public WeedingAction(PlantItem plantItem) : base(25f)
+        public override void OnGet(params object[] args)
         {
+            _plantItem = args[0] as PlantItem;
             ActionName = "Weeding";
-            _plantItem = plantItem;
+
+            ActionSpeed = 25f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(new CheckMoveToTarget(agent, _plantItem.Pos));
+            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _plantItem.Pos));
         }
 
         protected override void DoExecute(Agent agent)
