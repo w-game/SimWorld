@@ -28,7 +28,7 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             var farmItem = GameItemManager.CreateGameItem<FarmItem>(
-                GameManager.I.ConfigReader.GetConfig<BuildingConfig>("BUILDING_FARM"),
+                ConfigReader.GetConfig<BuildingConfig>("BUILDING_FARM"),
                 _targetPos,
                 GameItemType.Static,
                 _house);
@@ -57,7 +57,7 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             _farmItem.Plant(_seedId);
-            agent.Bag.RemoveItem(GameManager.I.ConfigReader.GetConfig<PropConfig>(_seedId), 1);
+            agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(_seedId), 1);
         }
     }
 
@@ -83,7 +83,7 @@ namespace AI
             var dropItems = _plantItem.CheckDropItems();
             foreach (var (dropItem, count) in dropItems)
             {
-                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
                 var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
                 propItem.ShowUI();
             }
@@ -110,7 +110,7 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            var propItem = GameItemManager.CreateGameItem<PropGameItem>(GameManager.I.ConfigReader.GetConfig<PropConfig>("Water"), agent.Pos, GameItemType.Static, 1);
+            var propItem = GameItemManager.CreateGameItem<PropGameItem>(ConfigReader.GetConfig<PropConfig>("Water"), agent.Pos, GameItemType.Static, 1);
             propItem.ShowUI();
             agent.Brain.RegisterAction(ActionPool.Get<TakeItemInHand>(propItem), true);
         }
@@ -183,7 +183,7 @@ namespace AI
             var dropItems = _plantItem.CheckDropItems();
             foreach (var (dropItem, count) in dropItems)
             {
-                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
                 var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
                 propItem.ShowUI();
             }

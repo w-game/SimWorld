@@ -13,7 +13,7 @@ namespace UI.Elements
 
         public void Init(CraftMaterialConfig config)
         {
-            icon.sprite = Resources.Load<Sprite>(GameManager.I.ConfigReader.GetConfig<PropConfig>(config.id).icon);
+            icon.sprite = Resources.Load<Sprite>(ConfigReader.GetConfig<PropConfig>(config.id).icon);
             requireAmountText.text = config.amount.ToString();
 
             List<PropItem> propItems = GameManager.I.CurrentAgent.Bag.CheckItem(config.id);

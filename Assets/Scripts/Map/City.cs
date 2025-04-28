@@ -32,7 +32,7 @@ namespace Map
             ChunkRand = chunkRand;
 
             Debug.Log($"City {GlobalPos} Size {Size} OriginChunk {OriginChunk.Pos}");
-            _roomConfigs = GameManager.I.ConfigReader.GetAllConfigs<RoomConfig>();
+            _roomConfigs = ConfigReader.GetAllConfigs<RoomConfig>();
 
             // 创建城市
             CreateCity();

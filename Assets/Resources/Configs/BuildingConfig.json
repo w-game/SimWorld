@@ -183,7 +183,7 @@
             "id": "BUILDING_SHOP_SHELF",
             "name": "Shop Shelf",
             "description": "A shelf for displaying items.",
-            "type": "Furniture",
+            "type": "ShopShelf",
             "icon": "Textures/ShopShelf",
             "prefab": "Prefabs/GameItems/FurnitureItem",
             "size": [1, 1],

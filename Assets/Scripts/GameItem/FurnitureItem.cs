@@ -224,8 +224,8 @@ namespace GameItem
             }
 
             CultivatingItem = propItem;
-            var seed = GameManager.I.ConfigReader.GetConfig<CropSeedConfig>(CultivatingItem.Config.id).target;
-            Seed = GameManager.I.ConfigReader.GetConfig<PropConfig>(seed);
+            var seed = ConfigReader.GetConfig<CropSeedConfig>(CultivatingItem.Config.id).target;
+            Seed = ConfigReader.GetConfig<PropConfig>(seed);
             CurProgress = 0;
             Done = false;
             OnChange?.Invoke();
@@ -258,5 +258,36 @@ namespace GameItem
                 OnChange?.Invoke();
             }
         }
+    }
+
+    public class ShopShelfItem : FurnitureItem
+    {
+        public override bool Walkable => false;
+        public ShopShelfItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+            var configs = ConfigReader.GetAllConfigs<PropConfig>();
+            var randomConfig = configs[UnityEngine.Random.Range(0, configs.Count)];
+            GameItemManager.CreateGameItem<FoodItem>(
+                randomConfig,
+                pos,
+                GameItemType.Static,
+                1);
+        }
+
+        // public override List<IAction> ActionsOnClick(Agent agent)
+        // {
+        //     var centerPos = Pos - new Vector3(0, 1);
+        //     var action = ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, centerPos);
+        //     var system = new SystemAction("Craft Item", a =>
+        //     {
+        //         var model = new PopShopModel();
+        //         model.ShowUI();
+        //     }, action);
+
+        //     return new List<IAction>()
+        //     {
+        //         system
+        //     };
+        // }
     }
 }

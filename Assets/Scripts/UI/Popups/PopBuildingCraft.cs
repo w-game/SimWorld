@@ -8,7 +8,7 @@ public class PopBuildingCraft : ViewBase
 
     void Start()
     {
-        var configList = GameManager.I.ConfigReader.GetAllConfigs<BuildingConfig>();
+        var configList = ConfigReader.GetAllConfigs<BuildingConfig>();
         foreach (var config in configList)
         {
             GenerateBuildingElement(config);

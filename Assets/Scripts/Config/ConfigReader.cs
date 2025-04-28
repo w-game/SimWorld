@@ -13,7 +13,7 @@ public class ConfigReader
     /// Key = Config type (e.g. typeof(BuildingConfig))
     /// Value = all loaded configs of that type
     /// </remarks>
-    private readonly Dictionary<Type, List<ConfigBase>> _configs = new();
+    private static readonly Dictionary<Type, List<ConfigBase>> _configs = new();
 
     /// <summary>Expose read‑only view if external systems need it.</summary>
     public IReadOnlyDictionary<Type, List<ConfigBase>> Configs => _configs;
@@ -66,12 +66,11 @@ public class ConfigReader
         _configs[typeof(T)] = new List<ConfigBase>(listWrapper.items);
     }
 
-    /// <summary>Return a single config by id.</summary>
-    public T GetConfig<T>(string id) where T : ConfigBase
+    public static T GetConfig<T>(string id) where T : ConfigBase
     {
         if (!_configs.TryGetValue(typeof(T), out var list))
             return null;
-            
+
         var cfg = list.Find(c => c.id == id) as T;
         if (cfg == null)
             return null;
@@ -80,7 +79,7 @@ public class ConfigReader
     }
 
     /// <summary>Return all configs of a given type.</summary>
-    public List<T> GetAllConfigs<T>() where T : ConfigBase
+    public static List<T> GetAllConfigs<T>() where T : ConfigBase
     {
         if (!_configs.TryGetValue(typeof(T), out var list))
             throw new Exception($"{typeof(T).Name} not loaded. Did you call LoadConfigs()?");

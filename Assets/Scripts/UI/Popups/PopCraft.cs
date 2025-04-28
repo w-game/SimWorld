@@ -28,13 +28,13 @@ namespace UI.Popups
         {
             base.OnShow();
 
-            var configs = GameManager.I.ConfigReader.GetAllConfigs<CraftConfig>();
+            var configs = ConfigReader.GetAllConfigs<CraftConfig>();
 
             foreach (var config in configs)
             {
                 ItemSlotElement slot = Instantiate(craftItemPrefab, craftItemParent);
                 craftItemSlots.Add(slot);
-                config.icon = GameManager.I.ConfigReader.GetConfig<PropConfig>(config.id).icon;
+                config.icon = ConfigReader.GetConfig<PropConfig>(config.id).icon;
                 slot.Init(new CraftPropItem(config, 1), OnItemClicked);
             }
 
@@ -62,7 +62,7 @@ namespace UI.Popups
             }
             materialItemSlots.Clear();
 
-            var propConfig = GameManager.I.ConfigReader.GetConfig<PropConfig>(_selectedItem.Config.id);
+            var propConfig = ConfigReader.GetConfig<PropConfig>(_selectedItem.Config.id);
             icon.sprite = Resources.Load<Sprite>(propConfig.icon);
             nameText.text = propConfig.name;
             // descriptionText.text = propConfig.description;
@@ -74,7 +74,7 @@ namespace UI.Popups
                 materialItemSlots.Add(materialSlot);
                 materialSlot.Init(material);
 
-                var materialConfig = GameManager.I.ConfigReader.GetConfig<PropConfig>(material.id);
+                var materialConfig = ConfigReader.GetConfig<PropConfig>(material.id);
                 if (GameManager.I.CurrentAgent.Bag.GetItem(materialConfig) < material.amount)
                 {
                     canCraft = false;

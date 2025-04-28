@@ -213,7 +213,7 @@ namespace Map
                     var worldPos = new Vector3(pos2.x + WorldPos.x + 0.5f, pos2.y + WorldPos.y + 0.5f, 0);
                     if (MapManager.I.TryGetBuildingItem(worldPos, out _)) continue;
 
-                    var biomeConfig = GameManager.I.ConfigReader.GetConfig<BiomeConfig>(Blocks[i, j].ToString().ToUpper());
+                    var biomeConfig = ConfigReader.GetConfig<BiomeConfig>(Blocks[i, j].ToString().ToUpper());
                     if (biomeConfig == null) continue;
 
                     float noise = biomeConfig.frequency * Mathf.PerlinNoise((WorldPos.x + i) * biomeConfig.scale, (WorldPos.y + j) * biomeConfig.scale);
@@ -244,7 +244,7 @@ namespace Map
                 if (spawn.mode == "cluster")
                 {
                 }
-                var config = GameManager.I.ConfigReader.GetConfig<ResourceConfig>(spawn.id);
+                var config = ConfigReader.GetConfig<ResourceConfig>(spawn.id);
                 var type = Type.GetType($"GameItem.{config.type}Item");
                 GameItemManager.CreateGameItem<IGameItem>(
                   type,

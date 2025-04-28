@@ -169,9 +169,9 @@ namespace GameItem
 
         public void Plant(string seedId)
         {
-            var cropSeedConfig = GameManager.I.ConfigReader.GetConfig<CropSeedConfig>(seedId);
+            var cropSeedConfig = ConfigReader.GetConfig<CropSeedConfig>(seedId);
             PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
-                GameManager.I.ConfigReader.GetConfig<ResourceConfig>(cropSeedConfig.target),
+                ConfigReader.GetConfig<ResourceConfig>(cropSeedConfig.target),
                 Pos + new Vector3(0.5f, 0.5f, 0),
                 GameItemType.Static,
                 false);

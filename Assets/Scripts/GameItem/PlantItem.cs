@@ -100,7 +100,7 @@ namespace GameItem
             List<(PropConfig, int)> dropItems = new List<(PropConfig, int)>();
             foreach (var dropItem in Config.dropItems)
             {
-                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
                 dropItems.Add((confg, dropItem.count));
             }
 

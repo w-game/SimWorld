@@ -5,8 +5,8 @@
             "name": "Apple",
             "description": "A delicious red apple.",
             "type": "Food",
-            "icon": "wall_icon.png",
-            "prefab": "Prefab/Wall",
+            "icon": "Textures/Apple",
+            "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1
         },
         {
@@ -31,7 +31,7 @@
             "id": "PROP_RESOURCE_WOOD",
             "name": "Wood",
             "description": "A piece of wood.",
-            "type": "Resource",
+            "type": "Material",
             "icon": "Textures/Wood",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 5
@@ -40,7 +40,7 @@
             "id": "PROP_MATERIAL_PLANK",
             "name": "Plank",
             "description": "A wooden plank.",
-            "type": "Resource",
+            "type": "Material",
             "icon": "Textures/Wood",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10

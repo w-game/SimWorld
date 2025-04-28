@@ -25,6 +25,7 @@ namespace GameItem
         {
             base.ShowUI();
             UI.SetRenderer(Config.icon);
+            UI.SetName(Config.name);
         }
 
         public override List<IAction> ItemActions(IGameItem agent)
@@ -32,12 +33,15 @@ namespace GameItem
             return new List<IAction>()
             {
                 ActionPool.Get<TakeItemInHand>(this),
-                ActionPool.Get<PutIntoBag>(this),
+                agent is Agent a && Owner == a.Citizen.Family ? ActionPool.Get<PutIntoBag>(this) : ActionPool.Get<StealAction>(this),
             };
         }
 
         public void BePickedUp(Agent agent)
         {
+            if (Owner != agent.Citizen.Family)
+                return;
+
             UI.Col.enabled = false; // Disable collider
 
             var originalPos = Pos;
@@ -89,12 +93,10 @@ namespace GameItem
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
-            return new List<IAction>()
-            {
-                ActionPool.Get<TakeItemInHand>(this),
-                ActionPool.Get<PutIntoBag>(this),
-                ActionPool.Get<EatAction>(this, GameManager.I.CurrentAgent.State.Hunger)
-            };
+            var actions = base.ItemActions(agent);
+            if (agent is Agent a && Owner == a.Citizen.Family)
+                actions.Add(ActionPool.Get<EatAction>(this, GameManager.I.CurrentAgent.State.Hunger));
+            return actions;
         }
     }
 

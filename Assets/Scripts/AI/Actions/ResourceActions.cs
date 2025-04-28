@@ -25,7 +25,7 @@ namespace AI
         {
             foreach (var dropItem in _item.Config.dropItems)
             {
-                var confg = GameManager.I.ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
                 var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _item.Pos, GameItemType.Static, dropItem.count);
                 propItem.ShowUI();
             }

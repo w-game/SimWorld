@@ -123,7 +123,7 @@ namespace Citizens
                 }
             }
 
-            JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_FARMER"), 1);
+            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_FARMER"), 1);
         }
 
         private void CheckPlantToFarm(FarmItem farmItem)
@@ -183,8 +183,8 @@ namespace Citizens
                 }
             }
 
-            JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_COOKER"), 1);
-            JobRecruitCount.Add(GameManager.I.ConfigReader.GetConfig<JobConfig>("JOB_WAITER"), 1);
+            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_COOKER"), 1);
+            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_WAITER"), 1);
         }
 
         public void AddOrder(PropConfig propConfig)
@@ -223,7 +223,7 @@ namespace Citizens
 
         public PropConfig GetOrder(Agent consumer)
         {
-            var orders = GameManager.I.ConfigReader.GetAllConfigs<PropConfig>();
+            var orders = ConfigReader.GetAllConfigs<PropConfig>();
             if (consumer == GameManager.I.CurrentAgent)
             {
                 // TODO: 弹出窗口进行选择
