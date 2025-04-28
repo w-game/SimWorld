@@ -55,6 +55,9 @@ namespace AI
                 UnregisterAction(CurAction);
             }
 
+            if (action == null)
+                return;
+
             CurAction = action;
             CurAction.OnCompleted += UnregisterAction;
             CurAction.OnActionProgress += OnActionProgress;

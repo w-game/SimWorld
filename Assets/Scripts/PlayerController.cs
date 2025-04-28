@@ -42,12 +42,10 @@ public class PlayerController : GameItemUI
     {
         var curPos = transform.position;
         var dir = curPos - _lastPos;
-        var moved = dir.magnitude > 0.01f;
 
-        animator.SetBool("MoveRight", moved && dir.x > 0f);
-        animator.SetBool("MoveLeft", moved && dir.x < 0f);
-        animator.SetBool("MoveUp", moved && dir.y > 0f);
-        animator.SetBool("MoveDown", moved && dir.y < 0f);
+        animator.SetFloat("Horizontal", dir.x > 0 ? 1 : (dir.x < 0 ? -1 : 0));
+        animator.SetFloat("Vertical", dir.y > 0 ? 1 : (dir.y < 0 ? -1 : 0));
+        // animator.SetFloat("Speed", dir.magnitude);
 
         _lastPos = curPos;
     }

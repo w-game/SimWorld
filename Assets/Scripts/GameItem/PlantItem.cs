@@ -8,10 +8,10 @@ namespace GameItem
 {
     public enum PlantStage
     {
-        Seed,
-        Sprout,
-        Flowering,
-        Harvestable
+        Seed = 0,
+        Sprout = 1,
+        Flowering = 2,
+        Harvestable = 3
     }
 
     public enum PlantState
@@ -29,6 +29,7 @@ namespace GameItem
         public float GrowthTime { get; set; } // 成长时间
         public PlantStage GrowthStage { get; set; } // 成长阶段
         public int GrowthRate { get; set; } // 成长速度
+        protected virtual bool Drought { get; set; } = true;
 
         public event UnityAction<PlantItem> OnEventInvoked;
 
@@ -46,6 +47,8 @@ namespace GameItem
                 }
             }
         }
+
+        private float _waterTime;
 
         public override void ShowUI()
         {
@@ -68,8 +71,7 @@ namespace GameItem
 
         private void OnGrowth()
         {
-            // 处理植物生长
-            if (GrowthStage == PlantStage.Harvestable)
+            if (GrowthStage == PlantStage.Harvestable || State != PlantState.None)
             {
                 return;
             }
@@ -80,6 +82,10 @@ namespace GameItem
             {
                 GrowthTime = 0;
                 GrowthStage++;
+                if ((int)GrowthStage >= Config.stages.Length - 1)
+                {
+                    GrowthStage = PlantStage.Harvestable;
+                }
                 UI.SetRenderer(Config.stages[(int)GrowthStage]);
             }
 
@@ -88,15 +94,35 @@ namespace GameItem
                 // 触发成熟事件
                 OnEventInvoked?.Invoke(this);
             }
+            else
+            {
+                CheckDrought();
+            }
         }
 
-        public List<(PropConfig, int)> CheckDropItems()
+        private void CheckDrought()
+        {
+            // 处理植物干旱
+            if (State == PlantState.Drought || !Drought)
+            {
+                return;
+            }
+
+            _waterTime += GameTime.DeltaTime;
+            if (_waterTime >= 24 * 60 * 60)
+            {
+                _waterTime = 0;
+                State = PlantState.Drought;
+            }
+        }
+
+        public virtual List<(PropConfig, int)> CheckDropItems()
         {
             if (GrowthStage != PlantStage.Harvestable)
             {
                 return new List<(PropConfig, int)>();
             }
-            
+
             List<(PropConfig, int)> dropItems = new List<(PropConfig, int)>();
             foreach (var dropItem in Config.dropItems)
             {
@@ -109,26 +135,6 @@ namespace GameItem
 
         public override void Update()
         {
-            if (GrowthStage == PlantStage.Harvestable)
-            {
-                return;
-            }
-
-            if (State != PlantState.None) return;
-
-            // 一定几率触发事件
-            // 例如：生病、干旱、杂草等
-            var prob = Random.Range(0, 100);
-
-            if (prob < 0.1) // 10% 的几率触发事件
-            {
-                State = PlantState.Drought;
-            }
-            else if (prob < 0.2) // 10% 的几率触发事件
-            {
-                State = PlantState.Weeds;
-            }
-
             OnGrowth();
         }
 
@@ -153,7 +159,7 @@ namespace GameItem
             return actions;
         }
 
-        protected virtual IAction CheckRemovePlant(Agent agent) 
+        protected virtual IAction CheckRemovePlant(Agent agent)
         {
             if (GrowthStage == PlantStage.Harvestable)
             {
@@ -169,11 +175,21 @@ namespace GameItem
                 State = PlantState.None;
             }
         }
+        
+        public void BeWatered()
+        {
+            if (State == PlantState.Drought)
+            {
+                State = PlantState.None;
+                _waterTime = 0;
+            }
+        }
     }
-    
+
     public class TreeItem : PlantItem
     {
         public override bool Walkable => false;
+        protected override bool Drought => false;
         public TreeItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos, random)
         {
         }
@@ -186,7 +202,7 @@ namespace GameItem
             if (axe != null)
             {
                 return ActionPool.Get<RemovePlantAction>(this, "Chop the tree");
-                
+
             }
             else
             {
@@ -195,6 +211,18 @@ namespace GameItem
                 removeAction.Enable = false;
                 return removeAction;
             }
+        }
+
+        public override List<(PropConfig, int)> CheckDropItems()
+        {
+            List<(PropConfig, int)> dropItems = new List<(PropConfig, int)>();
+            foreach (var dropItem in Config.dropItems)
+            {
+                var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
+                dropItems.Add((confg, dropItem.count));
+            }
+
+            return dropItems;
         }
     }
 }

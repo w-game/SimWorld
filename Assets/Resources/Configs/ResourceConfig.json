@@ -5,10 +5,13 @@
             "name": "Tree",
             "description": "A tall tree.",
             "type": "Plant",
-            "icon": "Textures/Tree",
+            "icon": "Textures/Tree_0",
             "prefab": "Prefabs/GameItems/PlantItem",
             "stages": [
-                "Textures/Tree"
+                "Textures/Tree_0",
+                "Textures/Tree_1",
+                "Textures/Tree_2",
+                "Textures/Tree_3"
             ],
             "dropItems": [
                 {

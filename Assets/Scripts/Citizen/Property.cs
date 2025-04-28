@@ -41,6 +41,8 @@ namespace Citizens
                     member.Agent.RegisterSchedule(schedule);
                 }
             }
+
+            Debug.Log($"Property: {House.HouseType} has been created.");
         }
 
         public void AddEmployee(Employee employee)
@@ -71,13 +73,14 @@ namespace Citizens
         {
             if (Employees.Count == 0)
             {
+                AssignJobUnitToOwner(jobUnit);
                 return false;
             }
 
             var employees = Employees.FindAll(employee => employee is T);
             if (employees.Count == 0)
             {
-
+                AssignJobUnitToOwner(jobUnit);
                 return false;
             }
 
@@ -117,9 +120,16 @@ namespace Citizens
                                 CheckPlantToFarm(farmItem);
                             }
                         }
-                        
+
                     });
                     AddJobUnit<Farmer>(jobUnit);
+                }
+                else
+                {
+                    if (buildingItem is FarmItem farmItem)
+                    {
+                        CheckPlantToFarm(farmItem);
+                    }
                 }
             }
 
@@ -130,7 +140,7 @@ namespace Citizens
         {
             if (farmItem.PlantItem == null)
             {
-                var jobUnit = new JobUnit(ActionPool.Get<PlantAction>(farmItem, "PLANT_WHEAT"), jobUnit =>
+                var jobUnit = new JobUnit(ActionPool.Get<PlantAction>(farmItem, "PROP_SEED_WHEAT"), jobUnit =>
                 {
                     farmItem.PlantItem.OnEventInvoked += OnCropItemEventInvoked;
                 });
@@ -143,12 +153,12 @@ namespace Citizens
             switch (plantItem.State)
             {
                 case PlantState.Drought:
-                    var jobUnit = new JobUnit(ActionPool.Get<WaterPlantAction>(plantItem.Pos));
-                    AddJobUnit<Farmer>(jobUnit);
+                    // var jobUnit = new JobUnit(ActionPool.Get<WaterPlantAction>(plantItem.Pos));
+                    // AddJobUnit<Farmer>(jobUnit);
                     break;
                 case PlantState.Weeds:
-                    var weedingJobUnit = new JobUnit(ActionPool.Get<WeedingAction>(plantItem));
-                    AddJobUnit<Farmer>(weedingJobUnit);
+                    // var weedingJobUnit = new JobUnit(ActionPool.Get<WeedingAction>(plantItem));
+                    // AddJobUnit<Farmer>(weedingJobUnit);
                     break;
                 default:
                     break;

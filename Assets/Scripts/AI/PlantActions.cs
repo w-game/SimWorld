@@ -17,7 +17,7 @@ namespace AI
             _targetPos = (Vector3)args[0];
             _house = args[1] as IHouse;
             ActionName = "Hoe the ground";
-            ActionSpeed = 20f;
+            ActionSpeed = 0.1f;
         }
 
         public override void OnRegister(Agent agent)
@@ -46,7 +46,7 @@ namespace AI
             _farmItem = args[0] as FarmItem;
             _seedId = args[1] as string;
             ActionName = "Plant seed";
-            ActionSpeed = 50f;
+            ActionSpeed = 1f;
         }
 
         public override void OnRegister(Agent agent)
