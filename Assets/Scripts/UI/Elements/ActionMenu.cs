@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class ActionMenu : MonoBehaviour
 {
-    [SerializeField] private GameObject panel;
+    [SerializeField] private RectTransform panel;
     [SerializeField] private GameObject actionButtonPrefab;
     private List<GameObject> _actionButtons = new List<GameObject>();
 
@@ -18,7 +18,7 @@ public class ActionMenu : MonoBehaviour
 
     private void Start()
     {
-        panel.SetActive(false);
+        panel.gameObject.SetActive(false);
         GameManager.I.ActionSystem.OnMouseClick += ShowEventMenu;
     }
 
@@ -26,7 +26,16 @@ public class ActionMenu : MonoBehaviour
     {
         if (_isActionMenuVisible)
         {
-            panel.transform.position = UIManager.I.mainCamera.WorldToScreenPoint(_menuPosition);
+            if (panel.rect.width == 0) return;
+
+            panel.transform.position =
+                UIManager.I.WorldPosToScreenPos(_menuPosition) +
+                new Vector3(panel.rect.width / 2, -panel.rect.height / 2, 0);
+
+            if (Vector3.Distance(Input.mousePosition, panel.transform.position) > panel.rect.width)
+            {
+                HideEventMenu();
+            }
         }
     }
 
@@ -37,11 +46,10 @@ public class ActionMenu : MonoBehaviour
 
     private void ShowEventMenu(List<IAction> actions, Vector3 position)
     {
-        _menuPosition = UIManager.I.mainCamera.ScreenToWorldPoint(position);
+        _menuPosition = UIManager.I.ScreenPosToWorldPos(position);
         UpdateActionButtons(actions);
-        panel.SetActive(true);
+        panel.gameObject.SetActive(true);
         _isActionMenuVisible = true;
-        Log.LogInfo("ActionMenu", "Event menu shown at position: " + position);
     }
 
     private void UpdateActionButtons(List<IAction> actions)
@@ -69,7 +77,7 @@ public class ActionMenu : MonoBehaviour
 
     public void HideEventMenu()
     {
-        panel.SetActive(false);
+        panel.gameObject.SetActive(false);
         _isActionMenuVisible = false;
     }
 }

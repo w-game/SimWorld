@@ -20940,7 +20940,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d40458748329243199ed4122da43a5e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panel: {fileID: 1674320386}
+  panel: {fileID: 1674320387}
   actionButtonPrefab: {fileID: 958958052067946258, guid: 7fa10e6fb51c14b4a97a10c854f8e376, type: 3}
 --- !u!1 &1527411078
 GameObject:
@@ -22250,7 +22250,7 @@ RectTransform:
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0, y: 1}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1674320389
 CanvasRenderer:
   m_ObjectHideFlags: 0

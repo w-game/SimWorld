@@ -22,6 +22,14 @@ public class UIManager : MonoSingleton<UIManager>
         return mainCamera.WorldToScreenPoint(position);
     }
 
+
+    public Vector3 ScreenPosToWorldPos(Vector3 position)
+    {
+        Vector3 worldPosition = mainCamera.ScreenToWorldPoint(position);
+        worldPosition.z = 0; // 设置一个适当的z轴值
+        return worldPosition;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
