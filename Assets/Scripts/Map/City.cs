@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NUnit.Framework;
 using UnityEngine;
 
 namespace Map
@@ -16,6 +17,12 @@ namespace Map
 
         public System.Random ChunkRand { get; private set; } // 随机数生成器
 
+        // Minimum empty tiles required between houses
+        private const int HOUSE_MARGIN = 1;
+
+        // Cached room configs and occupancy grids
+        private List<RoomConfig> _roomConfigs;
+
         public City(Vector2Int pos, int size, Chunk originChunk, System.Random chunkRand)
         {
             GlobalPos = pos + originChunk.WorldPos; // 转换为全局坐标
@@ -25,6 +32,8 @@ namespace Map
             ChunkRand = chunkRand;
 
             Debug.Log($"City {GlobalPos} Size {Size} OriginChunk {OriginChunk.Pos}");
+            _roomConfigs = GameManager.I.ConfigReader.GetAllConfigs<RoomConfig>();
+
             // 创建城市
             CreateCity();
         }
@@ -146,130 +155,97 @@ namespace Map
 
         private void PutRoom()
         {
+            bool[,] blockOccupancyMap = new bool[Size, Size];
+            bool[,] roadMap = new bool[Size, Size];
+
             foreach (var road in Roads)
             {
-                // Randomize road points for more varied placement
-                List<Vector2Int> roadPoints = new List<Vector2Int>(road);
-                roadPoints = roadPoints.OrderBy(x => ChunkRand.Next()).ToList();
+                foreach (var worldPos in road)
+                {
+                    Vector2Int local = worldPos - OriginChunk.WorldPos;
+                    if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
+                        roadMap[local.x, local.y] = true;
+                }
+            }
 
-                // Try placing a limited number of houses per road to avoid clutter
+            foreach (var road in Roads)
+            {
+                var roadPoints = new List<Vector2Int>(road);
+                Shuffle(roadPoints);
                 int housesPlaced = 0;
-                int maxHousesPerRoad = 20;
+                const int maxHousesPerRoad = 20;
 
                 foreach (var roadPoint in roadPoints)
                 {
-                    // Try all four directions from the current road point
+                    if (housesPlaced >= maxHousesPerRoad)
+                        break;
+
                     for (int dir = 0; dir < 4; dir++)
                     {
-                        // If we've placed enough houses on this road, stop
-                        if (housesPlaced >= maxHousesPerRoad)
-                            break;
-
-                        var house = PlaceBuilding(roadPoint, 0);
+                        var house = PlaceBuilding(roadPoint, blockOccupancyMap, roadMap);
                         if (house != null)
                         {
                             Houses.Add(house);
+                            // Mark blocks in occupancy map
+                            foreach (var b in house.Blocks)
+                            {
+                                var local = b - OriginChunk.WorldPos;
+                                if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
+                                    blockOccupancyMap[local.x, local.y] = true;
+                            }
                             housesPlaced++;
+                            if (housesPlaced >= maxHousesPerRoad)
+                                break;
                         }
                     }
-
-                    // If we've placed enough houses on this road, move to the next
-                    if (housesPlaced >= maxHousesPerRoad)
-                        break;
                 }
             }
         }
 
-        private IHouse PlaceBuilding(Vector2Int roadPoint, int direction = -1)
+        private void Shuffle<T>(List<T> list)
         {
-            if (direction == -1)
+            int n = list.Count;
+            for (int i = n - 1; i > 0; i--)
             {
-                direction = ChunkRand.Next(0, 4);
+                int j = ChunkRand.Next(i + 1);
+                T tmp = list[i];
+                list[i] = list[j];
+                list[j] = tmp;
             }
+        }
 
-            var roomConfigs = GameManager.I.ConfigReader.GetAllConfigs<RoomConfig>();
-
-            // 随机选择建筑大小
-            var roomSize = ChunkRand.Next(0, roomConfigs.Count);
-            var roomConfig = roomConfigs[roomSize];
-            int buildingWidth = roomConfig.width, buildingHeight = roomConfig.height;
-
-            // 随机选择建筑方向
-
-            var buildingBlocks = new List<Vector2Int>();
-            Vector2Int minPos = new Vector2Int(int.MaxValue, int.MaxValue);
-            Vector2Int maxPos = new Vector2Int(int.MinValue, int.MinValue);
-
-            var offset = Vector2Int.one;
-            switch (direction)
-            {
-                case 0: // 上
-                    // minPos = new Vector2Int(roadPoint.x + 1, roadPoint.y + 1);
-                    // maxPos = new Vector2Int(roadPoint.x + buildingWidth + 1, roadPoint.y + buildingHeight + 1);
-                    offset *= new Vector2Int(1, 1);
-                    break;
-                case 1: // 下
-                    // minPos = new Vector2Int(roadPoint.x - 1 - buildingWidth, roadPoint.y - 1 - buildingHeight);
-                    // maxPos = new Vector2Int(roadPoint.x - 1, roadPoint.y - 1);
-                    offset *= new Vector2Int(-1, -1);
-                    break;
-                case 2: // 左
-                    // minPos = new Vector2Int(roadPoint.x - 1 - buildingHeight, roadPoint.y + 1);
-                    // maxPos = new Vector2Int(roadPoint.x - 1, roadPoint.y + 1 + buildingWidth);
-                    offset *= new Vector2Int(-1, 1);
-                    break;
-                case 3: // 右
-                    // minPos = new Vector2Int(roadPoint.x + 1, roadPoint.y - 1 - buildingWidth);
-                    // maxPos = new Vector2Int(roadPoint.x + 1 + buildingHeight, roadPoint.y - 1);
-                    offset *= new Vector2Int(1, -1);
-                    break;
-            }
-
-            // 先合并计算所有块的坐标，并同步更新边界
-            for (int i = -buildingWidth / 2; i <= buildingWidth / 2; i++)
-            {
-                for (int j = 1; j <= buildingHeight; j++)
-                {
-                    Vector2Int pos = roadPoint + offset * new Vector2Int(i, j);
-
-                    minPos = new Vector2Int(Mathf.Min(minPos.x, pos.x), Mathf.Min(minPos.y, pos.y));
-                    maxPos = new Vector2Int(Mathf.Max(maxPos.x, pos.x), Mathf.Max(maxPos.y, pos.y));
-
-                    buildingBlocks.Add(pos);
-                }
-            }
-
-            // 边界检查
-            var minLocalPos = minPos - OriginChunk.WorldPos;
-            var maxLocalPos = maxPos - OriginChunk.WorldPos;
-            if (minLocalPos.x < 0 || maxLocalPos.x >= OriginChunk.Size ||
-                minLocalPos.y < 0 || maxLocalPos.y >= OriginChunk.Size)
-            {
+        private IHouse PlaceBuilding(Vector2Int roadPoint, bool[,] blockOccupancyMap, bool[,] roadMap)
+        {
+            // Randomly pick a room config
+            var roomConfig = _roomConfigs[ChunkRand.Next(_roomConfigs.Count)];
+            int w = roomConfig.width, h = roomConfig.height;
+            // Compute candidate block positions
+            List<Vector2Int> buildingBlocks = new List<Vector2Int>();
+            Vector2Int minPos = roadPoint + new Vector2Int(-w/2, 1);
+            for (int dx = -w/2; dx <= w/2; dx++)
+                for (int dy = 1; dy <= h; dy++)
+                    buildingBlocks.Add(roadPoint + new Vector2Int(dx, dy));
+            // Boundary check
+            var minLocal = minPos - OriginChunk.WorldPos;
+            var maxLocal = new Vector2Int(minLocal.x + w, minLocal.y + h);
+            if (minLocal.x < 0 || maxLocal.x >= Size || minLocal.y < 0 || maxLocal.y >= Size)
                 return null;
-            }
 
-            // 与其他建筑重叠或与道路重叠的检查统一处理
-            foreach (var blockPos in buildingBlocks)
+            // Check adjacency to existing houses or roads
+            foreach (var b in buildingBlocks)
             {
-                // 检查是否与其他建筑重叠
-                foreach (var house in Houses)
+                var local = b - OriginChunk.WorldPos;
+                for (int ix = -HOUSE_MARGIN; ix <= HOUSE_MARGIN; ix++)
                 {
-                    if (house.Blocks.Contains(blockPos) ||
-                        house.Blocks.Contains(blockPos + new Vector2Int(1, 0)) ||
-                        house.Blocks.Contains(blockPos + new Vector2Int(-1, 0)) ||
-                        house.Blocks.Contains(blockPos + new Vector2Int(0, 1)) ||
-                        house.Blocks.Contains(blockPos + new Vector2Int(0, -1)))
+                    for (int iy = -HOUSE_MARGIN; iy <= HOUSE_MARGIN; iy++)
                     {
-                        return null;
-                    }
-                }
-
-                // 检查是否与道路重叠
-                foreach (var road in Roads)
-                {
-                    if (road.Contains(blockPos))
-                    {
-                        return null;
+                        int x = local.x + ix;
+                        int y = local.y + iy;
+                        if (x >= 0 && x < Size && y >= 0 && y < Size)
+                        {
+                            if (blockOccupancyMap[x, y] || roadMap[local.x, local.y])
+                                return null;
+                        }
                     }
                 }
             }

@@ -104,7 +104,6 @@ namespace Map
             var chunk = Map.GetChunk(cityLayerPos, CityLayer);
             if (chunk != null && chunk.City != null)
             {
-                Debug.Log($"Chunk {Pos} Layer {Layer} has city {chunk.City.GlobalPos}");
                 foreach (var road in chunk.City.Roads)
                 {
                     foreach (var roadPos in road)
@@ -116,7 +115,6 @@ namespace Map
                             if (Blocks[localPos.x, localPos.y] == BlockType.Ocean)
                                 continue; // 如果是海洋，则不设置
                             Blocks[localPos.x, localPos.y] = BlockType.Road;
-                            Debug.Log($"Set road at {roadPos}");
                         }
                     }
                 }

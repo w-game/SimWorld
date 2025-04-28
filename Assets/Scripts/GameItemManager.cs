@@ -11,6 +11,11 @@ public class GameItemManager
     private static Dictionary<Vector2Int, List<IGameItem>> _staticGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
     private static List<IGameItem> _dynamicGameItems = new List<IGameItem>();
 
+    private HashSet<IGameItem> _uniqueStaticItems = new HashSet<IGameItem>();
+    private List<IGameItem> _itemsToDestroy = new List<IGameItem>();
+    private static readonly float HideUISqrDistance = 64f * 64f;
+    private static readonly float DestroySqrDistance = 256f * 256f;
+
     public static event Func<Vector3, Vector2Int> ItemPosToMapPosConverter;
 
     public ObjectPool<GameItemUI> ItemUIPool { get; private set; }
@@ -47,7 +52,6 @@ public class GameItemManager
                 break;
         }
 
-        Debug.Log($"Create {item.GetType()} at {pos}");
         return item;
     }
 
@@ -127,31 +131,36 @@ public class GameItemManager
 
     public void Update()
     {
-        var uniqueStaticItems = new HashSet<IGameItem>(_staticGameItems.Values.SelectMany(x => x));
-        foreach (var gameItem in uniqueStaticItems)
+        _uniqueStaticItems.Clear();
+        foreach (var list in _staticGameItems.Values)
         {
-            gameItem.DoUpdate();
-            var dis = Vector2.Distance(gameItem.Pos, GameManager.I.CurrentAgent.Pos);
-            if (dis > 64)
+            foreach (var item in list)
             {
-                gameItem.HideUI();
-            }
-            else if (gameItem.UI == null && gameItem is not BuildingItem)
-            {
-                gameItem.ShowUI();
-            }
-
-            if (dis > 256)
-            {
-                gameItem.Destroy();
+                _uniqueStaticItems.Add(item);
             }
         }
 
-        foreach (var gameItem in new List<IGameItem>(_dynamicGameItems))
+        UpdateItemList(_uniqueStaticItems);
+        UpdateItemList(_dynamicGameItems);
+    }
+
+    private void UpdateItemList(IEnumerable<IGameItem> items)
+    {
+        _itemsToDestroy.Clear();
+        var agentPos = GameManager.I.CurrentAgent.Pos;
+
+        foreach (var gameItem in items)
         {
             gameItem.DoUpdate();
-            var dis = Vector2.Distance(gameItem.Pos, GameManager.I.CurrentAgent.Pos);
-            if (dis > 64)
+
+            float sqrDis = (gameItem.Pos - agentPos).sqrMagnitude;
+            if (sqrDis > DestroySqrDistance)
+            {
+                _itemsToDestroy.Add(gameItem);
+                continue;
+            }
+
+            if (sqrDis > HideUISqrDistance)
             {
                 gameItem.HideUI();
             }
@@ -159,11 +168,11 @@ public class GameItemManager
             {
                 gameItem.ShowUI();
             }
+        }
 
-            if (dis > 256)
-            {
-                gameItem.Destroy();
-            }
+        foreach (var item in _itemsToDestroy)
+        {
+            item.Destroy();
         }
     }
 

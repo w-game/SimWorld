@@ -76,6 +76,11 @@ namespace GameItem
             return actions;
         }
 
+        public override void HideUI()
+        {
+            MapManager.I.SetMapTile(Pos, MapLayer.Building, null);
+        }
+
         public override void Destroy()
         {
             MapManager.I.SetMapTile(Pos, MapLayer.Building, null);

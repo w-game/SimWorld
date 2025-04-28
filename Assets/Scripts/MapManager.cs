@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Citizens;
 using GameItem;
 using Map;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using System.Diagnostics;
+using UnityEngine.Profiling;
 
 public enum MapLayer
 {
@@ -68,6 +69,10 @@ public class MapManager : MonoSingleton<MapManager>
 
     private Agent _player;
 
+    // Remember last chunk position and prevent overlapping coroutines
+    private Vector2Int _lastPlayerChunkPos;
+    private Coroutine _updateChunksCoroutine;
+
     private void Start()
     {
         CartonMap = new CartonMap();
@@ -99,7 +104,24 @@ public class MapManager : MonoSingleton<MapManager>
 
     void Update()
     {
-        StartCoroutine(UpdateChunkCoroutine());
+        // Compute current player chunk
+        Vector2Int currentChunkPos = new Vector2Int(
+            Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
+            Mathf.FloorToInt(_player.Pos.y / CartonMap.NORMAL_CHUNK_SIZE)
+        );
+
+        // Only start a new update if the player moved to a different chunk
+        if (currentChunkPos != _lastPlayerChunkPos)
+        {
+            _lastPlayerChunkPos = currentChunkPos;
+
+            // Stop any ongoing chunk update coroutine
+            if (_updateChunksCoroutine != null)
+                StopCoroutine(_updateChunksCoroutine);
+
+            // Start a new chunk update
+            _updateChunksCoroutine = StartCoroutine(UpdateChunkCoroutine());
+        }
     }
 
     private void GenerateChunk(Vector2Int pos)
@@ -110,6 +132,7 @@ public class MapManager : MonoSingleton<MapManager>
             chunk.CalcBlocks();
             chunk.CheckCityItems();
             chunk.CalcMapItems();
+
             VisualChunk(chunk);
             if (!_chunkActive.ContainsKey(pos))
             {
@@ -140,16 +163,20 @@ public class MapManager : MonoSingleton<MapManager>
             }
         }
 
-        foreach (var chunk in new Dictionary<Vector2Int, Chunk>(_chunkActive))
+        // Clean up distant chunks
+        List<Vector2Int> toRemove = new List<Vector2Int>();
+        foreach (var kvp in _chunkActive)
         {
-            if (chunk.Value != null)
+            if (kvp.Value != null &&
+                Vector2Int.Distance(kvp.Value.Pos, playerChunkPos) > SIGHT_RANGE + 2)
             {
-                if (Vector2Int.Distance(chunk.Value.Pos, playerChunkPos) > SIGHT_RANGE + 2)
-                {
-                    _chunkActive.Remove(chunk.Key);
-                    UnVisualChunk(chunk.Value);
-                }
+                toRemove.Add(kvp.Key);
             }
+        }
+        foreach (var key in toRemove)
+        {
+            UnVisualChunk(_chunkActive[key]);
+            _chunkActive.Remove(key);
         }
     }
 
@@ -162,32 +189,6 @@ public class MapManager : MonoSingleton<MapManager>
                 var pos = new Vector2Int(i, j);
                 var blockWorldPos = pos + chunk.WorldPos;
                 SetBlockType(blockWorldPos, chunk.Blocks[i, j]);
-
-                var itemsAtPos = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(blockWorldPos.x + 0.5f, blockWorldPos.y + 0.5f, 0));
-
-                foreach (var item in itemsAtPos)
-                {
-                    item.ShowUI();
-                }
-            }
-        }
-
-        var cityChunk = CartonMap.GetChunk(new Vector3(chunk.WorldPos.x, chunk.WorldPos.y), Chunk.CityLayer);
-        if (cityChunk.City != null)
-        {
-            var families = GameManager.I.CitizenManager.GetCitizens(cityChunk.City);
-            foreach (var family in families)
-            {
-                foreach (var member in family.Members)
-                {
-                    // var localPos = WorldPosToCellPos(member.Agent.Pos) - chunk.WorldPos;
-
-                    // if (localPos.x < 0 || localPos.x >= chunk.Size || localPos.y < 0 || localPos.y >= chunk.Size)
-                    // {
-                    //     continue;
-                    // }
-                    member.Agent.ShowUI();
-                }
             }
         }
     }
@@ -203,7 +204,7 @@ public class MapManager : MonoSingleton<MapManager>
                 tilemap.SetTile(new Vector3Int(blockWorldPos.x, blockWorldPos.y, 0), null);
                 if (pos.x % 4 == 0)
                 {
-                    ocean.SetTile(new Vector3Int(pos.x, pos.y, 0), null);
+                    ocean.SetTile(new Vector3Int(blockWorldPos.x, blockWorldPos.y, 0), null);
                 }
             }
         }
@@ -212,7 +213,7 @@ public class MapManager : MonoSingleton<MapManager>
     public BlockType CheckBlockType(Vector3 pos)
     {
         var blockType = CartonMap.GetBlockType(pos);
-        Debug.Log($"点击的 Tile 坐标: {pos}, 类型: {blockType}");
+        UnityEngine.Debug.Log($"点击的 Tile 坐标: {pos}, 类型: {blockType}");
 
         return blockType;
     }
