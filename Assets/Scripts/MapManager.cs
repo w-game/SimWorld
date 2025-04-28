@@ -206,6 +206,13 @@ public class MapManager : MonoSingleton<MapManager>
                 {
                     ocean.SetTile(new Vector3Int(blockWorldPos.x, blockWorldPos.y, 0), null);
                 }
+
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(blockWorldPos.x, blockWorldPos.y, 0));
+
+                foreach (var item in items)
+                {
+                    GameItemManager.DestroyGameItem(item);
+                }
             }
         }
     }
