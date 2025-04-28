@@ -6,28 +6,31 @@ using Citizens;
 using DG.Tweening;
 using GameItem;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class GameItemManager
 {
     private static Dictionary<Vector2Int, List<IGameItem>> _staticGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
     private static List<IGameItem> _dynamicGameItems = new List<IGameItem>();
 
-    private HashSet<IGameItem> _uniqueStaticItems = new HashSet<IGameItem>();
-    private List<IGameItem> _itemsToDestroy = new List<IGameItem>();
+    private static HashSet<IGameItem> _uniqueStaticItems = new HashSet<IGameItem>();
+    private static HashSet<IGameItem> _uniqueDynamicItems = new HashSet<IGameItem>();
+    private static List<IGameItem> _itemsToDestroyStatic = new List<IGameItem>();
+    private static List<IGameItem> _itemsToDestroyDynamic = new List<IGameItem>();
     private static readonly float HideUISqrDistance = 64f * 64f;
-    private static readonly float DestroySqrDistance = 256f * 256f;
+    private static readonly float DestroySqrDistance = 64f * 64f;
 
     public static event Func<Vector3, Vector2Int> ItemPosToMapPosConverter;
 
-    public ObjectPool<GameItemUI> ItemUIPool { get; private set; }
-
-    private Coroutine _staticItemCoroutine;
-    private Coroutine _dynamicItemCoroutine;
+    public ObjectPool ItemUIPool { get; private set; }
 
     public GameItemManager(Func<Vector3, Vector2Int> func)
     {
         ItemPosToMapPosConverter = func;
-        ItemUIPool = new ObjectPool<GameItemUI>(128);
+        ItemUIPool = new ObjectPool(128);
+
+        GameManager.I.StartCoroutine(LoopUpdateStatic());
+        GameManager.I.StartCoroutine(LoopUpdateDynamic());
     }
 
     public static T CreateGameItem<T>(ConfigBase config, Vector3 pos, GameItemType itemType, params object[] otherObjs) where T : class, IGameItem
@@ -61,17 +64,31 @@ public class GameItemManager
 
     public static bool DestroyGameItem(IGameItem gameItem)
     {
-        gameItem.Destroy();
         switch (gameItem.ItemType)
         {
             case GameItemType.Static:
-                UnregisterStaticGameItem(gameItem);
+                _itemsToDestroyStatic.Add(gameItem);
                 break;
             case GameItemType.Dynamic:
-                UnregisterDynamicGameItem(gameItem);
+                _itemsToDestroyDynamic.Add(gameItem);
                 break;
         }
         return true;
+    }
+
+    public static void DestroyGameItem(IGameItem gameItem, GameItemType type)
+    {
+        switch (type)
+        {
+            case GameItemType.Static:
+                UnregisterStaticGameItem(gameItem);
+                gameItem.Destroy();
+                break;
+            case GameItemType.Dynamic:
+                UnregisterDynamicGameItem(gameItem);
+                gameItem.Destroy();
+                break;
+        }
     }
 
     private static void RegisterStaticGameItem(IGameItem gameItem)
@@ -79,7 +96,7 @@ public class GameItemManager
         foreach (var mapPos in gameItem.OccupiedPositions)
         {
             var pos = mapPos + ItemPosToMapPosConverter.Invoke(gameItem.Pos);
-            
+
             if (!_staticGameItems.ContainsKey(pos))
                 _staticGameItems[pos] = new List<IGameItem>();
 
@@ -101,9 +118,7 @@ public class GameItemManager
             {
                 _staticGameItems[pos].Remove(gameItem);
                 if (_staticGameItems[pos].Count == 0)
-                {
                     _staticGameItems.Remove(pos);
-                }
             }
         }
     }
@@ -133,51 +148,54 @@ public class GameItemManager
         return null;
     }
 
-    public void Update()
+    private void UpdateUniqueStaticItems()
     {
-        if (_staticItemCoroutine == null)
+        _uniqueStaticItems.Clear();
+        foreach (var list in _staticGameItems.Values)
         {
-            _uniqueStaticItems.Clear();
-            foreach (var list in _staticGameItems.Values)
+            foreach (var item in list)
             {
-                foreach (var item in list)
-                {
-                    _uniqueStaticItems.Add(item);
-                }
+                _uniqueStaticItems.Add(item);
             }
-            _staticItemCoroutine = GameManager.I.StartCoroutine(UpdateItemList(_uniqueStaticItems, "Static"));
-        }
-
-        if (_dynamicItemCoroutine == null)
-        {
-            _dynamicItemCoroutine = GameManager.I.StartCoroutine(UpdateItemList(_dynamicGameItems, "Dynamic", 200));
         }
     }
 
-    private IEnumerator UpdateItemList(IEnumerable<IGameItem> items, string type, int maxCount = 100)
+    public void UpdateUniqueDynamicItems()
     {
-        if (maxCount > 0)
+        _uniqueDynamicItems.Clear();
+        foreach (var item in _dynamicGameItems)
         {
-            maxCount = items.Count();
+            _uniqueDynamicItems.Add(item);
         }
+    }
 
-        if (maxCount == 0)
+    private IEnumerator LoopUpdateStatic(int maxCount = 1000)
+    {
+        UpdateUniqueStaticItems();
+        int count = maxCount;
+        while (true)
         {
-            yield break;
-        }
-        {
-            _itemsToDestroy.Clear();
+            maxCount = count;
+            int totalCount = _uniqueStaticItems.Count();
+
+            if (totalCount < maxCount)
+                maxCount = totalCount;
+
+            if (maxCount == 0)
+                yield return null;
+
+            _itemsToDestroyStatic.Clear();
             var agentPos = GameManager.I.CurrentAgent.Pos;
 
             int itemCount = 0;
-            foreach (var gameItem in items)
+            foreach (var gameItem in _uniqueStaticItems)
             {
                 gameItem.DoUpdate();
 
                 float sqrDis = (gameItem.Pos - agentPos).sqrMagnitude;
                 if (sqrDis > DestroySqrDistance)
                 {
-                    _itemsToDestroy.Add(gameItem);
+                    _itemsToDestroyStatic.Add(gameItem);
                     continue;
                 }
 
@@ -191,27 +209,77 @@ public class GameItemManager
                 }
 
                 itemCount++;
-                if (itemCount > maxCount) // 每一帧只处理100个物品
+                if (itemCount >= maxCount) // 每一帧只处理100个物品
                 {
                     yield return null;
                     itemCount = 0;
                 }
             }
 
-            foreach (var item in _itemsToDestroy)
+            foreach (var item in _itemsToDestroyStatic)
             {
-                item.Destroy();
+                DestroyGameItem(item, GameItemType.Static);
             }
 
-            switch (type)
+            UpdateUniqueStaticItems();
+            yield return null;
+        }
+    }
+
+    private IEnumerator LoopUpdateDynamic(int maxCount = 1000)
+    {
+        UpdateUniqueDynamicItems();
+        int count = maxCount;
+        while (true)
+        {
+            maxCount = count;
+            int totalCount = _uniqueDynamicItems.Count();
+
+            if (totalCount < maxCount)
+                maxCount = totalCount;
+
+            if (maxCount == 0)
+                yield return null;
+
+            _itemsToDestroyDynamic.Clear();
+            var agentPos = GameManager.I.CurrentAgent.Pos;
+
+            int itemCount = 0;
+            foreach (var gameItem in _uniqueDynamicItems)
             {
-                case "Static":
-                    _staticItemCoroutine = null;
-                    break;
-                case "Dynamic":
-                    _dynamicItemCoroutine = null;
-                    break;
+                gameItem.DoUpdate();
+
+                float sqrDis = (gameItem.Pos - agentPos).sqrMagnitude;
+                if (sqrDis > DestroySqrDistance)
+                {
+                    _itemsToDestroyDynamic.Add(gameItem);
+                    continue;
+                }
+
+                if (sqrDis > HideUISqrDistance)
+                {
+                    gameItem.HideUI();
+                }
+                else if (gameItem.UI == null)
+                {
+                    gameItem.ShowUI();
+                }
+
+                itemCount++;
+                if (itemCount >= maxCount) // 每一帧只处理 maxCount 个物品
+                {
+                    yield return null;
+                    itemCount = 0;
+                }
             }
+
+            foreach (var item in _itemsToDestroyDynamic)
+            {
+                DestroyGameItem(item, GameItemType.Dynamic);
+            }
+
+            UpdateUniqueDynamicItems();
+            yield return null;
         }
     }
 
@@ -234,7 +302,7 @@ public class GameItemManager
         sign.ItemType = type;
         switch (type)
         {
-            
+
             case GameItemType.Static:
                 UnregisterDynamicGameItem(sign);
                 RegisterStaticGameItem(sign);

@@ -38,7 +38,6 @@ public class GameManager : MonoBehaviour
     {
         ActionSystem.Update();
         GameTime.Update();
-        GameItemManager.Update();
 
         if (Input.GetKeyDown(KeyCode.E))
         {

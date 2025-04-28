@@ -83,15 +83,7 @@ namespace GameItem
         {
             if (UI == null)
             {
-                try
-                {
-                    Debug.Log($"GameItemBase ShowUI {Config.prefab}");
-                }
-                catch (System.Exception)
-                {
-                    ;
-                }
-                UI = GameManager.I.GameItemManager.ItemUIPool.Get(Config.prefab, Pos + new Vector3(0.5f, 0.5f, 0));
+                UI = GameManager.I.GameItemManager.ItemUIPool.Get<GameItemUI>(Config.prefab, Pos + new Vector3(0.5f, 0.5f, 0));
                 UI.Init(this);
             }
         }

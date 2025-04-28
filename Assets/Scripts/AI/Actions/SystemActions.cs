@@ -17,7 +17,6 @@ namespace AI
 
         public override void OnGet(params object[] args)
         {
-
         }
 
         public override void OnRegister(Agent agent)

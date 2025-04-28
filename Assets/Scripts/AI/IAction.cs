@@ -11,7 +11,7 @@ namespace AI
         string ActionName { get; }
         bool Done { get; set; }
         bool CanBeInterrupted { get; }
-        IAction NextAction { get; }
+        IAction NextAction { get; set; }
         bool Enable { get; }
         event Action<IAction> OnCompleted;
         event Action<float> OnActionProgress;

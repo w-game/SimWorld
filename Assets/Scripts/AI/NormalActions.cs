@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Citizens;
 using GameItem;
 using Map;
+using UI.Elements;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,6 +16,17 @@ namespace AI
         public List<IAction> PrecedingActions { get; } = new List<IAction>();
         public virtual string ActionName { get; protected set; }
         public virtual bool CanBeInterrupted => true;
+
+        public Vector3 Target
+        {
+            set
+            {
+                var cellPos = MapManager.I.WorldPosToCellPos(value);
+                var targetPos = new Vector3(cellPos.x + 0.5f, cellPos.y - 0.2f);
+                var actionProgressElement = GameManager.I.GameItemManager.ItemUIPool.Get<ActionProgressElement>("Prefabs/ActionProgress", targetPos);
+                actionProgressElement.Init(this, null);
+            }
+        }
 
         private bool _done = false;
 
@@ -44,6 +56,11 @@ namespace AI
         protected void OnActionFailedEvent()
         {
             OnActionFailed?.Invoke(this);
+        }
+
+        protected void OnActionProgressEvent(float progress)
+        {
+            OnActionProgress?.Invoke(progress);
         }
 
         // 先执行前置动作（如果有的话）
@@ -79,6 +96,10 @@ namespace AI
             NextAction = null;
             Enable = true;
             Pause = false;
+
+            OnActionFailed = null;
+            OnCompleted = null;
+            OnActionProgress = null;
         }
 
         public virtual float Evaluate(Agent agent, HouseType houseType)
@@ -86,12 +107,14 @@ namespace AI
             return 0f;
         }
 
-        protected void CheckMoveToArroundPos(Agent agent, Vector3 targetPos)
+        protected void CheckMoveToArroundPos(Agent agent, Vector3 targetPos, UnityAction onComplete = null)
         {
             var pos = MapManager.I.GetItemArroundPos(agent, targetPos);
             if (pos != Vector3.zero)
             {
-                PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, pos));
+                var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
+                action.OnCompleted += (a) => onComplete?.Invoke();
+                PrecedingActions.Add(action);
             }
             else
             {
@@ -126,6 +149,7 @@ namespace AI
             if (_curProgress < 100f)
             {
                 _curProgress += GameTime.DeltaTime * ActionSpeed;
+                OnActionProgressEvent(_curProgress);
             }
             else
             {
@@ -151,6 +175,7 @@ namespace AI
             if (_curProgress < 100f)
             {
                 _curProgress += GameTime.DeltaTime * ProgressSpeed / 2f;
+                OnActionProgressEvent(_curProgress);
             }
             else
             {

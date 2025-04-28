@@ -8,9 +8,9 @@ public interface IPoolable
     void OnRelease();
 }
 
-public class ObjectPool<T> where T : MonoBehaviour, IPoolable
+public class ObjectPool
 {
-    private readonly Dictionary<string, Queue<T>> _pool = new Dictionary<string, Queue<T>>();
+    private readonly Dictionary<string, Queue<IPoolable>> _pool = new Dictionary<string, Queue<IPoolable>>();
     private readonly int _maxSize;
 
     public ObjectPool(int maxSize)
@@ -18,11 +18,11 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolable
         _maxSize = maxSize;
     }
 
-    public T Get(string prefabPath, Vector3 pos)
+    public T Get<T>(string prefabPath, Vector3 pos) where T : MonoBehaviour, IPoolable
     {
         if (_pool.ContainsKey(prefabPath) && _pool[prefabPath].Count > 0)
         {
-            var i = _pool[prefabPath].Dequeue();
+            var i = _pool[prefabPath].Dequeue() as T;
             i.transform.position = pos;
             i.gameObject.SetActive(true);
             i.OnGet();
@@ -34,12 +34,13 @@ public class ObjectPool<T> where T : MonoBehaviour, IPoolable
         return instance;
     }
 
-    public void Release(T instance, string prefabPath)
+    public void Release<T>(T instance, string prefabPath) where T : MonoBehaviour, IPoolable
     {
         if (!_pool.ContainsKey(prefabPath))
         {
-            _pool[prefabPath] = new Queue<T>();
+            _pool[prefabPath] = new Queue<IPoolable>();
         }
+        
         if (_pool[prefabPath].Count < _maxSize)
         {
             instance.OnRelease();

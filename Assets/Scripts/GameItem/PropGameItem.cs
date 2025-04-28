@@ -14,7 +14,8 @@ namespace GameItem
 
         private Tween _tween;
 
-        private bool _isPicking;
+        private float _pickColdownTime = 0.05f;
+        private Agent _agent;
 
         public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
@@ -37,38 +38,39 @@ namespace GameItem
             };
         }
 
+        public override void Update()
+        {
+            _pickColdownTime -= Time.deltaTime;
+            if (_agent != null && _pickColdownTime <= 0)
+            {
+                if (_agent.Bag.AddItem(this))
+                {
+                    GameItemManager.DestroyGameItem(this);
+                }
+            }
+        }
+
         public void BePickedUp(Agent agent)
         {
-            if (Owner != agent.Citizen.Family)
+            if (Owner != agent.Citizen.Family || _agent != null)
                 return;
 
-            UI.Col.enabled = false; // Disable collider
+            _agent = agent;
+        }
 
-            var originalPos = Pos;
-            _tween = DOTween.To(() => Pos,
-                                     v =>
-                                     {
-                                         Pos = v;
-                                         if ((Pos - agent.Pos).sqrMagnitude < 0.5f && _tween != null)
-                                         {
-                                             if (agent.Bag.AddItem(this))
-                                             {
-                                                 DOTween.Kill(_tween);
-                                                 _tween = null;
-                                                 GameItemManager.DestroyGameItem(this);
-                                             }
-                                             else
-                                             {
-                                                 DOTween.Kill(_tween);
-                                                _tween = null;
-                                                 Pos = originalPos;
-                                             }
-                                         }
-                                     },
-                                     agent.Pos,
-                                     0.25f)
-                                 .SetEase(Ease.Linear);
-                                //  .SetTarget(this);
+        public override void Destroy()
+        {
+            if (_agent != null)
+            {
+                UI.PlayAnimation(_agent, () =>
+                {
+                    base.Destroy();
+                });
+            }
+            else
+            {
+                base.Destroy();
+            }
         }
     }
 

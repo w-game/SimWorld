@@ -21,6 +21,8 @@ namespace AI
 
         public event Action<float> OnActionProgress;
 
+        private WorkAction _workAction;
+
         public void SetAgent(Agent agent)
         {
             _agent = agent;
@@ -43,20 +45,33 @@ namespace AI
             action.OnCompleted -= UnregisterAction;
             action.OnActionProgress -= OnActionProgress;
             action.OnActionFailed -= UnregisterAction;
-            CurAction = null;
 
             OnActionUnregister?.Invoke(action);
+            CurAction = null;
+
+            if (_workAction != null)
+            {
+                CurAction = _workAction;
+                _workAction = null;
+            }
         }
 
         private void ChangeCurAction(IAction action)
         {
-            if (CurAction != null)
-            {
-                UnregisterAction(CurAction);
-            }
-
             if (action == null)
                 return;
+
+            if (CurAction != null)
+            {
+                if (CurAction is WorkAction workAction)
+                {
+                    _workAction = workAction;
+                }
+                else
+                {
+                    UnregisterAction(CurAction);
+                }
+            }
 
             CurAction = action;
             CurAction.OnCompleted += UnregisterAction;
@@ -133,7 +148,8 @@ namespace AI
                     ResolveHungerBehavior();
                     break;
                 case "Toilet":
-                    RegisterAction(ActionPool.Get<ToiletAction>(_agent.State.Toilet), true);
+                    var toiletAction = ActionPool.Get<ToiletAction>(_agent.State.Toilet);
+                    RegisterAction(toiletAction, true);
                     break;
                 case "Social":
                     // RegisterAction(new SocialAction(_agent.State.Social), true);

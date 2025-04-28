@@ -151,7 +151,7 @@ namespace Citizens
         {
             if (UI == null)
             {
-                UI = GameManager.I.GameItemManager.ItemUIPool.Get("Prefabs/Player", Pos);
+                UI = GameManager.I.GameItemManager.ItemUIPool.Get<PlayerController>("Prefabs/Player", Pos);
                 UI.Init(this);
                 PlayerController = UI as PlayerController;
             }
@@ -230,6 +230,7 @@ namespace Citizens
         {
             Citizen = citizen;
             Citizen.SetAgent(this);
+            Owner = Citizen.Family;
             State = new AgentState(this);
             Bag = new Inventory(16);
         }

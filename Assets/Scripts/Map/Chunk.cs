@@ -201,8 +201,6 @@ namespace Map
 
         public void CalcMapItems()
         {
-            
-
             List<(string id, Vector3 pos, string mode)> spawnList = new();
 
             for (int i = 0; i < Size; i++)

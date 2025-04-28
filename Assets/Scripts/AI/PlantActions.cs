@@ -17,12 +17,12 @@ namespace AI
             _targetPos = (Vector3)args[0];
             _house = args[1] as IHouse;
             ActionName = "Hoe the ground";
-            ActionSpeed = 0.1f;
+            ActionSpeed = 1f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _targetPos);
+            CheckMoveToArroundPos(agent, _targetPos, () => { Target = _targetPos; });
         }
 
         protected override void DoExecute(Agent agent)
@@ -51,7 +51,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _farmItem.Pos);
+            CheckMoveToArroundPos(agent, _farmItem.Pos, () => { Target = _farmItem.Pos; });
         }
 
         protected override void DoExecute(Agent agent)
@@ -185,6 +185,7 @@ namespace AI
             {
                 var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
                 var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
+                propItem.Owner = agent.Owner;
                 propItem.ShowUI();
             }
 
