@@ -4,7 +4,7 @@
             "id": "PLANT_TREE",
             "name": "Tree",
             "description": "A tall tree.",
-            "type": "Plant",
+            "type": "Tree",
             "icon": "Textures/Tree_0",
             "prefab": "Prefabs/GameItems/PlantItem",
             "stages": [
