@@ -12,6 +12,12 @@
             "targets": {
                 "plant": "PLANT_WHEAT"
             }
+        },
+        {
+            "id": "PROP_MATERIAL_ORE",
+            "targets": {
+                "smelt": "PROP_MATERIAL_IRON"
+            }
         }
     ]
 }

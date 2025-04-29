@@ -9,6 +9,7 @@ namespace UI.Elements
     {
         public string msg;
         public string iconPath;
+        public MessageType type;
     }
     public class MessageElement : ElementBase<Message>, IPoolable
     {
@@ -18,6 +19,21 @@ namespace UI.Elements
         {
             msg.text = data.msg;
             icon.sprite = Resources.Load<Sprite>(data.iconPath);
+
+            switch (data.type)
+            {
+                case MessageType.Info:
+                    msg.color = Color.white;
+                    break;
+                case MessageType.Warning:
+
+                    msg.color = Color.yellow;
+                    break;
+                case MessageType.Error:
+
+                    msg.color = Color.red;
+                    break;
+            }
             action?.Invoke(data);
         }
 

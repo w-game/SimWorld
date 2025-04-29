@@ -3,6 +3,7 @@ using System.Linq;
 using Citizens;
 using GameItem;
 using Map;
+using UI.Elements;
 using UI.Models;
 using UnityEngine;
 
@@ -53,7 +54,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _farmItem.Pos, () => { Target = _farmItem.Pos; });
+            CheckMoveToArroundPos(agent, _farmItem, () => { Target = _farmItem.Pos; });
         }
 
         protected override void DoExecute(Agent agent)
@@ -87,6 +88,7 @@ namespace AI
             {
                 var confg = ConfigReader.GetConfig<PropConfig>(dropItem.id);
                 var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
+                propItem.Owner = agent.Owner;
                 propItem.ShowUI();
             }
 
@@ -107,14 +109,25 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _wellItem.Pos));
+            if (agent.Bag.CheckItem("PROP_TOOL_HANDBUCKET").Count == 0)
+            {
+                var bucket = ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET");
+                MessageBox.I.ShowMessage("No Bucket!", bucket.icon, MessageType.Error);
+                OnActionFailedEvent();
+            }
+            else
+            {
+                CheckMoveToArroundPos(agent, _wellItem, () => { Target = _wellItem.Pos; });
+            }
         }
 
         protected override void DoExecute(Agent agent)
         {
-            var propItem = GameItemManager.CreateGameItem<PropGameItem>(ConfigReader.GetConfig<PropConfig>("Water"), agent.Pos, GameItemType.Static, 1);
-            propItem.ShowUI();
-            agent.Brain.RegisterAction(ActionPool.Get<TakeItemInHand>(propItem), true);
+            if (agent.Bag.CheckItem("PROP_TOOL_HANDBUCKET").Count > 0)
+            {
+                agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1);
+                agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
+            }
         }
     }
 

@@ -89,6 +89,13 @@ namespace AI
         // 注册时配置前置动作（例如移动、捡取物品等）
         public abstract void OnRegister(Agent agent);
 
+        protected void AddPrecedingAction<T>(Agent agent, params object[] args) where T : ActionBase
+        {
+            var action = ActionPool.Get<T>(args);
+            action.OnRegister(agent);
+            PrecedingActions.Add(action);
+        }
+
         public void Reset()
         {
             Done = false;
@@ -119,6 +126,23 @@ namespace AI
             else
             {
                 Done = true;
+            }
+        }
+
+        protected void CheckMoveToArroundPos<T>(Agent agent, T item, UnityAction onComplete = null) where T : IGameItem
+        {
+            if (item != null)
+            {
+                var arroundPosList = item.ArroundPosList();
+                if (arroundPosList.Count == 0)
+                {
+                    Done = true;
+                    return;
+                }
+                var pos = arroundPosList[0];
+                var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
+                action.OnCompleted += (a) => onComplete?.Invoke();
+                PrecedingActions.Add(action);
             }
         }
 

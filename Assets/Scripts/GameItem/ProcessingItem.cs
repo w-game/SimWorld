@@ -27,6 +27,7 @@ namespace GameItem
         protected abstract string TargetId { get; }
         protected abstract string Amound { get; }
         protected abstract string Time { get; }
+        protected abstract PropType PropType { get; }
 
         public event UnityAction<IProcessingItem> OnFinish;
 
@@ -42,7 +43,7 @@ namespace GameItem
                 return;
             }
             CurItem = ConfigReader.GetConfig<PropConfig>(id);
-            GameManager.I.CurrentAgent.Brain.RegisterAction(ActionPool.Get<MillstoneAction>(this, CurItem), true);
+            GameManager.I.CurrentAgent.Brain.RegisterAction(ActionPool.Get<ProcessingItemAction>(this, CurItem), true);
         }
 
         public virtual void ProcessItem(int curTime, Agent agent)
@@ -109,13 +110,14 @@ namespace GameItem
                 }
             }
 
+            var actionName = TargetId.ToLower();
             return new List<IAction>()
             {
-                new SystemAction("Millstone", a =>
+                new SystemAction(actionName, a =>
                 {
-                    var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.Crop);
+                    var model = IModel.GetModel<PopSelectSeedModel>(this, PropType);
                     model.ShowUI();
-                })
+                }),
             };
         }
     }
@@ -128,6 +130,7 @@ namespace GameItem
         protected override string Amound => "millAmount";
 
         protected override string Time => "millTime";
+        protected override PropType PropType => PropType.Crop;
 
         public MillstoneItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
@@ -139,6 +142,20 @@ namespace GameItem
             {
 
             };
+        }
+    }
+
+    public class FurnaceItem : ProcessingItemBase
+    {
+        public override bool Walkable => false;
+
+        protected override string TargetId => "smelt";
+        protected override string Amound => "smeltAmount";
+
+        protected override string Time => "smeltTime";
+        protected override PropType PropType => PropType.Ore;
+        public FurnaceItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
         }
     }
 }

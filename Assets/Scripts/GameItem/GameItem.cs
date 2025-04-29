@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using Citizens;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace GameItem
         void HideUI();
         void Destroy();
         void DoUpdate();
+        List<Vector3> ArroundPosList();
         List<IAction> ItemActions(IGameItem agent);
         List<IAction> ActionsOnClick(Agent agent);
         List<Vector2Int> OccupiedPositions { get; }
@@ -64,6 +66,41 @@ namespace GameItem
         {
             ConfigBase = config;
             _pos = pos;
+        }
+
+        public List<Vector3> ArroundPosList()
+        {
+            HashSet<Vector3> occupiedPositions = new HashSet<Vector3>();
+
+            foreach (var pos in OccupiedPositions)
+            {
+                var targetPos = new Vector3(pos.x, pos.y) + Pos;
+                TrySetPos(targetPos + new Vector3(0, -1), occupiedPositions);
+                TrySetPos(targetPos + new Vector3(-1, 0), occupiedPositions);
+                TrySetPos(targetPos + new Vector3(1, 0), occupiedPositions);
+                TrySetPos(targetPos + new Vector3(0, 1), occupiedPositions);
+            }
+            return occupiedPositions.ToList();
+        }
+
+        private void TrySetPos(Vector3 pos, HashSet<Vector3> occupiedPositions)
+        {
+            var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+            var walkable = true;
+
+            foreach (var item in items)
+            {
+                if (item.Walkable == false)
+                {
+                    walkable = false;
+                    break;
+                }
+            }
+
+            if (walkable)
+            {
+                occupiedPositions.Add(pos);
+            }
         }
 
         public void CalcSize()

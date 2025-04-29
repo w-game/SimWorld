@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace UI.Elements
 {
+    public enum MessageType
+    {
+        Info,
+        Warning,
+        Error
+    }
+
     public class MessageBox : MonoBehaviour
     {
         [SerializeField] private Transform messageContainer;
@@ -31,10 +38,10 @@ namespace UI.Elements
             }
         }
 
-        public void ShowMessage(string message, string iconPath)
+        public void ShowMessage(string message, string iconPath, MessageType type = MessageType.Info)
         {
             var messageElement = GameManager.I.GameItemManager.ItemUIPool.Get<MessageElement>("Prefabs/UI/Elements/MessageElement", messageContainer);
-            messageElement.Init(new Message { msg = message, iconPath = iconPath });
+            messageElement.Init(new Message { msg = message, iconPath = iconPath, type = type });
 
             DOTween.Sequence()
                 .AppendCallback(() =>
@@ -47,7 +54,7 @@ namespace UI.Elements
                     GameManager.I.GameItemManager.ItemUIPool.Release(messageElement, "Prefabs/UI/Elements/MessageElement");
                 }));
         }
-        
+
         public void ClearMessages()
         {
             foreach (Transform child in messageContainer)

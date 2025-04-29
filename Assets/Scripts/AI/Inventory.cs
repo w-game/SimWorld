@@ -1,21 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using GameItem;
-using UnityEngine;
 using UnityEngine.Events;
 
 public class PropItemBase
 {
     public ConfigBase Config { get; private set; }
     public int Quantity { get; private set; }
-    public PropType Type { get; private set; }
 
     public PropItemBase(ConfigBase config, int quantity = 1)
     {
         Config = config;
         Quantity = quantity;
-        Type = Enum.Parse<PropType>(config.type);
     }
 
     public void AddQuantity(int quantity)
@@ -27,8 +23,10 @@ public class PropItemBase
 public class PropItem : PropItemBase
 {
     public new PropConfig Config => base.Config as PropConfig;
+    public PropType Type { get; private set; }
     public PropItem(ConfigBase config, int quantity = 1) : base(config, quantity)
     {
+        Type = (PropType)Enum.Parse(typeof(PropType), config.type);
     }
 }
 
@@ -37,6 +35,7 @@ public class CraftPropItem : PropItemBase
     public new CraftConfig Config => base.Config as CraftConfig;
     public CraftPropItem(ConfigBase config, int quantity = 1) : base(config, quantity)
     {
+        
     }
 }
 
@@ -49,7 +48,8 @@ public enum PropType
     Tool,
     Equipment,
     Weapon,
-    Crop
+    Crop,
+    Ore
 }
 
 public class Inventory

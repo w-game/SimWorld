@@ -3,28 +3,28 @@ using GameItem;
 
 namespace AI
 {
-    public class MillstoneAction : MultiTimesActionBase
+    public class ProcessingItemAction : MultiTimesActionBase
     {
-        private MillstoneItem _millstoneItem;
+        private ProcessingItemBase _item;
 
         public override void OnGet(params object[] args)
         {
-            _millstoneItem = args[0] as MillstoneItem;
+            _item = args[0] as ProcessingItemBase;
             ProgressSpeed = 10f;
-            TotalTimes = _millstoneItem.ConvertionTime;
+            TotalTimes = _item.ConvertionTime;
         }
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _millstoneItem.Pos, () => {
-                Target = _millstoneItem.Pos;
-                agent.Bag.RemoveItem(_millstoneItem.CurItem, 1);
+            CheckMoveToArroundPos(agent, _item.Pos, () => {
+                Target = _item.Pos;
+                agent.Bag.RemoveItem(_item.CurItem, 1);
             });
         }
 
         protected override void DoExecute(Agent agent)
         {
-            _millstoneItem.ProcessItem(CurTime, agent);
+            _item.ProcessItem(CurTime, agent);
         }
     }
 }

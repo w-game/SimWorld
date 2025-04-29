@@ -290,4 +290,20 @@ namespace GameItem
         //     };
         // }
     }
+
+    public class BucketItem : FurnitureItem
+    {
+        public override bool Walkable => false;
+        public BucketItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return new List<IAction>()
+            {
+                // system
+            };
+        }
+    }
 }

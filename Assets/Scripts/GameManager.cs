@@ -51,7 +51,7 @@ public class GameManager : MonoBehaviour
             //         new SleepAction(CurrentAgent.State.Sleep),
             //         CurrentAgent.Citizen));
 
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_SEED_WHEAT"), 1);
+            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_ORE"), 5);
         }
     }
 

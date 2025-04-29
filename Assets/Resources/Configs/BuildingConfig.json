@@ -205,6 +205,48 @@
                 "wood": 2
             },
             "buildSpeed": 15
+        },
+        {
+            "id": "BUILDING_WELL",
+            "name": "Well",
+            "description": "A well for water.",
+            "type": "Well",
+            "icon": "Textures/Well",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [2, 1],
+            "requiredResources": {
+                "PROP_MATERIAL_PLANK": 20,
+                "PROP_MATERIAL_IRON": 10
+            },
+            "buildSpeed": 5
+        },
+        {
+            "id": "BUILDING_BUCKET",
+            "name": "Bucket",
+            "description": "A bucket for carrying water.",
+            "type": "Bucket",
+            "icon": "Textures/Bucket",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "PROP_MATERIAL_PLANK": 20,
+                "PROP_MATERIAL_IRON": 10
+            },
+            "buildSpeed": 5
+        },
+        {
+            "id": "BUILDING_FURNACE",
+            "name": "Furnace",
+            "description": "A furnace for smelting ores.",
+            "type": "Furnace",
+            "icon": "Textures/Furnace",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [2, 1],
+            "requiredResources": {
+                "stone": 10,
+                "metal": 5
+            },
+            "buildSpeed": 10
         }
     ]
 }

@@ -12,6 +12,32 @@
                     "amount": 2
                 }
             ]
+        },
+        {
+            "id": "PROP_TOOL_HANDBUCKET",
+            "materials": [
+                {
+                    "id": "PROP_MATERIAL_IRON",
+                    "amount": 5
+                },
+                {
+                    "id": "PROP_MATERIAL_PLANK",
+                    "amount": 10
+                }
+            ]
+        },
+        {
+            "id": "PROP_TOOL_HOE",
+            "materials": [
+                {
+                    "id": "PROP_MATERIAL_BRANCH",
+                    "amount": 1
+                },
+                {
+                    "id": "PROP_MATERIAL_STONE",
+                    "amount": 2
+                }
+            ]
         }
     ]
 }

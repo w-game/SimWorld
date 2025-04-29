@@ -41,7 +41,7 @@
             "name": "Plank",
             "description": "A wooden plank.",
             "type": "Material",
-            "icon": "Textures/Wood",
+            "icon": "Textures/Flank",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10
         },
@@ -64,6 +64,18 @@
             "maxStackSize": 1,
             "additionals": {
                 "crop": 1
+            }
+        },
+        {
+            "id": "PROP_TOOL_HOE",
+            "name": "Hoe",
+            "description": "A tool for farming.",
+            "type": "Tool",
+            "icon": "Textures/Hoe",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 1,
+            "additionals": {
+                "hoe": 1
             }
         },
         {
@@ -103,6 +115,49 @@
             "description": "A bag of flour.",
             "type": "Material",
             "icon": "Textures/Flour",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10
+        },
+        {
+            "id": "PROP_TOOL_HANDBUCKET",
+            "name": "Hand Bucket",
+            "description": "A hand bucket.",
+            "type": "Tool",
+            "icon": "Textures/HandBucket",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 1
+        },
+        {
+            "id": "PROP_MATERIAL_HANDBUCKET_WATER",
+            "name": "Water",
+            "description": "A bucket of water.",
+            "type": "Material",
+            "icon": "Textures/HandWaterBucket",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10,
+            "additionals": {
+                "water": 1
+            }
+        },
+        {
+            "id": "PROP_MATERIAL_ORE",
+            "name": "Ore",
+            "description": "A piece of ore.",
+            "type": "Ore",
+            "icon": "Textures/Ore",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10,
+            "additionals": {
+                "smeltTime": 5,
+                "smeltAmount": 1
+            }
+        },
+        {
+            "id": "PROP_MATERIAL_IRON",
+            "name": "Iron",
+            "description": "A piece of iron.",
+            "type": "Material",
+            "icon": "Textures/Iron",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10
         }
