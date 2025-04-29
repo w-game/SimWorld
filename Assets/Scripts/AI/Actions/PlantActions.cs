@@ -1,10 +1,8 @@
 
-using System.Linq;
 using Citizens;
 using GameItem;
 using Map;
 using UI.Elements;
-using UI.Models;
 using UnityEngine;
 
 namespace AI

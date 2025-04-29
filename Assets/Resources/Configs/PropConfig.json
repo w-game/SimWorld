@@ -63,7 +63,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "chop": 1
+                "chop": 5
             }
         },
         {
@@ -76,6 +76,18 @@
             "maxStackSize": 1,
             "additionals": {
                 "hoe": 5
+            }
+        },
+        {
+            "id": "PROP_TOOL_PICKAXE",
+            "name": "Pickaxe",
+            "description": "A tool for mining.",
+            "type": "Tool",
+            "icon": "Textures/Pickaxe",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 1,
+            "additionals": {
+                "mine": 5
             }
         },
         {

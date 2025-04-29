@@ -5,11 +5,11 @@
             "materials": [
                 {
                     "id": "PROP_MATERIAL_BRANCH",
-                    "amount": 1
+                    "amount": 2
                 },
                 {
                     "id": "PROP_MATERIAL_STONE",
-                    "amount": 2
+                    "amount": 3
                 }
             ]
         },
@@ -31,11 +31,24 @@
             "materials": [
                 {
                     "id": "PROP_MATERIAL_BRANCH",
-                    "amount": 1
+                    "amount": 2
                 },
                 {
                     "id": "PROP_MATERIAL_STONE",
                     "amount": 2
+                }
+            ]
+        },
+        {
+            "id": "PROP_TOOL_PICKAXE",
+            "materials": [
+                {
+                    "id": "PROP_MATERIAL_BRANCH",
+                    "amount": 2
+                },
+                {
+                    "id": "PROP_MATERIAL_STONE",
+                    "amount": 3
                 }
             ]
         }
