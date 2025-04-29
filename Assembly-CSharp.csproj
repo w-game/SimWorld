@@ -94,6 +94,7 @@
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/SystemActions.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/ProducePanelElement.cs" />
     <Compile Include="Assets/Scripts/UI/Views/MainView.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ItemSlotElement.cs" />
     <Compile Include="Assets/Scripts/ItemShadow.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Assets/Scripts/GameItemManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionProgressElement.cs" />
     <Compile Include="Assets/Scripts/AI/Inventory.cs" />
+    <Compile Include="Assets/Scripts/GameItem/ProcessingItem.cs" />
     <Compile Include="Assets/Scripts/UI/Views/ActionListElement.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/ResourceActions.cs" />
     <Compile Include="Assets/Scripts/AI/BuildingCraftActions.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="Assets/Scripts/Citizen/Property.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/JobRecruitElement.cs" />
     <Compile Include="Assets/TIles/BuildingTile.cs" />
+    <Compile Include="Assets/Scripts/AI/Actions/BuildingActions.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />
     <Compile Include="Assets/Scripts/Util/ObjectPool.cs" />
     <Compile Include="Assets/Scripts/Citizen/Company.cs" />
@@ -666,6 +669,10 @@
     </Reference>
     <Reference Include="Mono.Cecil">
       <HintPath>Library/PackageCache/com.unity.nuget.mono-cecil/Mono.Cecil.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>Library/PackageCache/com.unity.nuget.newtonsoft-json/Runtime/Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">

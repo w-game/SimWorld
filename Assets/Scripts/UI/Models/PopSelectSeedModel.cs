@@ -3,26 +3,22 @@ using UnityEngine.Events;
 
 namespace UI.Models
 {
+    public interface ISelectItem
+    {
+        void OnSelected(string id);
+    }
     public class PopSelectSeedModel : ModelBase<PopSelectSeed>
     {
         public override string Path => "PopSelectSeed";
         public override ViewType ViewType => ViewType.Popup;
 
-        private UnityAction<string> _callback;
+        public PropType PropType => (PropType)Data[1];
+        private ISelectItem _selectItem => Data[0] as ISelectItem;
 
-        public PopSelectSeedModel(UnityAction<string> callback)
-        {
-            _callback = callback;
-        }
 
-        public void ExecuteCallback(string seedId)
+        public void OnSelected(string id)
         {
-            _callback?.Invoke(seedId);
-        }
-
-        protected override void OnHideUI()
-        {
-            _callback?.Invoke(string.Empty);
+            _selectItem?.OnSelected(id);
         }
     }
 }

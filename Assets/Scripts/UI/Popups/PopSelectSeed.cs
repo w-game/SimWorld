@@ -10,7 +10,8 @@ namespace UI.Popups
         protected override Inventory Inventory =>
             GameManager.I.CurrentAgent.Bag;
 
-        protected override PropType PropType => PropType.Seed;
+        private PopSelectSeedModel SelfModel => (PopSelectSeedModel)base.Model;
+        protected override PropType PropType => SelfModel.PropType;
 
         protected override void OnItemClicked(PropItem propItem)
         {
@@ -19,7 +20,7 @@ namespace UI.Popups
 
             if (Model is PopSelectSeedModel model)
             {
-                model.ExecuteCallback(propItem.Config.id);
+                model.OnSelected(propItem.Config.id);
             }
             Close();
         }

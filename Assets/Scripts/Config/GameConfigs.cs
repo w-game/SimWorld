@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Map;
 
 [Serializable]
@@ -37,14 +38,7 @@ public class BuildingRequiredItem
 public class PropConfig : ConfigBase
 {
     public int maxStackSize;
-    public PropEffectConfig[] effects;
-}
-
-[Serializable]
-public class PropEffectConfig
-{
-    public string type;
-    public float value;
+    public Dictionary<string, object> additionals;
 }
 
 [Serializable]
@@ -126,5 +120,5 @@ public class ItemWeight
 [Serializable]
 public class CropSeedConfig : ConfigBase
 {
-    public string target;
+    public Dictionary<string, string> targets;
 }

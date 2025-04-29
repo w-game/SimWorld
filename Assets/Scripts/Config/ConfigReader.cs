@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Newtonsoft.Json;
 
 /// <summary>
 /// Generic JSON‑based configuration loader.
@@ -59,7 +60,7 @@ public class ConfigReader
         if (textAsset == null)
             throw new Exception($"Config file not found: {path}");
 
-        var listWrapper = JsonUtility.FromJson<ConfigList<T>>(textAsset.text);
+        var listWrapper = JsonConvert.DeserializeObject<ConfigList<T>>(textAsset.text);
         if (listWrapper == null || listWrapper.items == null)
             throw new Exception($"Failed to parse config list in: {path}");
 

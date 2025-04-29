@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b9de90d5a209342d5bb800e7d1a23631
+guid: 6772aecaaf091407592cb2319ba26319
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6196575560788704128
-    second: Basic_Furniture_20_0
+      213: -7751777048443264340
+    second: Flour_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Basic_Furniture_20_0
+      name: Flour_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 14
-        height: 14
+        width: 16
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 084825bbb57510aa0800000000000000
-      internalID: -6196575560788704128
+      spriteID: ca2638958d72c6490800000000000000
+      internalID: -7751777048443264340
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Basic_Furniture_20_0: -6196575560788704128
+      Flour_0: -7751777048443264340
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

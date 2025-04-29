@@ -191,6 +191,20 @@
                 "wood": 3,
                 "metal": 1
             }
+        },
+        {
+            "id": "BUILDING_MILLSTONE",
+            "name": "Millstone",
+            "description": "A millstone for grinding grains.",
+            "type": "Millstone",
+            "icon": "Textures/Millstone",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "stone": 5,
+                "wood": 2
+            },
+            "buildSpeed": 15
         }
     ]
 }

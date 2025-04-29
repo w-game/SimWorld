@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b9de90d5a209342d5bb800e7d1a23631
+guid: 0b7f545af42ae48ab86b611902b954af
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6196575560788704128
-    second: Basic_Furniture_20_0
+      213: -2318793824323082926
+    second: Millstone_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 16
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Basic_Furniture_20_0
+      name: Millstone_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 3
         y: 0
-        width: 14
-        height: 14
+        width: 27
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 084825bbb57510aa0800000000000000
-      internalID: -6196575560788704128
+      spriteID: 2556ad16d4df1dfd0800000000000000
+      internalID: -2318793824323082926
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Basic_Furniture_20_0: -6196575560788704128
+      Millstone_0: -2318793824323082926
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

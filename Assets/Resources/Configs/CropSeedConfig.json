@@ -2,12 +2,16 @@
     "items": [
         {
             "id": "PROP_MATERIAL_WHEAT",
-            "target": "PROP_SEED_WHEAT"
+            "targets": {
+                "seed": "PROP_SEED_WHEAT",
+                "mill": "PROP_MATERIAL_FLOUR"
+            }
         },
         {
-
             "id": "PROP_SEED_WHEAT",
-            "target": "PLANT_WHEAT"
+            "targets": {
+                "plant": "PLANT_WHEAT"
+            }
         }
     ]
 }

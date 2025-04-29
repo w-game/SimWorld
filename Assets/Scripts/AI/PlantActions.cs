@@ -56,7 +56,7 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            _farmItem.Plant(_seedId);
+            _farmItem.BePlant(_seedId);
             agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(_seedId), 1);
         }
     }

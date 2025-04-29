@@ -127,7 +127,7 @@ namespace GameItem
         }
     }
 
-    public class FarmItem : BuildingItem
+    public class FarmItem : BuildingItem, ISelectItem
     {
         public PlantItem PlantItem => GameManager.I.GameItemManager.TryGetItemAtPos<PlantItem>(Pos);
         public FarmItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
@@ -160,25 +160,26 @@ namespace GameItem
             {
                 new SystemAction("Plant Seed", a =>
                 {
-                    var model = new PopSelectSeedModel(selectedSeedId =>
-                    {
-                        if (string.IsNullOrEmpty(selectedSeedId))
-                        {
-                            return;
-                        }
-
-                        GameManager.I.CurrentAgent.Brain.RegisterAction(ActionPool.Get<PlantAction>(this, selectedSeedId), true);
-                    });
+                    var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.Seed);
                     model.ShowUI();
                 })
             };
         }
 
-        public void Plant(string seedId)
+        public void OnSelected(string seedId)
+        {
+            if (string.IsNullOrEmpty(seedId))
+            {
+                return;
+            }
+            GameManager.I.CurrentAgent.Brain.RegisterAction(ActionPool.Get<PlantAction>(this, seedId), true);
+        }
+
+        public void BePlant(string seedId)
         {
             var cropSeedConfig = ConfigReader.GetConfig<CropSeedConfig>(seedId);
             PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
-                ConfigReader.GetConfig<ResourceConfig>(cropSeedConfig.target),
+                ConfigReader.GetConfig<ResourceConfig>(cropSeedConfig.targets["plant"]),
                 Pos + new Vector3(0.5f, 0.5f, 0),
                 GameItemType.Static,
                 false);

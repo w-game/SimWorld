@@ -20,6 +20,7 @@ namespace GameItem
         Vector2Int Size { get; }
         ConfigBase ConfigBase { get; }
         GameItemUI UI { get; }
+        Family Owner { get; set; }
         bool Walkable { get; }
         void CalcSize();
 

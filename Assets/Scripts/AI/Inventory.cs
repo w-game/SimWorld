@@ -158,7 +158,7 @@ public class Inventory
 
     internal PropItem GetItemHasEffect(string type)
     {
-        var propItems = Items.FindAll(i => i.Config.effects != null && i.Config.effects.Any(e => e.type == type));
+        var propItems = Items.FindAll(i => i.Config.additionals != null && i.Config.additionals.ContainsKey(type));
         if (propItems.Count == 0)
         {
             return null;
@@ -168,13 +168,13 @@ public class Inventory
         PropItem item = null;
         foreach (var propItem in propItems)
         {
-            foreach (var effect in propItem.Config.effects)
+            foreach (var addition in propItem.Config.additionals)
             {
-                if (effect.type == type)
+                if (addition.Key == type)
                 {
-                    if (effect.value > maxValue)
+                    if ((float)addition.Value > maxValue)
                     {
-                        maxValue = effect.value;
+                        maxValue = (float)addition.Value;
                         item = propItem;
                     }
                 }

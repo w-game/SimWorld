@@ -38,7 +38,8 @@ public class CraftBuildingItemAction : SingleActionBase
     protected override void DoExecute(Agent agent)
     {
         var type = Type.GetType($"GameItem.{_item.Config.type}Item");
-        GameItemManager.CreateGameItem<IGameItem>(type, _item.Config, _item.Pos, GameItemType.Static);
+        var item = GameItemManager.CreateGameItem<IGameItem>(type, _item.Config, _item.Pos, GameItemType.Static);
+        item.Owner = agent.Owner;
         GameItemManager.DestroyGameItem(_item);
     }
 }

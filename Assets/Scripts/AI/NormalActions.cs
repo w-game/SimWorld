@@ -163,8 +163,8 @@ namespace AI
     {
         protected int TotalTimes { get; set; }
         protected float ProgressSpeed { get; set; }
-        private int _curTimes = 0;
-        private float _curProgress;
+        protected int CurTime { get; private set; } = 0;
+        protected float CurProgress { get; private set; }
 
         public override void Execute(Agent agent)
         {
@@ -172,17 +172,17 @@ namespace AI
 
             if (Done || PrecedingActions.Count != 0 || Pause) return;
 
-            if (_curProgress < 100f)
+            if (CurProgress < 100f)
             {
-                _curProgress += GameTime.DeltaTime * ProgressSpeed / 2f;
-                OnActionProgressEvent(_curProgress);
+                CurProgress += GameTime.DeltaTime * ProgressSpeed / 2f;
+                OnActionProgressEvent(CurProgress);
             }
             else
             {
+                CurTime++;
+                CurProgress = 0f;
                 DoExecute(agent);
-                _curProgress = 0f;
-                _curTimes++;
-                if (_curTimes >= TotalTimes)
+                if (CurTime >= TotalTimes)
                 {
                     Done = true;
                 }

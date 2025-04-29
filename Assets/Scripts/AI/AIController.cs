@@ -40,9 +40,20 @@ namespace AI
             }
         }
 
+        private void OnActionComplete(IAction action)
+        {
+            var nextAction = action.NextAction;
+            UnregisterAction(action);
+
+            if (nextAction != null)
+            {
+                RegisterAction(nextAction, true);
+            }
+        }
+
         private void UnregisterAction(IAction action)
         {
-            action.OnCompleted -= UnregisterAction;
+            action.OnCompleted -= OnActionComplete;
             action.OnActionProgress -= OnActionProgress;
             action.OnActionFailed -= UnregisterAction;
 
@@ -74,7 +85,7 @@ namespace AI
             }
 
             CurAction = action;
-            CurAction.OnCompleted += UnregisterAction;
+            CurAction.OnCompleted += OnActionComplete;
             CurAction.OnActionProgress += OnActionProgress;
             CurAction.OnActionFailed += UnregisterAction;
 

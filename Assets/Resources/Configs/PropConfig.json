@@ -62,12 +62,9 @@
             "icon": "Textures/Axe",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
-            "effects": [
-                {
-                    "type": "Chop",
-                    "value": 1
-                }
-            ]
+            "additionals": {
+                "crop": 1
+            }
         },
         {
             "id": "PROP_MATERIAL_GRASS",
@@ -85,7 +82,11 @@
             "type": "Crop",
             "icon": "Textures/Wheats",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 30
+            "maxStackSize": 30,
+            "additionals": {
+                "millTime": 5,
+                "millAmount": 3
+            }
         },
         {
             "id": "PROP_SEED_WHEAT",
@@ -93,6 +94,15 @@
             "description": "A seed for planting wheat.",
             "type": "Seed",
             "icon": "Textures/WheatSeed",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10
+        }, 
+        {
+            "id": "PROP_MATERIAL_FLOUR",
+            "name": "Flour",
+            "description": "A bag of flour.",
+            "type": "Material",
+            "icon": "Textures/Flour",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10
         }

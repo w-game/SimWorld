@@ -28,7 +28,7 @@ namespace GameItem
         public override bool Walkable => true;
         public float GrowthTime { get; set; } // 成长时间
         public PlantStage GrowthStage { get; set; } // 成长阶段
-        public int GrowthRate { get; set; } // 成长速度
+        public int GrowthRate { get; set; } = 1; // 成长速度
         protected virtual bool Drought { get; set; } = true;
 
         public event UnityAction<PlantItem> OnEventInvoked;
