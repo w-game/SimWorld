@@ -36,7 +36,7 @@ namespace GameItem
         {
         }
 
-        public virtual void OnSelected(string id)
+        public virtual void OnSelected(string id, int amount = 1)
         {
             if (string.IsNullOrEmpty(id))
             {

@@ -168,7 +168,7 @@ namespace GameItem
             };
         }
 
-        public void OnSelected(string seedId)
+        public void OnSelected(string seedId, int amount = 1)
         {
             if (string.IsNullOrEmpty(seedId))
             {

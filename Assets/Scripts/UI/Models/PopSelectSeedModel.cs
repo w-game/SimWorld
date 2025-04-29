@@ -5,7 +5,7 @@ namespace UI.Models
 {
     public interface ISelectItem
     {
-        void OnSelected(string id);
+        void OnSelected(string id, int amount = 1);
     }
     public class PopSelectSeedModel : ModelBase<PopSelectSeed>
     {

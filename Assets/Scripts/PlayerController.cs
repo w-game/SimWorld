@@ -27,7 +27,7 @@ public class PlayerController : GameItemUI
             {
                 if (ui.GameItem is PropGameItem propGameItem)
                 {
-                    propGameItem.BePickedUp(_agent);
+                    propGameItem.CheckPickUp(_agent);
                 }
             }
         }

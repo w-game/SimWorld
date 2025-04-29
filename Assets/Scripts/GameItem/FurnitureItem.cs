@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AI;
 using Citizens;
+using UI.Elements;
 using UI.Models;
 using UnityEngine;
 using UnityEngine.Events;
@@ -196,6 +197,7 @@ namespace GameItem
         public bool Done { get; private set; } = false;
 
         public PropConfig Seed { get; private set; }
+
         public SeedIncubatorItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
@@ -260,35 +262,100 @@ namespace GameItem
         }
     }
 
-    public class ShopShelfItem : FurnitureItem
+    public class ShopShelfItem : FurnitureItem, ISelectItem
     {
         public override bool Walkable => false;
+
+        public SellItem SellItem { get; private set; }
+        public int Price { get; private set; } = 1;
+        public int SellAmount { get; private set; } = 1;
         public ShopShelfItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
-            var configs = ConfigReader.GetAllConfigs<PropConfig>();
-            var randomConfig = configs[UnityEngine.Random.Range(0, configs.Count)];
-            GameItemManager.CreateGameItem<FoodItem>(
-                randomConfig,
-                pos,
-                GameItemType.Static,
-                1);
+
         }
 
-        // public override List<IAction> ActionsOnClick(Agent agent)
-        // {
-        //     var centerPos = Pos - new Vector3(0, 1);
-        //     var action = ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, centerPos);
-        //     var system = new SystemAction("Craft Item", a =>
-        //     {
-        //         var model = new PopShopModel();
-        //         model.ShowUI();
-        //     }, action);
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            var actions = new List<IAction>();
 
-        //     return new List<IAction>()
-        //     {
-        //         system
-        //     };
-        // }
+            actions.Add(ActionPool.Get<BuyAction>(this, agent.Money.Amount >= Price));
+
+            if (Owner != agent.Owner)
+            {
+                actions.Add(ActionPool.Get<BuyAction>(this, agent.Money.Amount >= Price));
+            }
+            
+            if (SellItem != null)
+            {
+                return actions;
+            }
+
+            var system = new SystemAction("Select items to sell", a =>
+            {
+                var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.None);
+                model.ShowUI();
+            });
+
+            return new List<IAction>()
+            {
+                system
+            };
+        }
+
+        public void OnSelected(string id, int amount = 1)
+        {
+            var agent = GameManager.I.CurrentAgent;
+            if (Vector3.Distance(agent.Pos, Pos) > 1)
+            {
+                agent.MoveToArroundPos(this, () =>
+                {
+                    SellItemToShop(id, amount, agent);
+                });
+            }
+            else
+            {
+                SellItemToShop(id, amount, agent);
+            }
+            
+        }
+
+        private void SellItemToShop(string id, int amount, Agent agent)
+        {
+            agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(id), amount);
+            var config = ConfigReader.GetConfig<PropConfig>(id);
+            SellItem = GameItemManager.CreateGameItem<SellItem>(
+                config,
+                Pos,
+                GameItemType.Static,
+                amount,
+                this);
+            SellItem.Owner = agent.Owner;
+            Price = 101;
+        }
+
+        public void OnSold()
+        {
+            if (SellItem != null)
+            {
+                GameItemManager.DestroyGameItem(SellItem);
+                SellItem = null;
+            }
+        }
+
+        public void Buy(Agent agent)
+        {
+            if (SellItem != null)
+            {
+                agent.Bag.AddItem(SellItem.Config, SellAmount);
+                agent.Money.Subtract(Price);
+                OnSold();
+            }
+        }
+
+        public void OnTaked(bool isSteal)
+        {
+            SellItem = null;
+        }
     }
 
     public class BucketItem : FurnitureItem

@@ -29,8 +29,38 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            agent.Bag.AddItem(_gameItem);
-            GameItemManager.DestroyGameItem(_gameItem);
+            _gameItem.BePickedUp(agent);
+        }
+    }
+
+    public class BuyAction : SingleActionBase
+    {
+        private ShopShelfItem _gameItem;
+
+        public override void OnGet(params object[] args)
+        {
+            _gameItem = args[0] as ShopShelfItem;
+            if (args[1] is bool afford && afford)
+            {
+                ActionName = $"Buy ({_gameItem.Price} Coins)";
+                Enable = true;
+            }
+            else
+            {
+                ActionName = "Buy (Not Afford)";
+                Enable = false;
+            }
+            ActionSpeed = 999f;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            CheckMoveToArroundPos(agent, _gameItem.Pos);
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            _gameItem.Buy(agent);
         }
     }
 }

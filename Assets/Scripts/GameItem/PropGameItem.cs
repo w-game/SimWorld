@@ -4,6 +4,7 @@ using AI;
 using Citizens;
 using UnityEngine;
 using DG.Tweening;
+using UnityEngine.Events;
 
 namespace GameItem
 {
@@ -14,6 +15,7 @@ namespace GameItem
 
         private Agent _agent;
         private bool _isPickedUp = false;
+        protected event UnityAction<bool> OnTakedEvent;
 
         public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
@@ -36,12 +38,18 @@ namespace GameItem
             };
         }
 
-        public void BePickedUp(Agent agent)
+        public void CheckPickUp(Agent agent)
         {
             if (Owner != agent.Citizen.Family || _isPickedUp)
                 return;
 
             _isPickedUp = true;
+
+            BePickedUp(agent);
+        }
+
+        public void BePickedUp(Agent agent)
+        {
             DOTween.Sequence()
                 .AppendInterval(0.1f)
                 .AppendCallback(() =>
@@ -49,6 +57,7 @@ namespace GameItem
                     if (agent.Bag.AddItem(this))
                     {
                         _agent = agent;
+                        OnTakedEvent?.Invoke(agent.Owner != Owner);
                         GameItemManager.DestroyGameItem(this);
                     }
                 });
@@ -109,6 +118,27 @@ namespace GameItem
     {
         public PaperItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
         {
+        }
+    }
+
+    public class SellItem : PropGameItem
+    {
+        private ShopShelfItem _shopShelfItem;
+        public SellItem(PropConfig config, Vector3 pos, int count, ShopShelfItem shopShelfItem) : base(config, pos, count)
+        {
+            OnTakedEvent += OnTaked;
+            _shopShelfItem = shopShelfItem;
+        }
+
+        private void OnTaked(bool isSteal)
+        {
+            _shopShelfItem.OnTaked(isSteal);
+        }
+
+        public override void ShowUI()
+        {
+            base.ShowUI();
+            UI.Col.enabled = false;
         }
     }
 }

@@ -299,7 +299,7 @@ namespace AI
     // 捡取物品动作（例如从地上捡取食物）
     public class TakeItemInHand : SingleActionBase
     {
-        public override string ActionName => "捡取物品";
+        public override string ActionName => "Take Item";
         private PropGameItem _item;
 
         public override void OnRegister(Agent agent)

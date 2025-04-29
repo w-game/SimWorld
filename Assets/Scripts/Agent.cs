@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AI;
 using GameItem;
+using UI.Elements;
 using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Events;
@@ -112,6 +113,26 @@ namespace Citizens
         }
     }
 
+    public class Money
+    {
+        public int Amount { get; private set; }
+
+        public Money(int amount)
+        {
+            Amount = amount;
+        }
+
+        public void Add(int amount)
+        {
+            Amount += amount;
+        }
+
+        public void Subtract(int amount)
+        {
+            Amount -= amount;
+        }
+    }
+
     public class Agent : GameItemBase<ConfigBase>
     {
         public float MoveSpeed { get; private set; } = 5f;
@@ -136,6 +157,7 @@ namespace Citizens
         private Schedule _currentSchedule;
         public PlayerController PlayerController { get; private set; }
         public Inventory Bag { get; private set; }
+        public Money Money { get; private set; }
         public override bool Walkable => false;
 
         public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
@@ -147,6 +169,7 @@ namespace Citizens
             Owner = Citizen.Family;
             State = new AgentState(this);
             Bag = new Inventory(16);
+            Money = new Money(100);
         }
 
         public override void ShowUI()
@@ -398,6 +421,23 @@ namespace Citizens
                 }
             }
             return foundItems;
+        }
+
+        internal void MoveToArroundPos(IGameItem item, Action callback)
+        {
+            var arroundPosList = item.ArroundPosList();
+            if (arroundPosList.Count == 0)
+            {
+                MessageBox.I.ShowMessage("No space to put the item", "Textures/Path", MessageType.Error);
+                return;
+            }
+            var pos = arroundPosList[0];
+            var action = ActionPool.Get<CheckMoveToTarget>(this, pos);
+            SystemAction system = new SystemAction("Move to", a =>
+            {
+                callback?.Invoke();
+            }, action);
+            Brain.RegisterAction(system, true);
         }
     }
 }
