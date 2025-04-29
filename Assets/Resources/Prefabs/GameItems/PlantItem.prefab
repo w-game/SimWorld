@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 6995507105862040163}
   - component: {fileID: 8233519774215896957}
   - component: {fileID: 5893717179894546714}
-  - component: {fileID: 8468537223019253723}
   m_Layer: 0
   m_Name: PlantItem
   m_TagString: Untagged
@@ -141,18 +140,3 @@ MonoBehaviour:
   sr: {fileID: 6995507105862040163}
   col: {fileID: 8233519774215896957}
   itemNameText: {fileID: 0}
---- !u!114 &8468537223019253723
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7368457845068600889}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cf986ddecde044bca90a514cb7a6ceb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  shadowDir: {x: 1, y: -1}
-  shadowLength: 1.5
-  rootLocal: {x: 0.5, y: 0}
