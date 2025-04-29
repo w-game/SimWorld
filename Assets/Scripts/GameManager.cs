@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
             //         CurrentAgent.Citizen));
 
             CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_ORE"), 5);
+            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 5);
         }
     }
 

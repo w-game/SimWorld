@@ -142,11 +142,7 @@ namespace GameItem
         {
             List<IAction> actions = new List<IAction>();
 
-            if (State == PlantState.Drought)
-            {
-                actions.Add(ActionPool.Get<WaterPlantAction>(Pos));
-            }
-            else if (State == PlantState.Weeds)
+            if (State == PlantState.Weeds)
             {
                 actions.Add(ActionPool.Get<WeedingAction>(this));
             }

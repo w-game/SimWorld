@@ -134,7 +134,7 @@
             "type": "Material",
             "icon": "Textures/HandWaterBucket",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10,
+            "maxStackSize": 1,
             "additionals": {
                 "water": 1
             }

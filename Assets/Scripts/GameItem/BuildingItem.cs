@@ -136,29 +136,30 @@ namespace GameItem
             Tiles = MapManager.I.farmTiles;
         }
 
-        internal void BeWatered(PropGameItem waterItem)
+        internal void BeWatered()
         {
-            if (waterItem != null)
-            {
-                MapManager.I.SetMapTile(Pos, MapLayer.Building, MapManager.I.farmWateredTiles);
-            }
+            MapManager.I.SetMapTile(Pos, MapLayer.Building, MapManager.I.farmWateredTiles);
         }
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
             var action = ActionPool.Get<PlantAction>(this, "");
-            return base.ItemActions(agent).Concat(new List<IAction> { action }).ToList();
+            var waterAction = ActionPool.Get<WaterPlantAction>(this);
+            return base.ItemActions(agent).Concat(new List<IAction> { action, waterAction }).ToList();
         }
 
         public override List<IAction> ActionsOnClick(Agent agent)
         {
+            var waterAction = ActionPool.Get<WaterPlantAction>(this);
+
             if (PlantItem != null)
             {
-                return new List<IAction>();
+                return new List<IAction>() { waterAction };
             }
 
             return new List<IAction>()
             {
+                waterAction,
                 new SystemAction("Plant Seed", a =>
                 {
                     var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.Seed);

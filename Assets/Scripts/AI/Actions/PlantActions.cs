@@ -104,7 +104,7 @@ namespace AI
         {
             _wellItem = args[0] as WellItem;
             ActionName = "Draw water";
-            ActionSpeed = 20f;
+            ActionSpeed = 1f;
         }
 
         public override void OnRegister(Agent agent)
@@ -126,7 +126,7 @@ namespace AI
             if (agent.Bag.CheckItem("PROP_TOOL_HANDBUCKET").Count > 0)
             {
                 agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1);
-                agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
+                agent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
             }
         }
     }
@@ -135,43 +135,34 @@ namespace AI
     // 施肥、浇水、收获
     public class WaterPlantAction : SingleActionBase
     {
-        private Vector3 _targetPos;
-        private PropGameItem _waterItem;
+        private FarmItem _farmItem;
 
         public override void OnGet(params object[] args)
         {
-            _targetPos = (Vector3)args[0];
+            _farmItem = args[0] as FarmItem;
             ActionName = "Water the plant";
-            ActionSpeed = 50f;
+            ActionSpeed = 1f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            // 判断手上是否有水
-            var itemInHand = agent.GetItemInHand();
-            if (itemInHand == null)
+            if (agent.Bag.CheckItem("PROP_MATERIAL_HANDBUCKET_WATER").Count == 0)
             {
-                PrecedingActions.Add(ActionPool.Get<DrawWaterAction>(agent.GetGameItem<WellItem>()));
+                var water = ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER");
+                MessageBox.I.ShowMessage("No Water!", water.icon, MessageType.Error);
+                OnActionFailedEvent();
             }
-            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _targetPos));
+            else
+            {
+                CheckMoveToArroundPos(agent, _farmItem, () => { Target = _farmItem.Pos; });
+            }
         }
 
         protected override void DoExecute(Agent agent)
         {
-            MapManager.I.TryGetBuildingItem(_targetPos, out var buildingItem);
-            if (buildingItem is FarmItem farmItem)
-            {
-                _waterItem = agent.GetItemInHand();
-
-                if (_waterItem != null)
-                {
-                    farmItem.BeWatered(_waterItem);
-                }
-                else
-                {
-                    OnActionFailedEvent();
-                }
-            }
+            agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
+            agent.Bag.AddItem(new PropItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1));
+            _farmItem.BeWatered();
         }
     }
 
