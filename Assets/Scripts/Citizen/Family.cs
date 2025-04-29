@@ -27,6 +27,7 @@ namespace Citizens
         internal void AddHouse(IHouse house)
         {
             Houses.Add(house);
+            house.SetOwner(this);
         }
 
         internal IHouse GetHouse(HouseType houseType)
@@ -40,6 +41,7 @@ namespace Citizens
             else
             {
                 house = new House(new List<Vector2Int>(), houseType);
+                house.SetOwner(this);
                 Houses.Add(house);
                 return house;
             }

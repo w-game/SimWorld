@@ -109,7 +109,7 @@ namespace AI
             switch (blockType)
             {
                 case BlockType.Plain:
-                    if (!MapManager.I.TryGetBuildingItem(pos, out var buildingItem))
+                    if (GameManager.I.GameItemManager.GetItemsAtPos(pos).Count == 0)
                     {
                         IHouse house = GameManager.I.CurrentAgent.Citizen.Family.GetHouse(HouseType.Farm);
                         var cellPos = MapManager.I.WorldPosToCellPos(pos);

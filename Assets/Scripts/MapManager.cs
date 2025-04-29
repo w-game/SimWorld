@@ -27,6 +27,8 @@ public class House : IHouse
 
     public Vector2Int MinPos => new Vector2Int(Blocks[0].x, Blocks[0].y);
 
+    public Family Owner { get; private set; }
+
     public House(List<Vector2Int> blocks, HouseType houseType)
     {
         Blocks = blocks;
@@ -43,6 +45,11 @@ public class House : IHouse
     {
         furnitureItems = new List<T>();
         return false;
+    }
+
+    public void SetOwner(Family family)
+    {
+        Owner = family;
     }
 }
 

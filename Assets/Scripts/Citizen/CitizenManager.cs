@@ -33,7 +33,8 @@ namespace Citizens
         private FamilyMember CreateMember(Family family, IHouse house, bool sex, int age)
         {
             var member = new FamilyMember(sex, age);
-    
+            family.AddMember(member);
+
             var randomPos = new Vector2(Random.Range(house.MinPos.x + 1, house.MinPos.x + house.Size.x - 2), Random.Range(house.MinPos.y + 1, house.MinPos.y + house.Size.y - 2));
 
             var agent = GameItemManager.CreateGameItem<Agent>(
@@ -43,7 +44,6 @@ namespace Citizens
                 GameManager.I.ActionSystem.CreateAIController(),
                 member
             );
-            family.AddMember(member);
 
             agent.RegisterSchedule(
                 new Schedule(
@@ -211,6 +211,7 @@ namespace Citizens
                 company.AddProperty(property);
                 companies.Add(family, company);
             }
+            house.SetOwner(family);
 
             company.AddProperty(property);
         }

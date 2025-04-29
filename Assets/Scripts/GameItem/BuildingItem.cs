@@ -184,6 +184,8 @@ namespace GameItem
                 GameItemType.Static,
                 false);
 
+            plantItem.Owner = Owner;
+
             plantItem.ShowUI();
         }
     }

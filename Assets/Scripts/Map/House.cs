@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Citizens;
 using GameItem;
 using UnityEngine;
 
@@ -27,7 +28,9 @@ namespace Map
         HouseType HouseType { get; }
         Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; }
         Vector2Int MinPos { get; }
+        Family Owner { get; }
 
+        void SetOwner(Family family);
         bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem;
         bool TryGetFurnitures<T>(out List<T> furnitureItems) where T : FurnitureItem;
     }
@@ -48,7 +51,9 @@ namespace Map
         public RoomConfig RoomConfig { get; private set; } // 房间配置
 
         public Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; private set; } = new Dictionary<Vector2Int, FurnitureItem>(); // 家具物品
+        private List<BuildingItem> _buildingItems = new List<BuildingItem>(); // 房屋内的建筑物
         public List<Vector2Int> CommercialPos { get; private set; } = new List<Vector2Int>(); // 商业位置
+        public Family Owner { get; private set; }
 
         public CartonHouse(List<Vector2Int> blocks, RoomConfig config, Vector2Int minPos, City city, System.Random chunkRand)
         {
@@ -64,6 +69,20 @@ namespace Map
             CalcRooms();
         }
 
+        public void SetOwner(Family family)
+        {
+            Owner = family;
+            foreach (var item in FurnitureItems.Values)
+            {
+                item.Owner = family;
+            }
+
+            foreach (var item in _buildingItems)
+            {
+                item.Owner = family;
+            }
+        }
+
         private void CalcRooms()
         {
             for (int i = 0; i < RoomConfig.width; i++)
@@ -71,9 +90,10 @@ namespace Map
                 for (int j = 0; j < RoomConfig.height; j++)
                 {
                     var pos = new Vector2Int(i, j) + MinPos;
+                    BuildingItem buildingItem = null;
                     if (RoomConfig.layout[i + j * RoomConfig.width] == 0)
                     {
-                        GameItemManager.CreateGameItem<WallItem>(
+                        buildingItem = GameItemManager.CreateGameItem<WallItem>(
                             ConfigReader.GetConfig<BuildingConfig>("BUILDING_WALL"),
                             new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
                             GameItemType.Static,
@@ -81,7 +101,7 @@ namespace Map
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 1)
                     {
-                        GameItemManager.CreateGameItem<FloorItem>(
+                        buildingItem = GameItemManager.CreateGameItem<FloorItem>(
                             ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"),
                             new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
                             GameItemType.Static,
@@ -90,7 +110,7 @@ namespace Map
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 2)
                     {
-                        GameItemManager.CreateGameItem<DoorItem>(
+                        buildingItem = GameItemManager.CreateGameItem<DoorItem>(
                             ConfigReader.GetConfig<BuildingConfig>("BUILDING_DOOR"),
                             new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
                             GameItemType.Static,
@@ -103,21 +123,27 @@ namespace Map
                     }
                     else if (RoomConfig.layout[i + j * RoomConfig.width] == 4)
                     {
-                        GameItemManager.CreateGameItem<CommercialItem>(
+                        buildingItem = GameItemManager.CreateGameItem<CommercialItem>(
                             ConfigReader.GetConfig<BuildingConfig>("BUILDING_FLOOR"),
                             new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
                             GameItemType.Static,
                             this
                         );
                         CommercialPos.Add(pos);
-                    } else if (RoomConfig.layout[i + j * RoomConfig.width] == -2)
+                    }
+                    else if (RoomConfig.layout[i + j * RoomConfig.width] == -2)
                     {
-                        GameItemManager.CreateGameItem<FarmItem>(
+                        buildingItem = GameItemManager.CreateGameItem<FarmItem>(
                             ConfigReader.GetConfig<BuildingConfig>("BUILDING_FARM"),
                             new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
                             GameItemType.Static,
                             this
                         );
+                    }
+
+                    if (buildingItem != null)
+                    {
+                        _buildingItems.Add(buildingItem);
                     }
                 }
             }

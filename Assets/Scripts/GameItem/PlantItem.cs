@@ -159,11 +159,16 @@ namespace GameItem
             return actions;
         }
 
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return base.ActionsOnClick(agent);
+        }
+
         protected virtual IAction CheckRemovePlant(Agent agent)
         {
             if (GrowthStage == PlantStage.Harvestable)
             {
-                return ActionPool.Get<HarvestAction>(this);
+                return ActionPool.Get<HarvestAction>(this, Owner == null ? false : Owner != agent.Owner);
             }
             return ActionPool.Get<RemovePlantAction>(this);
         }

@@ -32,7 +32,7 @@ namespace GameItem
             return new List<IAction>()
             {
                 ActionPool.Get<TakeItemInHand>(this),
-                agent is Agent a && Owner == a.Citizen.Family ? ActionPool.Get<PutIntoBag>(this) : ActionPool.Get<StealAction>(this),
+                ActionPool.Get<PutIntoBag>(this, agent is Agent a && Owner != a.Owner)
             };
         }
 

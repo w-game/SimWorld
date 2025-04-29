@@ -1,4 +1,5 @@
 
+using System.Linq;
 using Citizens;
 using GameItem;
 using Map;
@@ -32,6 +33,7 @@ namespace AI
                 _targetPos,
                 GameItemType.Static,
                 _house);
+            farmItem.Owner = agent.Owner;
             farmItem.ShowUI();
         }
     }
@@ -167,7 +169,22 @@ namespace AI
         public override void OnGet(params object[] args)
         {
             _plantItem = args[0] as PlantItem;
-            ActionName = "Harvest the plant";
+            if (args.Length > 1)
+            {
+                var steal = (bool)args[1];
+                if (steal)
+                {
+                    ActionName = "Harvest (Steal)";
+                }
+                else
+                {
+                    ActionName = "Harvest";
+                }
+            }
+            else
+            {
+                ActionName = "Harvest";
+            }
 
             ActionSpeed = 50f;
         }
