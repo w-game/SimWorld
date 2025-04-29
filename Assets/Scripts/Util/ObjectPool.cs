@@ -18,20 +18,37 @@ public class ObjectPool
         _maxSize = maxSize;
     }
 
-    public T Get<T>(string prefabPath, Vector3 pos) where T : MonoBehaviour, IPoolable
+    public T Get<T>(string prefabPath, Vector3 pos, Transform parent) where T : MonoBehaviour, IPoolable
     {
+        if (parent == null)
+        {
+            parent = GameManager.I.transform;
+        }
+
         if (_pool.ContainsKey(prefabPath) && _pool[prefabPath].Count > 0)
         {
             var i = _pool[prefabPath].Dequeue() as T;
             i.transform.position = pos;
             i.gameObject.SetActive(true);
             i.OnGet();
+            i.transform.SetParent(parent);
             return i;
         }
         var prefab = Resources.Load<GameObject>(prefabPath);
-        T instance = UnityEngine.Object.Instantiate(prefab, pos, Quaternion.identity).GetComponent<T>();
+        
+        T instance = UnityEngine.Object.Instantiate(prefab, pos, Quaternion.identity, parent).GetComponent<T>();
         instance.OnGet();
         return instance;
+    }
+
+    public T Get<T>(string prefabPath, Vector3 pos = default) where T : MonoBehaviour, IPoolable
+    {
+        return Get<T>(prefabPath, pos, null);
+    }
+
+    public T Get<T>(string prefabPath, Transform parent) where T : MonoBehaviour, IPoolable
+    {
+        return Get<T>(prefabPath, default, parent);
     }
 
     public void Release<T>(T instance, string prefabPath) where T : MonoBehaviour, IPoolable
@@ -40,12 +57,13 @@ public class ObjectPool
         {
             _pool[prefabPath] = new Queue<IPoolable>();
         }
-        
+
         if (_pool[prefabPath].Count < _maxSize)
         {
             instance.OnRelease();
             _pool[prefabPath].Enqueue(instance);
             instance.gameObject.SetActive(false);
+            instance.transform.SetParent(GameManager.I.transform);
         }
         else
         {

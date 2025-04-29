@@ -44,7 +44,7 @@ namespace UI.Popups
             GameManager.I.CurrentAgent.Bag.OnInventoryChanged += UpdateCraftButton;
         }
 
-        private void UpdateCraftButton()
+        private void UpdateCraftButton(PropItem propItem, int quantity)
         {
             if (_selectedItem == null)
                 return;

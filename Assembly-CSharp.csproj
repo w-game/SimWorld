@@ -149,6 +149,7 @@
     <Compile Include="Assets/Scripts/UI/Popups/PopSchdule.cs" />
     <Compile Include="Assets/Scripts/GameManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/MaterialElement.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/MessageBox.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopSelectSeed.cs" />
     <Compile Include="Assets/Scripts/MapManager.cs" />
     <Compile Include="Assets/Scripts/GameTime.cs" />
@@ -157,6 +158,7 @@
     <Compile Include="Assets/Scripts/Util/Log.cs" />
     <Compile Include="Assets/Scripts/Test.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopSelectSeedModel.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/MessageElement.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/BuildingElement.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -25,11 +25,11 @@ namespace UI.Popups
                 slot.Init(null, propItem => OnItemClicked(propItem as PropItem));
             }
 
-            UpdateBag();
+            UpdateBag(null, 0);
             Inventory.OnInventoryChanged += UpdateBag;
         }
 
-        private void UpdateBag()
+        private void UpdateBag(PropItem propItem, int quantity)
         {
             int inventoryIdx = 0;
             for (int i = 0; i < inventorySlots.Count; i++)

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AI;
 using Citizens;
 using GameItem;
+using UI.Elements;
 using UI.Views;
 using UnityEngine;
 
@@ -32,6 +33,7 @@ public class GameManager : MonoBehaviour
 
         CreatePlayer();
         ActionListElement.I.Init();
+        MessageBox.I.Init();
     }
 
     void Update()

@@ -57,7 +57,7 @@ public class Inventory
     public List<PropItem> Items { get; private set; } = new List<PropItem>();
     public int MaxSize { get; private set; } = 20;
 
-    public event UnityAction OnInventoryChanged;
+    public event UnityAction<PropItem, int> OnInventoryChanged;
 
     public Inventory(int maxSize)
     {
@@ -86,7 +86,7 @@ public class Inventory
                     continue;
                 }
                 propItem.AddQuantity(quantity);
-                OnInventoryChanged?.Invoke();
+                OnInventoryChanged?.Invoke(propItem, quantity);
                 return true;
             }
         }
@@ -95,7 +95,7 @@ public class Inventory
         {
             var newItem = new PropItem(config, quantity);
             Items.Add(newItem);
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(newItem, quantity);
             return true;
         }
 
@@ -110,13 +110,13 @@ public class Inventory
             if (propItem.Quantity > quantity)
             {
                 propItem.AddQuantity(-quantity);
-                OnInventoryChanged?.Invoke();
+                OnInventoryChanged?.Invoke(propItem, -quantity);
                 return;
             }
             else
             {
                 Items.Remove(propItem);
-                OnInventoryChanged?.Invoke();
+                OnInventoryChanged?.Invoke(propItem, -propItem.Quantity);
                 return;
             }
         }
@@ -127,13 +127,13 @@ public class Inventory
         if (item.Quantity > quantity)
         {
             item.AddQuantity(-quantity);
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(item, -quantity);
             return;
         }
         else
         {
             Items.Remove(item);
-            OnInventoryChanged?.Invoke();
+            OnInventoryChanged?.Invoke(item, -item.Quantity);
             return;
         }
     }
