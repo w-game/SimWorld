@@ -63,7 +63,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "crop": 1
+                "chop": 1
             }
         },
         {
@@ -75,7 +75,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "hoe": 1
+                "hoe": 5
             }
         },
         {

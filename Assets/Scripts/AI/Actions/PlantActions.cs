@@ -217,18 +217,30 @@ namespace AI
     public class WeedingAction : SingleActionBase
     {
         private PlantItem _plantItem;
+        private PropConfig _hoeConfig;
 
         public override void OnGet(params object[] args)
         {
             _plantItem = args[0] as PlantItem;
-            ActionName = "Weeding";
-
-            ActionSpeed = 25f;
+            if (args.Length > 1)
+            {
+                _hoeConfig = args[1] as PropConfig;
+            }
+            if (_hoeConfig == null)
+            {
+                ActionName = "Weeding (No Hoe)";
+                ActionSpeed = 1f;
+            }
+            else
+            {
+                ActionName = "Weeding (" + _hoeConfig.name + ")";
+                ActionSpeed = 5f;
+            }
         }
 
         public override void OnRegister(Agent agent)
         {
-            PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _plantItem.Pos));
+            CheckMoveToArroundPos(agent, _plantItem, () => { Target = _plantItem.Pos; });
         }
 
         protected override void DoExecute(Agent agent)

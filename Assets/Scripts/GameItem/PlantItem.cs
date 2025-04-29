@@ -16,7 +16,6 @@ namespace GameItem
 
     public enum PlantState
     {
-        None,
         // 干旱
         Drought,
         // 杂草
@@ -33,20 +32,7 @@ namespace GameItem
 
         public event UnityAction<PlantItem> OnEventInvoked;
 
-        private PlantState _state;
-        public PlantState State
-        {
-            get => _state;
-            private set
-            {
-                _state = value;
-                if (_state != PlantState.None)
-                {
-                    // 处理植物状态变化
-                    OnEventInvoked?.Invoke(this);
-                }
-            }
-        }
+        public List<PlantState> States { get; } = new List<PlantState>();
 
         private float _waterTime;
 
@@ -67,11 +53,13 @@ namespace GameItem
             {
                 GrowthStage = PlantStage.Seed;
             }
+
+            States.Add(PlantState.Weeds);
         }
 
         private void OnGrowth()
         {
-            if (GrowthStage == PlantStage.Harvestable || State != PlantState.None)
+            if (GrowthStage == PlantStage.Harvestable || States.Count == 0)
             {
                 return;
             }
@@ -103,7 +91,7 @@ namespace GameItem
         private void CheckDrought()
         {
             // 处理植物干旱
-            if (State == PlantState.Drought || !Drought)
+            if (States.Contains(PlantState.Drought) || !Drought)
             {
                 return;
             }
@@ -112,7 +100,13 @@ namespace GameItem
             if (_waterTime >= 24 * 60 * 60)
             {
                 _waterTime = 0;
-                State = PlantState.Drought;
+                States.Add(PlantState.Drought);
+                var prob = Random.Range(0, 100);
+                if (prob < 10)
+                {
+                    // 50% 概率长杂草
+                    States.Add(PlantState.Weeds);
+                }
             }
         }
 
@@ -142,13 +136,13 @@ namespace GameItem
         {
             List<IAction> actions = new List<IAction>();
 
-            if (State == PlantState.Weeds)
-            {
-                actions.Add(ActionPool.Get<WeedingAction>(this));
-            }
-
             if (agent is Agent a)
             {
+                if (States.Contains(PlantState.Weeds))
+                {
+                    var hop = a.Bag.GetItemHasEffect("hoe");
+                    actions.Add(ActionPool.Get<WeedingAction>(this, hop?.Config));
+                }
                 actions.Add(CheckRemovePlant(a));
             }
 
@@ -169,19 +163,19 @@ namespace GameItem
             return ActionPool.Get<RemovePlantAction>(this);
         }
 
-        internal void Weeding()
+        public void Weeding()
         {
-            if (State == PlantState.Weeds)
+            if (States.Contains(PlantState.Weeds))
             {
-                State = PlantState.None;
+                States.Remove(PlantState.Weeds);
             }
         }
         
         public void BeWatered()
         {
-            if (State == PlantState.Drought)
+            if (States.Contains(PlantState.Drought))
             {
-                State = PlantState.None;
+                States.Remove(PlantState.Drought);
                 _waterTime = 0;
             }
         }
@@ -198,7 +192,7 @@ namespace GameItem
         protected override IAction CheckRemovePlant(Agent agent)
         {
             // 这里可以添加树木的特殊逻辑
-            var axe = agent.Bag.GetItemHasEffect("Chop");
+            var axe = agent.Bag.GetItemHasEffect("chop");
 
             if (axe != null)
             {

@@ -150,18 +150,13 @@ namespace Citizens
 
         private void OnCropItemEventInvoked(PlantItem plantItem)
         {
-            switch (plantItem.State)
+            foreach (var state in plantItem.States)
             {
-                case PlantState.Drought:
-                    // var jobUnit = new JobUnit(ActionPool.Get<WaterPlantAction>(plantItem.Pos));
-                    // AddJobUnit<Farmer>(jobUnit);
-                    break;
-                case PlantState.Weeds:
-                    // var weedingJobUnit = new JobUnit(ActionPool.Get<WeedingAction>(plantItem));
-                    // AddJobUnit<Farmer>(weedingJobUnit);
-                    break;
-                default:
-                    break;
+                if (state == PlantState.Weeds)
+                {
+                    var jobUnit = new JobUnit(ActionPool.Get<WeedingAction>(plantItem));
+                    AddJobUnit<Farmer>(jobUnit);
+                }
             }
 
             if (plantItem.GrowthStage == PlantStage.Harvestable)
