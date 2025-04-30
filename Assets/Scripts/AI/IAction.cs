@@ -5,7 +5,7 @@ using Map;
 
 namespace AI
 {
-    public interface IAction
+    public interface IAction : IActionPool
     {
         List<IAction> PrecedingActions { get; }
         string ActionName { get; }

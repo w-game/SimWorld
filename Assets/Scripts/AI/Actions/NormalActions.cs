@@ -10,7 +10,7 @@ using UnityEngine.Events;
 namespace AI
 {
     // 抽象基类，封装前置动作执行逻辑
-    public abstract class ActionBase : IAction, IActionPool
+    public abstract class ActionBase : IAction
     {
         // 用于保存该动作执行前必须完成的动作
         public List<IAction> PrecedingActions { get; } = new List<IAction>();
@@ -96,7 +96,7 @@ namespace AI
             PrecedingActions.Add(action);
         }
 
-        public void Reset()
+        public virtual void Reset()
         {
             Done = false;
             PrecedingActions.Clear();
@@ -181,13 +181,19 @@ namespace AI
                 Done = true;
             }
         }
+
+        public override void Reset()
+        {
+            _curProgress = 0f;
+            base.Reset();
+        }
     }
 
     public abstract class MultiTimesActionBase : ActionBase
     {
-        protected int TotalTimes { get; set; }
+        public int TotalTimes { get; protected set; }
         protected float ProgressSpeed { get; set; }
-        protected int CurTime { get; private set; } = 0;
+        public int CurTime { get; private set; } = 0;
         protected float CurProgress { get; private set; }
 
         public override void Execute(Agent agent)
@@ -212,6 +218,13 @@ namespace AI
                 }
             }
         }
+
+        public override void Reset()
+        {
+            CurTime = 0;
+            CurProgress = 0f;
+            base.Reset();
+        }
     }
 
     public abstract class ConditionActionBase : ActionBase
@@ -232,6 +245,12 @@ namespace AI
             {
                 DoExecute(agent);
             }
+        }
+
+        public override void Reset()
+        {
+            Condition = null;
+            base.Reset();
         }
     }
 

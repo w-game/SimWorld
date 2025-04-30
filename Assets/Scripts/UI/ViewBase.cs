@@ -44,6 +44,12 @@ namespace UI
 
         public virtual void Push<T>(IModel model, string path) where T : ViewBase
         {
+            var existingModel = ViewStack.Find(x => x.Path == model.Path);
+            if (existingModel != null)
+            {
+                existingModel.ShowUI();
+                return;
+            }
             GameObject prefab = Resources.Load<GameObject>(path);
             if (prefab == null)
             {

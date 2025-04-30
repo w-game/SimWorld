@@ -247,6 +247,20 @@
                 "metal": 5
             },
             "buildSpeed": 10
+        },
+        {
+            "id": "BUILDING_TEAPOT",
+            "name": "Teapot",
+            "description": "A teapot for brewing tea.",
+            "type": "Furniture",
+            "icon": "Textures/Teapot",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "wood": 2,
+                "metal": 1
+            },
+            "buildSpeed": 5
         }
     ]
 }

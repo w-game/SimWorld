@@ -58,6 +58,7 @@ namespace AI
             action.OnActionFailed -= UnregisterAction;
 
             OnActionUnregister?.Invoke(action);
+            ActionPool.Release(action);
             CurAction = null;
 
             if (_workAction != null)

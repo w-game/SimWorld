@@ -33,6 +33,10 @@ public class GameManager : MonoBehaviour
 
         CreatePlayer();
         ActionListElement.I.Init();
+    }
+
+    void Start()
+    {
         MessageBox.I.Init();
     }
 

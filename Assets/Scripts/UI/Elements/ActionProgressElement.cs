@@ -36,7 +36,18 @@ namespace UI.Elements
 
         public void SetProgress(float progress)
         {
-            fill.fillAmount = progress / 100f;
+            if (_action is SingleActionBase singleAction)
+            {
+                fill.fillAmount = progress / 100f;
+            }
+            else if (_action is MultiTimesActionBase multiTimesAction)
+            {
+                fill.fillAmount = (multiTimesAction.CurTime * 100f + progress) / (multiTimesAction.TotalTimes * 100f);
+            }
+            else
+            {
+                fill.fillAmount = progress / 100f;
+            }
         }
     }
 }
