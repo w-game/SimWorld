@@ -9,9 +9,8 @@ namespace GameItem
     public enum PlantStage
     {
         Seed = 0,
-        Sprout = 1,
-        Flowering = 2,
-        Harvestable = 3
+        Growing = 1,
+        Harvestable = 2
     }
 
     public enum PlantState
@@ -27,7 +26,7 @@ namespace GameItem
         public override bool Walkable => true;
         public float GrowthTime { get; set; } // 成长时间
         public PlantStage GrowthStage { get; set; } // 成长阶段
-        public int GrowthRate { get; set; } = 1; // 成长速度
+        public float GrowthRate { get; set; } = 1; // 成长速度
         protected virtual bool Drought { get; set; } = true;
 
         public event UnityAction<PlantItem> OnEventInvoked;
@@ -35,26 +34,49 @@ namespace GameItem
         public List<PlantState> States { get; } = new List<PlantState>();
 
         private float _waterTime;
+        private int _stage;
+        public int Stage
+        {
+            get => _stage;
+            private set
+            {
+                _stage = value;
+                if (_stage >= Config.stages.Length - 1)
+                {
+                    GrowthStage = PlantStage.Harvestable;
+                    OnEventInvoked?.Invoke(this);
+                }
+                else if (_stage == 0)
+                {
+                    GrowthStage = PlantStage.Seed;
+                }
+                else
+                {
+                    GrowthStage = PlantStage.Growing;
+                }
+            }
+        }
 
         public override void ShowUI()
         {
             base.ShowUI();
 
-            UI.SetRenderer(Config.stages[(int)GrowthStage]);
+            UI.SetRenderer(Config.stages[Stage]);
         }
 
         public PlantItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos)
         {
             if (random)
             {
-                GrowthStage = (PlantStage)Random.Range(0, config.stages.Length);
+                Stage = Random.Range(0, config.stages.Length);
             }
             else
             {
-                GrowthStage = PlantStage.Seed;
+                Stage = 0;
             }
 
             States.Add(PlantState.Weeds);
+            GrowthRate = 100f * (config.stages.Length - 1) / (config.matureDays * 24f * 60f * 60f);
         }
 
         private void OnGrowth()
@@ -69,23 +91,11 @@ namespace GameItem
             if (GrowthTime >= 100)
             {
                 GrowthTime = 0;
-                GrowthStage++;
-                if ((int)GrowthStage >= Config.stages.Length - 1)
-                {
-                    GrowthStage = PlantStage.Harvestable;
-                }
-                UI.SetRenderer(Config.stages[(int)GrowthStage]);
+                Stage++;
+                UI.SetRenderer(Config.stages[Stage]);
             }
 
-            if (GrowthStage == PlantStage.Harvestable)
-            {
-                // 触发成熟事件
-                OnEventInvoked?.Invoke(this);
-            }
-            else
-            {
-                CheckDrought();
-            }
+            CheckDrought();
         }
 
         private void CheckDrought()

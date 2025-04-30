@@ -9,10 +9,9 @@
           "threshold": 0.95,
           "mode": "cluster",
           "items": [
-            { "id": "PLANT_TREE",   "weight": 0.005 },
-            { "id": "PLANT_GRASS",  "weight": 0.2 },
-            { "id": "PLANT_FLOWER", "weight": 0.02 },
-            { "id": "NONE",         "weight": 0.8 }
+            { "id": "PLANT_TREE",   "weight": 0.5 },
+            { "id": "PLANT_GRASS",  "weight": 20 },
+            { "id": "PLANT_FLOWER", "weight": 2 }
           ]
         }
       ]
@@ -26,13 +25,13 @@
           "threshold": 0.85,
           "mode": "cluster",
           "items": [
-            { "id": "PLANT_TREE",    "weight": 0.15 },
-            { "id": "PLANT_BUSH",    "weight": 0.05 },
-            { "id": "PLANT_GRASS",   "weight": 0.1 },
-            { "id": "PLANT_FLOWER",  "weight": 0.01 },
-            { "id": "PLANT_WHEAT",   "weight": 0.001 },
-            { "id": "RESOURCE_ROCK", "weight": 0.01 },
-            { "id": "NONE",          "weight": 0.679 }
+            { "id": "PLANT_TREE",    "weight": 15 },
+            { "id": "PLANT_BUSH",    "weight": 5 },
+            { "id": "PLANT_GRASS",   "weight": 10 },
+            { "id": "PLANT_FLOWER",  "weight": 1 },
+            { "id": "PLANT_WHEAT",   "weight": 0.5 },
+            { "id": "PLANT_CORN",    "weight": 0.5 },
+            { "id": "RESOURCE_ROCK", "weight": 1 }
           ]
         }
       ]

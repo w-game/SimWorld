@@ -45,6 +45,7 @@ public class PropConfig : ConfigBase
 public class ResourceConfig : ConfigBase
 {
     public string[] stages;
+    public int matureDays;
     public DropItem[] dropItems;
 }
 
@@ -115,10 +116,4 @@ public class ItemWeight
 {
     public string id;
     public float weight;
-}
-
-[Serializable]
-public class CropSeedConfig : ConfigBase
-{
-    public Dictionary<string, string> targets;
 }

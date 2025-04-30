@@ -179,9 +179,9 @@ namespace GameItem
 
         public void BePlant(string seedId)
         {
-            var cropSeedConfig = ConfigReader.GetConfig<CropSeedConfig>(seedId);
+            var config = ConfigReader.GetConfig<PropConfig>(seedId);
             PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
-                ConfigReader.GetConfig<ResourceConfig>(cropSeedConfig.targets["plant"]),
+                ConfigReader.GetConfig<ResourceConfig>(config.additionals["plant"] as string),
                 Pos + new Vector3(0.5f, 0.5f, 0),
                 GameItemType.Static,
                 false);

@@ -7,6 +7,7 @@
             "type": "Tree",
             "icon": "Textures/Tree_0",
             "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 15,
             "stages": [
                 "Textures/Tree_0",
                 "Textures/Tree_1",
@@ -27,6 +28,7 @@
             "type": "Plant",
             "icon": "Textures/Grass_0",
             "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 5,
             "stages": [
                 "Textures/Grass_0",
                 "Textures/Grass_1",
@@ -47,6 +49,7 @@
             "type": "Plant",
             "icon": "Textures/Wheat_0",
             "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 10,
             "stages": [
                 "Textures/Wheat_0",
                 "Textures/Wheat_1",
@@ -60,6 +63,28 @@
                 }
             ]
         },
+        {   
+            "id": "PLANT_CORN",
+            "name": "Corn",
+            "description": "Corn",
+            "type": "Plant",
+            "icon": "Textures/Plants/Corn_0",
+            "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 12,
+            "stages": [
+                "Textures/Plants/Corn_0",
+                "Textures/Plants/Corn_1",
+                "Textures/Plants/Corn_2",
+                "Textures/Plants/Corn_3",
+                "Textures/Plants/Corn_4"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_MATERIAL_CORN",
+                    "count": 1
+                }
+            ]
+        },
         {
             "id": "PLANT_BUSH",
             "name": "Bush",
@@ -67,6 +92,7 @@
             "type": "Plant",
             "icon": "Textures/Bush_0",
             "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 7,
             "stages": [
                 "Textures/Bush_0",
                 "Textures/Bush_1"
@@ -103,6 +129,7 @@
             "type": "Plant",
             "icon": "Textures/Flower_0",
             "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 8,
             "stages": [
                 "Textures/Flower_0",
                 "Textures/Flower_1",

@@ -109,7 +109,9 @@
             "maxStackSize": 30,
             "additionals": {
                 "millTime": 5,
-                "millAmount": 3
+                "millAmount": 3,
+                "seed": "PROP_SEED_WHEAT",
+                "mill": "PROP_MATERIAL_FLOUR"
             }
         },
         {
@@ -119,8 +121,37 @@
             "type": "Seed",
             "icon": "Textures/WheatSeed",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10
+            "maxStackSize": 10,
+            "additionals": {
+                "plant": "PLANT_WHEAT"
+            }
         }, 
+        {
+            "id": "PROP_MATERIAL_CORN",
+            "name": "Corn",
+            "description": "A piece of corn.",
+            "type": "Crop",
+            "icon": "Textures/Plants/Corn",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 30,
+            "additionals": {
+                "millTime": 5,
+                "millAmount": 3,
+                "seed": "PROP_SEED_CORN"
+            }
+        },
+        {
+            "id": "PROP_SEED_CORN",
+            "name": "Corn Seed",
+            "description": "A seed for planting corn.",
+            "type": "Seed",
+            "icon": "Textures/Plants/CornSeed",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10,
+            "additionals": {
+                "plant": "PLANT_CORN"
+            }
+        },
         {
             "id": "PROP_MATERIAL_FLOUR",
             "name": "Flour",
@@ -161,7 +192,8 @@
             "maxStackSize": 10,
             "additionals": {
                 "smeltTime": 5,
-                "smeltAmount": 1
+                "smeltAmount": 1,
+                "smelt": "PROP_MATERIAL_IRON"
             }
         },
         {

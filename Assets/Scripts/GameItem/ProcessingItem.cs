@@ -50,7 +50,7 @@ namespace GameItem
         {
             if (curTime >= ConvertionTime)
             {
-                var targetId = ConfigReader.GetConfig<CropSeedConfig>(CurItem.id).targets[TargetId];
+                var targetId = CurItem.additionals[TargetId] as string;
                 ProduceItem = ConfigReader.GetConfig<PropConfig>(targetId);
                 OnFinish?.Invoke(this);
 

@@ -221,17 +221,16 @@ namespace Map
                     if (layer == null) continue;
 
                     // weighted selection
-                    float total = layer.items.Sum(it => it.weight);
-                    float r = (float)_chunkRand.NextDouble() * total;
+                    float r = (float)_chunkRand.NextDouble() * 100f;
+                    var c = 0f;
                     foreach (var it in layer.items)
                     {
-                        if (r <= it.weight)
+                        c += it.weight;
+                        if (c >= r)
                         {
-                            if (it.id != "NONE")
-                                spawnList.Add((it.id, worldPos, layer.mode));
+                            spawnList.Add((it.id, worldPos, layer.mode));
                             break;
                         }
-                        r -= it.weight;
                     }
                 }
             }

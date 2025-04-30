@@ -226,7 +226,7 @@ namespace GameItem
             }
 
             CultivatingItem = propItem;
-            var seed = ConfigReader.GetConfig<CropSeedConfig>(CultivatingItem.Config.id).targets["seed"];
+            var seed = CultivatingItem.Config.additionals["seed"] as string;
             Seed = ConfigReader.GetConfig<PropConfig>(seed);
             CurProgress = 0;
             Done = false;
