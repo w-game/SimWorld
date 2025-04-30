@@ -49,7 +49,7 @@ namespace AI
     }
     public class ActionSystem
     {
-        public event Action<List<IAction>, Vector3> OnMouseClick;
+        public event Action<Dictionary<string, List<IAction>>, Vector3> OnMouseClick;
 
         internal void Init()
         {
@@ -80,11 +80,12 @@ namespace AI
 
                 var items = GameManager.I.GameItemManager.GetItemsAtPos(mousePos);
 
-                var actions = new List<IAction>();
+                var actions = new Dictionary<string, List<IAction>>();
                 var isWalkable = true;
                 foreach (var item in items)
                 {
-                    actions.AddRange(item.ActionsOnClick(GameManager.I.CurrentAgent));
+                    var itemActions = item.ActionsOnClick(GameManager.I.CurrentAgent);
+                    actions[item.ConfigBase.name] = itemActions;
                     if (!item.Walkable)
                     {
                         isWalkable = false;
@@ -92,11 +93,19 @@ namespace AI
                 }
 
                 var blockType = MapManager.I.CheckBlockType(mousePos);
-                actions.AddRange(BlockTypeToActions(mousePos, blockType));
-
                 if (isWalkable && blockType != BlockType.Ocean)
                 {
-                    actions.Add(ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, mousePos));
+                    actions.Add("Ground", new List<IAction>() { ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, mousePos) });
+                }
+
+                var groundActions = BlockTypeToActions(mousePos, blockType);
+                if (groundActions.Count > 0)
+                {
+                    if (!actions.ContainsKey("Ground"))
+                    {
+                        actions["Ground"] = new List<IAction>();
+                    }
+                    actions["Ground"].AddRange(groundActions);
                 }
 
                 OnMouseClick?.Invoke(actions, Input.mousePosition);

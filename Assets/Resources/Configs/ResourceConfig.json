@@ -22,8 +22,8 @@
         },
         {
             "id": "PLANT_GRASS",
-            "name": "Tree",
-            "description": "A tall tree.",
+            "name": "Grass",
+            "description": "A tall grass.",
             "type": "Plant",
             "icon": "Textures/Grass_0",
             "prefab": "Prefabs/GameItems/PlantItem",
