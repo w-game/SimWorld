@@ -8,7 +8,12 @@ namespace AI
         public SystemAction(string actionName, UnityAction<IAction> callback, IAction action = null)
         {
             ActionName = actionName;
-            OnCompleted += (a) => callback?.Invoke(a);
+            OnCompleted += (a, success) => {
+                if (success)
+                {
+                    callback?.Invoke(a);
+                }
+            };
             if (action != null)
             {
                 PrecedingActions.Add(action);

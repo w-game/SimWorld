@@ -1,11 +1,17 @@
 using TMPro;
+using UI.Models;
 using UnityEngine;
 
 namespace UI.Views
 {
-    public class MainView : ViewBase
+    public class MainView : ViewBase<MainViewModel>
     {
         [SerializeField] private TextMeshProUGUI time;
+
+        public override void OnShow()
+        {
+            
+        }
 
         void Update()
         {

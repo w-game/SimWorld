@@ -143,15 +143,15 @@ namespace Citizens
         public Personality Personality { get; private set; }
         public AIController Brain { get; private set; } // 大脑
         public List<Vector2Int> _paths;
-        public Dictionary<int, List<Schedule>> Schedules = new Dictionary<int, List<Schedule>>()
+        public Dictionary<int, Dictionary<string, Schedule>> Schedules = new Dictionary<int, Dictionary<string, Schedule>>()
         {
-            { 1, new List<Schedule>() },
-            { 2, new List<Schedule>() },
-            { 3, new List<Schedule>() },
-            { 4, new List<Schedule>() },
-            { 5, new List<Schedule>() },
-            { 6, new List<Schedule>() },
-            { 7, new List<Schedule>() }
+            { 1, new Dictionary<string, Schedule>() },
+            { 2, new Dictionary<string, Schedule>() },
+            { 3, new Dictionary<string, Schedule>() },
+            { 4, new Dictionary<string, Schedule>() },
+            { 5, new Dictionary<string, Schedule>() },
+            { 6, new Dictionary<string, Schedule>() },
+            { 7, new Dictionary<string, Schedule>() }
         };
 
         private Schedule _currentSchedule;
@@ -214,9 +214,9 @@ namespace Citizens
             var schedules = Schedules[GameManager.I.GameTime.Day];
             foreach (var schedule in schedules)
             {
-                if (schedule.Check(GameManager.I.GameTime.CurrentTime, GameManager.I.GameTime.Day))
+                if (schedule.Value.Check(GameManager.I.GameTime.CurrentTime, GameManager.I.GameTime.Day))
                 {
-                    _currentSchedule = schedule;
+                    _currentSchedule = schedule.Value;
                     break;
                 }
             }
@@ -357,29 +357,29 @@ namespace Citizens
             // item.transform.localPosition = Vector3.zero;
         }
 
-        internal void RegisterSchedule(Schedule newSchedule)
+        internal void RegisterSchedule(Schedule newSchedule, string scheduleName)
         {
             foreach (var day in newSchedule.Days)
             {
                 var schedules = Schedules[day];
                 if (schedules.Count == 0)
                 {
-                    schedules.Add(newSchedule);
+                    schedules.Add(scheduleName, newSchedule);
                     return;
                 }
                 else
                 {
                     // 检测时间是否重叠
-                    foreach (var sch in new List<Schedule>(schedules))
+                    foreach (var sch in new Dictionary<string, Schedule>(schedules))
                     {
-                        if ((newSchedule.StartTime > sch.StartTime && newSchedule.StartTime < sch.EndTime) ||
-                            (newSchedule.EndTime > sch.StartTime && newSchedule.EndTime < sch.EndTime) ||
-                            (newSchedule.StartTime < sch.StartTime && newSchedule.EndTime > sch.EndTime))
+                        if ((newSchedule.StartTime > sch.Value.StartTime && newSchedule.StartTime < sch.Value.EndTime) ||
+                            (newSchedule.EndTime > sch.Value.StartTime && newSchedule.EndTime < sch.Value.EndTime) ||
+                            (newSchedule.StartTime < sch.Value.StartTime && newSchedule.EndTime > sch.Value.EndTime))
                         {
-                            if (newSchedule.Priority > sch.Priority)
+                            if (newSchedule.Priority > sch.Value.Priority)
                             {
-                                schedules.Remove(sch);
-                                schedules.Add(newSchedule);
+                                schedules.Remove(sch.Key);
+                                schedules.Add(scheduleName, newSchedule);
                             }
                             else
                             {
@@ -438,6 +438,18 @@ namespace Citizens
                 callback?.Invoke();
             }, action);
             Brain.RegisterAction(system, true);
+        }
+
+        internal void UnregisterSchedule(string scheduleName)
+        {
+            foreach (var day in Schedules.Keys)
+            {
+                var schedules = Schedules[day];
+                if (schedules.ContainsKey(scheduleName))
+                {
+                    schedules.Remove(scheduleName);
+                }
+            }
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Citizens
                     5 * 60 * 60,
                     new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
                     ActionPool.Get<SleepAction>(agent.State.Sleep),
-                    member));
+                    member), "Sleep");
 
             return member;
         }
@@ -198,6 +198,7 @@ namespace Citizens
                     property = new FarmProperty(house, family);
                     break;
                 case HouseType.Shop:
+                    property = new ShopProperty(house, family);
                     return;
                 case HouseType.Teahouse:
                     property = new TeahouseProperty(house, family);

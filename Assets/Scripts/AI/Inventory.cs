@@ -64,11 +64,6 @@ public class Inventory
         MaxSize = maxSize;
     }
 
-    public bool AddItem(PropGameItem item)
-    {
-        return AddItem(item.Config, item.Count);
-    }
-
     public bool AddItem(PropItem item)
     {
         return AddItem(item.Config as PropConfig, item.Quantity);

@@ -63,4 +63,38 @@ namespace AI
             _gameItem.Buy(agent);
         }
     }
+
+    public class TakeItemFromContainer : SingleActionBase
+    {
+        private ContainerItem _containerItem;
+        private PropConfig _propConfig;
+        private int _amount;
+
+        public override void OnGet(params object[] args)
+        {
+            _containerItem = args[0] as ContainerItem;
+            _propConfig = args[1] as PropConfig;
+            _amount = (int)args[2];
+            ActionName = $"Take {_propConfig.name}";
+            ActionSpeed = 999f;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            CheckMoveToArroundPos(agent, _containerItem.Pos);
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            var propItem = _containerItem.TakeItem(_propConfig, _amount);
+            if (propItem != null)
+            {
+                agent.Bag.AddItem(propItem);
+            }
+            else
+            {
+                ActionFailed();
+            }
+        }
+    }
 }

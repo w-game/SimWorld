@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UI.Popups
 {
-    public class PopSeedIncubator : PopInventoryType
+    public class PopSeedIncubator : PopInventoryType<PopSeedIncubatorModel>
     {
         [SerializeField] private Image cultivatingIcon;
         [SerializeField] private Image cultivatingProgress;

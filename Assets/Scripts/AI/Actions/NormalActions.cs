@@ -29,6 +29,7 @@ namespace AI
         }
 
         private bool _done = false;
+        private bool _success = true;
 
         public bool Done
         {
@@ -38,25 +39,19 @@ namespace AI
                 _done = value;
                 if (_done)
                 {
-                    OnCompleted?.Invoke(this);
+                    OnCompleted?.Invoke(this, _success);
                 }
             }
         }
 
         public event Action<float> OnActionProgress;
-        public event Action<IAction> OnCompleted;
-        public event Action<IAction> OnActionFailed;
+        public event Action<IAction, bool> OnCompleted;
 
         // 后续行为，当前行为完成后替换主行为
         public IAction NextAction { get; set; }
 
         public bool Enable { get; set; } = true;
         public bool Pause { get; set; } = false;
-
-        protected void OnActionFailedEvent()
-        {
-            OnActionFailed?.Invoke(this);
-        }
 
         protected void OnActionProgressEvent(float progress)
         {
@@ -91,7 +86,16 @@ namespace AI
 
         protected void AddPrecedingAction<T>(Agent agent, params object[] args) where T : ActionBase
         {
+            AddPrecedingAction<T>(agent, null, args);
+        }
+
+        protected void AddPrecedingAction<T>(Agent agent, Action<IAction, bool> onCompleted, params object[] args) where T : ActionBase
+        {
             var action = ActionPool.Get<T>(args);
+            if (onCompleted != null)
+            {
+                action.OnCompleted += onCompleted;
+            }
             action.OnRegister(agent);
             PrecedingActions.Add(action);
         }
@@ -104,9 +108,15 @@ namespace AI
             Enable = true;
             Pause = false;
 
-            OnActionFailed = null;
+            _success = true;
             OnCompleted = null;
             OnActionProgress = null;
+        }
+
+        public void ActionFailed()
+        {
+            _success = false;
+            Done = true;
         }
 
         public virtual float Evaluate(Agent agent, HouseType houseType)
@@ -120,7 +130,7 @@ namespace AI
             if (pos != Vector3.zero)
             {
                 var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
-                action.OnCompleted += (a) => onComplete?.Invoke();
+                action.OnCompleted += (a, _) => onComplete?.Invoke();
                 PrecedingActions.Add(action);
             }
             else
@@ -141,7 +151,7 @@ namespace AI
                 }
                 var pos = arroundPosList[0];
                 var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
-                action.OnCompleted += (a) => onComplete?.Invoke();
+                action.OnCompleted += (a, _) => onComplete?.Invoke();
                 PrecedingActions.Add(action);
             }
         }

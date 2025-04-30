@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UI.Popups
 {
-    public class PopSelectSeed : PopInventoryType
+    public class PopSelectSeed : PopInventoryType<PopSelectSeedModel>
     {
         protected override int SlotAmount => 16;
 

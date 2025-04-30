@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using Citizens;
 using UI.Elements;
@@ -269,6 +270,8 @@ namespace GameItem
         public SellItem SellItem { get; private set; }
         public int Price { get; private set; } = 1;
         public int SellAmount { get; private set; } = 1;
+
+        public event UnityAction<ShopShelfItem, PropConfig> OnSoldEvent;
         public ShopShelfItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
 
@@ -284,7 +287,7 @@ namespace GameItem
             {
                 actions.Add(ActionPool.Get<BuyAction>(this, agent.Money.Amount >= Price));
             }
-            
+
             if (SellItem != null)
             {
                 return actions;
@@ -309,28 +312,14 @@ namespace GameItem
             {
                 agent.MoveToArroundPos(this, () =>
                 {
-                    SellItemToShop(id, amount, agent);
+                    Restock(id, amount, agent);
                 });
             }
             else
             {
-                SellItemToShop(id, amount, agent);
+                Restock(id, amount, agent);
             }
-            
-        }
 
-        private void SellItemToShop(string id, int amount, Agent agent)
-        {
-            agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(id), amount);
-            var config = ConfigReader.GetConfig<PropConfig>(id);
-            SellItem = GameItemManager.CreateGameItem<SellItem>(
-                config,
-                Pos,
-                GameItemType.Static,
-                amount,
-                this);
-            SellItem.Owner = agent.Owner;
-            Price = 101;
         }
 
         public void OnSold()
@@ -338,7 +327,10 @@ namespace GameItem
             if (SellItem != null)
             {
                 GameItemManager.DestroyGameItem(SellItem);
-                SellItem = null;
+                OnSoldEvent?.Invoke(this, SellItem.Config);
+                
+                if (SellItem.PropItem.Quantity == 0)
+                    SellItem = null;
             }
         }
 
@@ -356,6 +348,29 @@ namespace GameItem
         {
             SellItem = null;
         }
+
+        public void Restock(PropConfig config, int amount, Agent agent)
+        {
+            if (SellItem != null)
+            {
+                return;
+            }
+
+            agent.Bag.RemoveItem(config, amount);
+            SellItem = GameItemManager.CreateGameItem<SellItem>(
+                config,
+                Pos,
+                GameItemType.Static,
+                amount,
+                this);
+            SellItem.Owner = Owner;
+            Price = 101;
+        }
+
+        public void Restock(string id, int amount, Agent agent)
+        {
+            Restock(ConfigReader.GetConfig<PropConfig>(id), amount, agent);
+        }
     }
 
     public class BucketItem : FurnitureItem
@@ -371,6 +386,48 @@ namespace GameItem
             {
                 // system
             };
+        }
+    }
+    
+    public class ContainerItem : FurnitureItem
+    {
+        public override bool Walkable => false;
+
+        public Inventory Inventory { get; private set; }
+        public ContainerItem(BuildingConfig config, Vector3 pos, int capacity) : base(config, pos)
+        {
+            Inventory = new Inventory(capacity);
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return new List<IAction>()
+            {
+                // system
+            };
+        }
+
+        internal PropItem TakeItem(PropConfig propConfig, int amount)
+        {
+            var propItem = Inventory.Items.Find(i => i.Config == propConfig);
+            if (propItem != null)
+            {
+                Inventory.RemoveItem(propConfig, amount);
+                return new PropItem(propConfig, amount);
+            }
+
+            return null;
+        }
+
+        public int CheckAmount(PropConfig propConfig)
+        {
+            var propItems = Inventory.Items.FindAll(i => i.Config == propConfig);
+            if (propItems.Count > 0)
+            {
+                return propItems.Sum(i => i.Quantity);
+            }
+
+            return 0;
         }
     }
 }

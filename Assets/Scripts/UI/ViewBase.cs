@@ -12,19 +12,29 @@ namespace UI
         Popup,
         Element
     }
-    public class ViewBase : MonoBehaviour
+
+    public interface IView
+    {
+        public GameObject self { get; }
+        void OnShow();
+        void OnHide();
+        void SetModel(IModel model);
+    }
+
+    public abstract class ViewBase<T> : MonoBehaviour, IView where T : class, IModel
     {
         [SerializeField] private Button closeBtn;
 
-        public IModel Model { get; set; }
+        public T Model { get; set; }
+
+        public GameObject self => gameObject;
+
         void Awake()
         {
             closeBtn?.onClick.AddListener(Close);
         }
 
-        public virtual void OnShow()
-        {
-        }
+        public abstract void OnShow();
 
         public virtual void OnHide()
         {
@@ -35,6 +45,17 @@ namespace UI
         {
             Model.HideUI();
         }
+
+        public void SetModel(IModel model)
+        {
+            Model = model as T;
+            if (Model == null)
+            {
+                Debug.LogError($"Failed to set model. Expected type: {typeof(T)}, but got: {model.GetType()}");
+                return;
+            }
+            Model.View = this;
+        }
     }
 
     // UIStack manages a stack of views for navigation
@@ -42,30 +63,29 @@ namespace UI
     {
         protected readonly List<IModel> ViewStack = new();
 
-        public virtual void Push<T>(IModel model, string path) where T : ViewBase
+        public virtual IView Push<T>(IModel model, string path) where T : IView
         {
             var existingModel = ViewStack.Find(x => x.Path == model.Path);
             if (existingModel != null)
             {
-                existingModel.ShowUI();
-                return;
+                return existingModel.View;
             }
             GameObject prefab = Resources.Load<GameObject>(path);
             if (prefab == null)
             {
                 Debug.LogError($"Failed to load prefab at path: {path}");
-                return;
+                return null;
             }
 
             T view = Instantiate(prefab, transform).GetComponent<T>();
             if (view == null)
             {
                 Debug.LogError($"The prefab loaded from {path} does not contain a ViewBase component.");
-                return;
+                return view;
             }
-            
+
             ViewStack.Add(model);
-            model.SetView(view);
+            return view;
         }
 
         // Pop the current view from the stack
@@ -76,7 +96,7 @@ namespace UI
                 if (ViewStack.Contains(model))
                 {
                     ViewStack.Remove(model);
-                    Destroy(model.View.gameObject);
+                    Destroy(model.View.self);
                 }
             }
         }
@@ -110,15 +130,15 @@ namespace UI
             Instance = this;
         }
 
-        public override void Push<T>(IModel model, string path)
+        public override IView Push<T>(IModel model, string path)
         {
             if (ViewStack.Count > 0)
             {
                 var previousModel = ViewStack[^1];
-                previousModel.View.gameObject.SetActive(false);
+                previousModel.View.self.SetActive(false);
                 previousModel.View.OnHide();
             }
-            base.Push<T>(model, path);
+            return base.Push<T>(model, path);
         }
 
         public override void Pop(IModel model)

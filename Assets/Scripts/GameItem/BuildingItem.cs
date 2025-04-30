@@ -152,9 +152,15 @@ namespace GameItem
         {
             var waterAction = ActionPool.Get<WaterPlantAction>(this);
 
+            var SystemAction = new SystemAction("View Room Details", a =>
+            {
+                var model = IModel.GetModel<PopHouseDetailsModel>(House);
+                model.ShowUI();
+            });
+
             if (PlantItem != null)
             {
-                return new List<IAction>() { waterAction };
+                return new List<IAction>() { waterAction, SystemAction };
             }
 
             return new List<IAction>()
@@ -164,7 +170,8 @@ namespace GameItem
                 {
                     var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.Seed);
                     model.ShowUI();
-                })
+                }),
+                SystemAction
             };
         }
 

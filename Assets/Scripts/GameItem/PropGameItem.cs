@@ -16,10 +16,12 @@ namespace GameItem
         private Agent _agent;
         private bool _isPickedUp = false;
         protected event UnityAction<bool> OnTakedEvent;
+        public PropItem PropItem { get; private set; }
 
         public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
             Count = count;
+            PropItem = new PropItem(config, count);
         }
 
         public override void ShowUI()
@@ -54,7 +56,7 @@ namespace GameItem
                 .AppendInterval(0.1f)
                 .AppendCallback(() =>
                 {
-                    if (agent.Bag.AddItem(this))
+                    if (agent.Bag.AddItem(PropItem))
                     {
                         _agent = agent;
                         OnTakedEvent?.Invoke(agent.Owner != Owner);

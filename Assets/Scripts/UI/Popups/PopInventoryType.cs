@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using UI.Elements;
+using UI.Models;
 using UnityEngine;
 
 namespace UI.Popups
 {
-    public abstract class PopInventoryType : ViewBase
+    public abstract class PopInventoryType<T> : ViewBase<T> where T : class, IModel
     {
         [SerializeField] private ItemSlotElement itemSlotPrefab;
         [SerializeField] private Transform itemSlotParent;
@@ -15,8 +16,6 @@ namespace UI.Popups
         protected abstract PropType PropType { get; }
         public override void OnShow()
         {
-            base.OnShow();
-
             for (int i = 0; i < SlotAmount; i++)
             {
                 ItemSlotElement slot = Instantiate(itemSlotPrefab, itemSlotParent);

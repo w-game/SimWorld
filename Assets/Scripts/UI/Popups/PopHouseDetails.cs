@@ -2,23 +2,25 @@ using Citizens;
 using Map;
 using TMPro;
 using UI.Elements;
+using UI.Models;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UI.Views
 {
-    public class PopHouseDetails : ViewBase
+    public class PopHouseDetails : ViewBase<PopHouseDetailsModel>
     {
         [SerializeField] private TextMeshProUGUI propertyName;
         [SerializeField] private TextMeshProUGUI propertyDetails;
         [SerializeField] private GameObject recruitmentItemPrefab;
+        [SerializeField] private Button buyButton;
+
         public override void OnShow()
         {
-            base.OnShow();
-            var house = Model.Data[0] as House;
-            if (house != null)
+            if (Model.House != null)
             {
-                var property = Property.Properties[house];
-                propertyName.text = house.HouseType.ToString();
+                var property = Property.Properties[Model.House];
+                propertyName.text = Model.House.HouseType.ToString();
                 propertyDetails.text = $"Employee: {property.Employees.Count}";
                 foreach (var job in property.JobRecruitCount)
                 {
@@ -29,6 +31,8 @@ namespace UI.Views
                     });
                 }
             }
+
+            buyButton.onClick.AddListener(Model.BuyProperty);
         }
     }
 }

@@ -29,7 +29,7 @@ namespace UI.Elements
             _action = null;
         }
 
-        private void ReleaseSelf(IAction action)
+        private void ReleaseSelf(IAction action, bool success)
         {
             GameManager.I.GameItemManager.ItemUIPool.Release(this, "Prefab/ActionProgress");
         }

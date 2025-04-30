@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UI.Elements;
+using UI.Models;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI.Popups
 {
-    public class PopCraft : ViewBase
+    public class PopCraft : ViewBase<PopCraftModel>
     {
         [SerializeField] private ItemSlotElement craftItemPrefab;
         [SerializeField] private Transform craftItemParent;
@@ -26,8 +27,6 @@ namespace UI.Popups
         private CraftPropItem _selectedItem;
         public override void OnShow()
         {
-            base.OnShow();
-
             var configs = ConfigReader.GetAllConfigs<CraftConfig>();
 
             foreach (var config in configs)

@@ -13,9 +13,8 @@ namespace AI
         bool CanBeInterrupted { get; }
         IAction NextAction { get; set; }
         bool Enable { get; }
-        event Action<IAction> OnCompleted;
+        event Action<IAction, bool> OnCompleted;
         event Action<float> OnActionProgress;
-        event Action<IAction> OnActionFailed;
 
         void Execute(Agent agent);
         void OnRegister(Agent agent);

@@ -13,7 +13,7 @@ namespace Citizens
         public IHouse House { get; private set; }
         public Family Owner { get; private set; }
         public List<Employee> Employees { get; } = new List<Employee>();
-        public List<JobUnit> JobUnits { get; } = new List<JobUnit>();
+        public Dictionary<Type, List<JobUnit>> JobUnits { get; } = new Dictionary<Type, List<JobUnit>>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 18 * 60 * 60 };
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
 
@@ -24,23 +24,7 @@ namespace Citizens
 
             Properties.Add(house, this);
 
-            foreach (var member in owner.Members)
-            {
-                if (member.IsAdult)
-                {
-                    var ownerJob = new Owner();
-                    ownerJob.Property = this;
-                    member.SetJob(ownerJob);
-                    Schedule schedule = new Schedule(
-                        _workTime[0], _workTime[1],
-                        new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                        ActionPool.Get<WorkAction>(member.Job), member,
-                        SchedulePriority.High
-                        );
-
-                    member.Agent.RegisterSchedule(schedule);
-                }
-            }
+            BeBought(owner.Members[0].Agent);
 
             Debug.Log($"Property: {House.HouseType} has been created.");
         }
@@ -54,45 +38,56 @@ namespace Citizens
                 new List<int> { 1, 2, 3, 4, 5, 6, 7 },
                 ActionPool.Get<WorkAction>(employee), employee.Member
                 );
-            employee.Member.Agent.RegisterSchedule(schedule);
+            employee.Member.Agent.RegisterSchedule(schedule, "WorkSchedule");
         }
 
-        private bool AssignJobUnitToOwner(JobUnit jobUnit)
+        protected void AddJobUnit<T>(JobUnit jobUnit) where T : Job
         {
-            var owners = Owner.Members.FindAll(member => member.IsAdult && member.Job is Owner);
-            if (owners.Count > 0)
+            var type = typeof(T);
+            if (!JobUnits.ContainsKey(type))
             {
-                var owner = owners[UnityEngine.Random.Range(0, owners.Count)].Job;
-                owner.AssignJobUnit(jobUnit);
-                return true;
+                JobUnits[type] = new List<JobUnit>();
             }
-            return false;
-        }
-
-        protected bool AddJobUnit<T>(JobUnit jobUnit) where T : Job
-        {
-            if (Employees.Count == 0)
-            {
-                AssignJobUnitToOwner(jobUnit);
-                return false;
-            }
-
-            var employees = Employees.FindAll(employee => employee is T);
-            if (employees.Count == 0)
-            {
-                AssignJobUnitToOwner(jobUnit);
-                return false;
-            }
-
-            var employee = employees[UnityEngine.Random.Range(0, employees.Count)];
-            employee.AssignJobUnit(jobUnit);
-            return true;
+            JobUnits[type].Add(jobUnit);
         }
 
         internal void AddApplicant(JobConfig jobConfig, Agent agent)
         {
 
-            AddEmployee(new Waiter(agent));
+            AddEmployee(new Waiter(agent.Citizen));
+        }
+
+        public void BeBought(Agent agent)
+        {
+            if (Owner != null)
+            {
+                foreach (var member in Owner.Members)
+                {
+                    if (member.IsAdult)
+                    {
+                        member.SetJob(null);
+                        member.Agent.UnregisterSchedule("WorkSchedule");
+                    }
+                }
+            }
+
+            foreach (var member in agent.Owner.Members)
+            {
+                if (member.IsAdult)
+                {
+                    var ownerJob = new Owner(member);
+                    ownerJob.Property = this;
+                    member.SetJob(ownerJob);
+                    Schedule schedule = new Schedule(
+                        _workTime[0], _workTime[1],
+                        new List<int> { 1, 2, 3, 4, 5, 6, 7 },
+                        ActionPool.Get<WorkAction>(member.Job), member,
+                        SchedulePriority.High
+                        );
+
+                    member.Agent.RegisterSchedule(schedule, "WorkSchedule");
+                }
+            }
         }
     }
 
@@ -106,7 +101,7 @@ namespace Citizens
         private void CheckFarmHoed()
         {
             foreach (var pos in House.Blocks)
-            { 
+            {
                 var block = new Vector3(pos.x, pos.y);
                 MapManager.I.TryGetBuildingItem(block, out var buildingItem);
                 if (buildingItem == null)
@@ -247,6 +242,62 @@ namespace Citizens
     {
         public TeahouseProperty(IHouse house, Family owner) : base(house, owner)
         {
+        }
+    }
+
+    public class TavernProperty : RestaurantProperty
+    {
+        public TavernProperty(IHouse house, Family owner) : base(house, owner)
+        {
+        }
+    }
+
+    public class ShopProperty : Property
+    {
+        private float _resotckRate = 0.5f;
+        public List<ContainerItem> ContainerItems { get; } = new List<ContainerItem>();
+        private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
+        
+        private List<ShopShelfItem> ShopShelfItemsInRestocking = new List<ShopShelfItem>();
+        public ShopProperty(IHouse house, Family owner) : base(house, owner)
+        {
+            foreach (var furniture in House.FurnitureItems)
+            {
+                if (furniture.Value is ShopShelfItem shopShelfItem)
+                {
+                    shopShelfItem.OnSoldEvent += CheckRestock;
+                    shopShelfItem.Owner = owner;
+                    _shopShelfItems.Add(shopShelfItem);
+                }
+                else if (furniture.Value is ContainerItem containerItem)
+                {
+                    ContainerItems.Add(containerItem);
+                }
+            }
+
+            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_SALESMAN"), 1);
+        }
+
+        private void CheckRestock(ShopShelfItem shelfItem, PropConfig propConfig)
+        {
+            if (ShopShelfItemsInRestocking.Contains(shelfItem))
+            {
+                return;
+            }
+
+            var gap = shelfItem.SellItem.Config.maxStackSize - shelfItem.SellItem.PropItem.Quantity;
+            if (shelfItem.SellItem.PropItem.Quantity < shelfItem.SellItem.Config.maxStackSize * _resotckRate)
+            {
+                var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
+                AddJobUnit<Salesman>(jobUnit);
+                ShopShelfItemsInRestocking.Add(shelfItem);
+            }
+        }
+
+        public void Restock(ShopShelfItem shopShelfItem, PropConfig propConfig, int totalAmount, Agent agent)
+        {
+            shopShelfItem.Restock(propConfig, totalAmount, agent);
+            CheckRestock(shopShelfItem, propConfig);
         }
     }
 }

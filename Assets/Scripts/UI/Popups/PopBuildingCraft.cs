@@ -1,7 +1,8 @@
 using UI;
+using UI.Models;
 using UnityEngine;
 
-public class PopBuildingCraft : ViewBase
+public class PopBuildingCraft : ViewBase<PopBuildingCraftModel>
 {
     [SerializeField] private GameObject buildingElemebtPrefab;
     [SerializeField] private Transform buildingElementParent;
@@ -29,5 +30,10 @@ public class PopBuildingCraft : ViewBase
     {
         base.OnHide();
         BuildingManager.I.StopBuildingMode();
+    }
+
+    public override void OnShow()
+    {
+        
     }
 }

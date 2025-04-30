@@ -1,6 +1,8 @@
+using UI.Models;
+
 namespace UI.Popups
 {
-    public class PopBag : PopInventoryType
+    public class PopBag : PopInventoryType<PopBagModel>
     {
         protected override int SlotAmount => 16;
 

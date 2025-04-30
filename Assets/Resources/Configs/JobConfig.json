@@ -14,6 +14,11 @@
             "id": "JOB_FARMER",
             "name": "Farmer",
             "description": "A person who cultivates land and grows crops."
+        },
+        {
+            "id": "JOB_SALESMAN",
+            "name": "Salesman",
+            "description": "A person who sells goods or services."
         }
     ]
 }

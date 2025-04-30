@@ -111,7 +111,7 @@ namespace AI
             {
                 var bucket = ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET");
                 MessageBox.I.ShowMessage("No Bucket!", bucket.icon, MessageType.Error);
-                OnActionFailedEvent();
+                ActionFailed();
             }
             else
             {
@@ -148,7 +148,7 @@ namespace AI
             {
                 var water = ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER");
                 MessageBox.I.ShowMessage("No Water!", water.icon, MessageType.Error);
-                OnActionFailedEvent();
+                ActionFailed();
             }
             else
             {

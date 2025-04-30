@@ -86,6 +86,7 @@
     <Compile Include="Assets/Scripts/UIManager.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopBuildingCraftModel.cs" />
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/JobUnitElement.cs" />
     <Compile Include="Assets/TIles/DirtTile.cs" />
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/CommericalActions.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Assets/Scripts/AI/Inventory.cs" />
     <Compile Include="Assets/Scripts/GameItem/ProcessingItem.cs" />
     <Compile Include="Assets/Scripts/UI/Views/ActionListElement.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopJobUnitsModel.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/ResourceActions.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopBag.cs" />
     <Compile Include="Assets/Scripts/UI/Views/AgentStateElement.cs" />
@@ -129,6 +131,7 @@
     <Compile Include="Assets/Scripts/GameItem/GameItem.cs" />
     <Compile Include="Assets/Scripts/Citizen/Property.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/JobRecruitElement.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopJobUnits.cs" />
     <Compile Include="Assets/TIles/BuildingTile.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/BuildingActions.cs" />
     <Compile Include="Assets/Scripts/GameItem/PlantItem.cs" />
@@ -138,7 +141,6 @@
     <Compile Include="Assets/Scripts/AI/SkillActions.cs" />
     <Compile Include="Assets/Scripts/AI/IAction.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopBagModel.cs" />
-    <Compile Include="Assets/Scripts/UI/MainView.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/HouseWorkActions.cs" />
     <Compile Include="Assets/Scripts/Map/House.cs" />
     <Compile Include="Assets/Scripts/Map/Chunk.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="Assets/Scripts/Map/CartonMap.cs" />
     <Compile Include="Assets/Scripts/Map/City.cs" />
     <Compile Include="Assets/Textures/Sprout Lands - Sprites - premium pack/Tilesets/ground tiles/water frames/WaterTile.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/MainViewModel.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopSchdule.cs" />
     <Compile Include="Assets/Scripts/GameManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/MaterialElement.cs" />

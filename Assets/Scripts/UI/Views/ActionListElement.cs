@@ -26,15 +26,13 @@ namespace UI.Views
         private void OnActionRegister(IAction action)
         {
             action.OnCompleted += OnActionCompleted;
-            action.OnActionFailed += OnActionCompleted;
             UpdateUI();
         }
 
         // 当 Action 完成后调用
-        private void OnActionCompleted(IAction action)
+        private void OnActionCompleted(IAction action, bool success)
         {
             action.OnCompleted -= OnActionCompleted;
-            action.OnActionFailed -= OnActionCompleted;
             UpdateUI();
         }
 

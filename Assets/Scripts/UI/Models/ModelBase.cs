@@ -25,24 +25,24 @@ namespace UI.Models
         string Path { get; }
         ViewType ViewType { get; }
         object[] Data { get; set; }
-        ViewBase View { get; set; }
+        IView View { get; set; }
         void HideUI();
         void ShowUI();
-        void SetView(ViewBase view);
+        void SetView(IView view);
     }
 
-    public abstract class ModelBase<T> : IModel where T : ViewBase
+    public abstract class ModelBase<T> : IModel where T : IView
     {
         public abstract string Path { get; }
         public abstract ViewType ViewType { get; }
         public object[] Data { get; set; }
-        public ViewBase View { get; set; }
+        public IView View { get; set; }
 
         public void ShowUI()
         {
             if (View != null)
             {
-                View.gameObject.SetActive(true);
+                View.self.SetActive(true);
                 return;
             }
             if (ViewType == ViewType.View)
@@ -50,7 +50,9 @@ namespace UI.Models
             }
             else if (ViewType == ViewType.Popup)
             {
-                PopStack.Instance.Push<T>(this, $"Prefabs/UI/Popups/{Path}");
+                var view = PopStack.Instance.Push<T>(this, $"Prefabs/UI/Popups/{Path}");
+                SetView(view);
+                view.OnShow();
             }
             else if (ViewType == ViewType.Element)
             {
@@ -66,6 +68,7 @@ namespace UI.Models
             {
                 View.OnHide();
                 PopStack.Instance.Pop(this);
+                View = null;
 
                 OnHideUI();
             }
@@ -76,11 +79,10 @@ namespace UI.Models
 
         protected virtual void OnHideUI() { }
 
-        public void SetView(ViewBase view)
+        public void SetView(IView view)
         {
             View = view;
-            view.Model = this;
-            view.OnShow();
+            view.SetModel(this);
         }
     }
 }

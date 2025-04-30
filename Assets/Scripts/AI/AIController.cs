@@ -40,7 +40,7 @@ namespace AI
             }
         }
 
-        private void OnActionComplete(IAction action)
+        private void OnActionComplete(IAction action, bool success)
         {
             var nextAction = action.NextAction;
             UnregisterAction(action);
@@ -55,7 +55,6 @@ namespace AI
         {
             action.OnCompleted -= OnActionComplete;
             action.OnActionProgress -= OnActionProgress;
-            action.OnActionFailed -= UnregisterAction;
 
             OnActionUnregister?.Invoke(action);
             ActionPool.Release(action);
@@ -88,7 +87,6 @@ namespace AI
             CurAction = action;
             CurAction.OnCompleted += OnActionComplete;
             CurAction.OnActionProgress += OnActionProgress;
-            CurAction.OnActionFailed += UnregisterAction;
 
             action.OnRegister(_agent);
             OnActionRegister?.Invoke(action);
