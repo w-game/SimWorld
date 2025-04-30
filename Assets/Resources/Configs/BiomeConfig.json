@@ -29,8 +29,9 @@
             { "id": "PLANT_BUSH",    "weight": 5 },
             { "id": "PLANT_GRASS",   "weight": 10 },
             { "id": "PLANT_FLOWER",  "weight": 1 },
-            { "id": "PLANT_WHEAT",   "weight": 0.5 },
-            { "id": "PLANT_CORN",    "weight": 0.5 },
+            { "id": "PLANT_WHEAT",   "weight": 0.1 },
+            { "id": "PLANT_CORN",    "weight": 0.1 },
+            { "id": "PLANT_CARROT",  "weight": 0.1 },
             { "id": "RESOURCE_ROCK", "weight": 1 }
           ]
         }

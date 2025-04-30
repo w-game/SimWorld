@@ -86,6 +86,27 @@
             ]
         },
         {
+            "id": "PLANT_CARROT",
+            "name": "Carrot",
+            "description": "Carrot",
+            "type": "Plant",
+            "icon": "Textures/Plants/Carrot_0",
+            "prefab": "Prefabs/GameItems/PlantItem",
+            "matureDays": 10,
+            "stages": [
+                "Textures/Plants/Carrot_0",
+                "Textures/Plants/Carrot_1",
+                "Textures/Plants/Carrot_2",
+                "Textures/Plants/Carrot_3"
+            ],
+            "dropItems": [
+                {
+                    "id": "PROP_MATERIAL_CARROT",
+                    "count": 1
+                }
+            ]
+        },
+        {
             "id": "PLANT_BUSH",
             "name": "Bush",
             "description": "A bush.",

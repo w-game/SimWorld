@@ -135,8 +135,6 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 30,
             "additionals": {
-                "millTime": 5,
-                "millAmount": 3,
                 "seed": "PROP_SEED_CORN"
             }
         },
@@ -150,6 +148,30 @@
             "maxStackSize": 10,
             "additionals": {
                 "plant": "PLANT_CORN"
+            }
+        },
+        {
+            "id": "PROP_SEED_CARROT",
+            "name": "Carrot Seed",
+            "description": "A seed for planting carrots.",
+            "type": "Seed",
+            "icon": "Textures/Plants/CarrotSeed",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 10,
+            "additionals": {
+                "plant": "PLANT_CARROT"
+            }
+        },
+        {
+            "id": "PROP_MATERIAL_CARROT",
+            "name": "Carrot",
+            "description": "A piece of carrot.",
+            "type": "Crop",
+            "icon": "Textures/Plants/Carrot",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 30,
+            "additionals": {
+                "seed": "PROP_SEED_CARROT"
             }
         },
         {
