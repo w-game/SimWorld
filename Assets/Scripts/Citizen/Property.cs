@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AI;
 using GameItem;
 using Map;
+using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -246,7 +247,7 @@ namespace Citizens
 
     public class ShopProperty : Property
     {
-        private float _resotckRate = 0.5f;
+        private float _restockRate = 0.5f;
         public List<ContainerItem> ContainerItems { get; } = new List<ContainerItem>();
         private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
         
@@ -267,6 +268,32 @@ namespace Citizens
                 }
             }
 
+            // 查询仓库中可上架的种类
+            var containerItems = ContainerItems.FindAll(c => c.Inventory.Items.Count > 0);
+            HashSet<PropConfig> propConfigs = new HashSet<PropConfig>();
+            foreach (var containerItem in containerItems)
+            {
+                foreach (var item in containerItem.Inventory.Items)
+                {
+                    propConfigs.Add(item.Config);
+                }
+            }
+
+            // 候选货物架
+            var shelfItems = _shopShelfItems.FindAll(s => s.SellItem == null);
+
+            foreach (var propConfig in propConfigs)
+            {
+                if (shelfItems.Count == 0)
+                {
+                    break;
+                }
+                var shelfItem = shelfItems[0];
+                shelfItems.RemoveAt(0);
+
+                CheckRestock(shelfItem, propConfig);
+            }
+
             JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_SALESMAN"), 1);
         }
 
@@ -277,18 +304,44 @@ namespace Citizens
                 return;
             }
 
-            var gap = shelfItem.SellItem.Config.maxStackSize - shelfItem.SellItem.PropItem.Quantity;
-            if (shelfItem.SellItem.PropItem.Quantity < shelfItem.SellItem.Config.maxStackSize * _resotckRate)
+            if (shelfItem.SellItem == null)
             {
-                var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
-                AddJobUnit<Salesman>(jobUnit);
-                ShopShelfItemsInRestocking.Add(shelfItem);
+                var container = ContainerItems.Find(c => c.Inventory.CheckItemAmount(propConfig.id) > 0);
+                if (container != null)
+                {
+                    var remainAmount = container.Inventory.CheckItemAmount(propConfig.id);
+                    var gap = remainAmount > propConfig.maxStackSize ? propConfig.maxStackSize : remainAmount;
+                    if (gap <= 0)
+                    {
+                        ShopShelfItemsInRestocking.Remove(shelfItem);
+                        return;
+                    }
+                    var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
+                    AddJobUnit<Salesman>(jobUnit);
+                    ShopShelfItemsInRestocking.Add(shelfItem);
+                }
+            }
+            else
+            {
+                var gap = shelfItem.SellItem.Config.maxStackSize - shelfItem.SellItem.PropItem.Quantity;
+                if (gap <= 0)
+                {
+                    ShopShelfItemsInRestocking.Remove(shelfItem);
+                    return;
+                }
+                if (shelfItem.SellItem.PropItem.Quantity < shelfItem.SellItem.Config.maxStackSize * _restockRate)
+                {
+                    var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
+                    AddJobUnit<Salesman>(jobUnit);
+                    ShopShelfItemsInRestocking.Add(shelfItem);
+                }
             }
         }
 
         public void Restock(ShopShelfItem shopShelfItem, PropConfig propConfig, int totalAmount, Agent agent)
         {
             shopShelfItem.Restock(propConfig, totalAmount, agent);
+            ShopShelfItemsInRestocking.Remove(shopShelfItem);
             CheckRestock(shopShelfItem, propConfig);
         }
     }

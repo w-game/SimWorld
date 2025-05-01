@@ -59,7 +59,7 @@ namespace GameItem
         public T Config => (T)ConfigBase;
         public GameItemUI UI { get; protected set; }
         public Family Owner { get; set; }
-        public abstract bool Walkable { get; }
+        public bool Walkable { get; protected set; }
         public virtual List<Vector2Int> OccupiedPositions { get; } = new List<Vector2Int>();
         public bool Active { get; set; } = true;
 
@@ -67,6 +67,8 @@ namespace GameItem
         {
             ConfigBase = config;
             _pos = pos;
+
+            Walkable = config == null ? false : config.walkable;
         }
 
         public List<Vector3> ArroundPosList()

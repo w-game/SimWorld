@@ -124,7 +124,6 @@ namespace GameItem
 
     public class MillstoneItem : ProcessingItemBase
     {
-        public override bool Walkable => false;
         protected override string TargetId => "mill";
 
         protected override string Amound => "millAmount";
@@ -147,8 +146,6 @@ namespace GameItem
 
     public class FurnaceItem : ProcessingItemBase
     {
-        public override bool Walkable => false;
-
         protected override string TargetId => "smelt";
         protected override string Amound => "smeltAmount";
 

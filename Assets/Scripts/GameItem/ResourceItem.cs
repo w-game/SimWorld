@@ -8,10 +8,9 @@ namespace GameItem
 
     public class ResourceItem : GameItemBase<ResourceConfig>
     {
-        public override bool Walkable => true;
-
         public ResourceItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos)
         {
+            Walkable = true;
         }
 
         public override List<IAction> ItemActions(IGameItem agent)

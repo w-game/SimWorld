@@ -10,7 +10,6 @@ namespace GameItem
 {
     public class PropGameItem : GameItemBase<PropConfig>
     {
-        public override bool Walkable => true;
         public int Count { get; private set; } = 1;
 
         private Agent _agent;
@@ -22,6 +21,7 @@ namespace GameItem
         {
             Count = count;
             PropItem = new PropItem(config, count);
+            Walkable = true;
         }
 
         public override void ShowUI()
@@ -35,7 +35,7 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                ActionPool.Get<TakeItemInHand>(this),
+                // ActionPool.Get<TakeItemInHand>(this),
                 ActionPool.Get<PutIntoBag>(this, agent is Agent a && Owner != a.Owner)
             };
         }

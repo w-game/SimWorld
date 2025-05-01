@@ -11,6 +11,7 @@ public class ConfigBase
     public string type;
     public string icon;
     public string prefab;
+    public bool walkable = false;
 }
 
 [Serializable]
@@ -23,8 +24,9 @@ public class PosConfig
 [Serializable]
 public class BuildingConfig : ConfigBase
 {
-    public int[] size;    
+    public int[] size;
     public BuildingRequiredItem[] requiredItems;
+    public Dictionary<string, object> additionals;
 }
 
 [Serializable]

@@ -20,6 +20,7 @@
             "type": "Door",
             "icon": "Textures/Door",
             "size": [1, 1],
+            "walkable": true,
             "requiredResources": {
                 "wood": 3,
                 "metal": 1
@@ -61,6 +62,7 @@
             "icon": "Textures/ChairDown",
             "prefab": "Prefabs/GameItems/FurnitureItem",
             "size": [1, 1],
+            "walkable": true,
             "requiredResources": {
                 "wood": 2,
                 "metal": 1
@@ -75,6 +77,7 @@
             "icon": "Textures/Bed",
             "prefab": "Prefabs/GameItems/FurnitureItem",
             "size": [1, 1],
+            "walkable": true,
             "requiredResources": {
                 "wood": 5,
                 "fabric": 2
@@ -89,6 +92,7 @@
             "icon": "Textures/Toilet",
             "prefab": "Prefabs/GameItems/FurnitureItem",
             "size": [1, 1],
+            "walkable": true,
             "requiredResources": {
                 "ceramic": 3,
                 "metal": 2
@@ -117,6 +121,7 @@
             "icon": "Textures/Floor",
             "prefab": "Prefabs/GameItems/FurnitureItem",
             "size": [1, 1],
+            "walkable": true,
             "requiredResources": {
                 "wood": 10,
                 "stone": 5
@@ -131,6 +136,7 @@
             "icon": "Textures/Farm",
             "prefab": "Prefabs/GameItems/BuildingItem",
             "size": [1, 1],
+            "walkable": true,
             "requiredResources": {
                 "wood": 5,
                 "stone": 3,
@@ -261,6 +267,23 @@
                 "metal": 1
             },
             "buildSpeed": 5
+        },
+        {
+            "id": "BUILDING_CONTAINER",
+            "name": "Container",
+            "description": "A container for storing items.",
+            "type": "Container",
+            "icon": "Textures/Chest",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "wood": 5,
+                "metal": 2
+            },
+            "buildSpeed": 10,
+            "additionals": {
+                "capacity": 20
+            }
         }
     ]
 }

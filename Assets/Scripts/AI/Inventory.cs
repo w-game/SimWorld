@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using GameItem;
 using UnityEngine.Events;
 
@@ -137,6 +138,12 @@ public class Inventory
     {
         var items = Items.FindAll(i => i.Config.id == id);
         return items;
+    }
+
+    public int CheckItemAmount(string id)
+    {
+        var items = Items.FindAll(i => i.Config.id == id);
+        return items.Sum(i => i.Quantity);
     }
 
     public int GetItem(PropConfig propConfig)

@@ -14,11 +14,11 @@ namespace GameItem
 {
     public class BlueprintItem : GameItemBase<BuildingConfig>
     {
-        public override bool Walkable => true;
 
         public BlueprintItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
             Size = new Vector2Int(config.size[0], config.size[1]);
+            Walkable = true;
         }
 
         public override void ShowUI()
@@ -43,7 +43,6 @@ namespace GameItem
 
     public class BuildingItem : GameItemBase<BuildingConfig>
     {
-        public override bool Walkable => true;
         public IHouse House { get; private set; }
         public List<TileBase> Tiles { get; protected set; }
         private bool _isPlaced;
@@ -97,7 +96,6 @@ namespace GameItem
 
     public class WallItem : BuildingItem
     {
-        public override bool Walkable => false;
         public WallItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.wallTiles;

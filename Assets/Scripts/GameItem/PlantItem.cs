@@ -23,7 +23,6 @@ namespace GameItem
 
     public class PlantItem : GameItemBase<ResourceConfig>
     {
-        public override bool Walkable => true;
         public float GrowthTime { get; set; } // 成长时间
         public PlantStage GrowthStage { get; set; } // 成长阶段
         public float GrowthRate { get; set; } = 1; // 成长速度
@@ -77,6 +76,7 @@ namespace GameItem
 
             States.Add(PlantState.Weeds);
             GrowthRate = 100f * (config.stages.Length - 1) / (config.matureDays * 24f * 60f * 60f);
+            Walkable = true;
         }
 
         private void OnGrowth()
@@ -193,10 +193,10 @@ namespace GameItem
 
     public class TreeItem : PlantItem
     {
-        public override bool Walkable => false;
         protected override bool Drought => false;
         public TreeItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos, random)
         {
+            Walkable = false;
         }
 
         protected override IAction CheckRemovePlant(Agent agent)

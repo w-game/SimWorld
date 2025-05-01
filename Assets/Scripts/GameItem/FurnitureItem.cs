@@ -12,7 +12,6 @@ namespace GameItem
 {
     public class FurnitureItem : GameItemBase<BuildingConfig>
     {
-        public override bool Walkable => true;
         public Agent Using { get; internal set; }
 
         public FurnitureItem(BuildingConfig config, Vector3 pos) : base(config, pos)
@@ -65,7 +64,6 @@ namespace GameItem
 
     public class TableItem : FurnitureItem
     {
-        public override bool Walkable => false;
         public List<ChairItem> Chairs { get; } = new List<ChairItem>();
 
         public TableItem(BuildingConfig config, Vector3 pos) : base(config, pos)
@@ -109,7 +107,6 @@ namespace GameItem
 
     public class WellItem : FurnitureItem
     {
-        public override bool Walkable => false;
         public WellItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
@@ -125,7 +122,6 @@ namespace GameItem
 
     public class StoveItem : FurnitureItem
     {
-        public override bool Walkable => false;
         public StoveItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
@@ -139,7 +135,6 @@ namespace GameItem
 
     public class WorkbenchItem : FurnitureItem
     {
-        public override bool Walkable => false;
         public WorkbenchItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
 
@@ -186,7 +181,6 @@ namespace GameItem
 
     public class SeedIncubatorItem : FurnitureItem
     {
-        public override bool Walkable => false;
         public PropItem CultivatingItem { get; private set; }
         // TODO: 根据温度计算速度
         public float Temperature { get; private set; }
@@ -265,7 +259,6 @@ namespace GameItem
 
     public class ShopShelfItem : FurnitureItem, ISelectItem
     {
-        public override bool Walkable => false;
 
         public SellItem SellItem { get; private set; }
         public int Price { get; private set; } = 1;
@@ -280,8 +273,6 @@ namespace GameItem
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             var actions = new List<IAction>();
-
-            actions.Add(ActionPool.Get<BuyAction>(this, agent.Money.Amount >= Price));
 
             if (Owner != agent.Owner)
             {
@@ -328,7 +319,7 @@ namespace GameItem
             {
                 GameItemManager.DestroyGameItem(SellItem);
                 OnSoldEvent?.Invoke(this, SellItem.Config);
-                
+
                 if (SellItem.PropItem.Quantity == 0)
                     SellItem = null;
             }
@@ -364,6 +355,7 @@ namespace GameItem
                 amount,
                 this);
             SellItem.Owner = Owner;
+            SellItem.Pos += new Vector3(0.5f, 0.49f);
             Price = 101;
         }
 
@@ -375,7 +367,6 @@ namespace GameItem
 
     public class BucketItem : FurnitureItem
     {
-        public override bool Walkable => false;
         public BucketItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
@@ -388,15 +379,22 @@ namespace GameItem
             };
         }
     }
-    
+
     public class ContainerItem : FurnitureItem
     {
-        public override bool Walkable => false;
 
         public Inventory Inventory { get; private set; }
-        public ContainerItem(BuildingConfig config, Vector3 pos, int capacity) : base(config, pos)
+        public ContainerItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
+            var capacity = config.additionals["capacity"] as int? ?? 10;
             Inventory = new Inventory(capacity);
+            var configs = ConfigReader.GetAllConfigs<PropConfig>();
+            foreach (var propConfig in configs)
+            {
+                if (propConfig.type != PropType.Seed.ToString())
+                    continue;
+                Inventory.AddItem(propConfig, propConfig.maxStackSize);
+            }
         }
 
         public override List<IAction> ActionsOnClick(Agent agent)
@@ -428,6 +426,13 @@ namespace GameItem
             }
 
             return 0;
+        }
+    }
+
+    public class CounterItem : FurnitureItem
+    {
+        public CounterItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
         }
     }
 }

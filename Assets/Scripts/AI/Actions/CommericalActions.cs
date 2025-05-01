@@ -180,73 +180,53 @@ namespace AI
             ActionSpeed = 20f;
 
             _containerItems = new List<(ContainerItem, int)>();
+            _totalAmount = 0;
         }
 
         private bool FindContainerItem()
         {
-            var totalAmount = 0;
+            _containerItems.Clear();
+            int totalAmount = 0;
             foreach (var containerItem in _shopProperty.ContainerItems)
             {
                 int amount = containerItem.CheckAmount(_propConfig);
-                if (amount > 0)
-                {
-                    _containerItems.Add((containerItem, amount));
-                    totalAmount += amount;
-                }
-
-                if (totalAmount >= _amount)
-                {
-                    return true;
-                }
+                if (amount <= 0) continue;
+                int need = Mathf.Min(amount, _amount - totalAmount);
+                _containerItems.Add((containerItem, need));
+                totalAmount += need;
+                if (totalAmount >= _amount) break;
             }
-
             return totalAmount > 0;
         }
 
         public override void OnRegister(Agent agent)
         {
-            if (FindContainerItem())
+            if (!FindContainerItem())
             {
-                foreach (var (containerItem, amount) in _containerItems)
-                {
-                    var realAmount = _totalAmount + amount > _amount ? _amount - _totalAmount : amount;
-                    AddPrecedingAction<TakeItemFromContainer>(agent, (a, success) =>
-                    {
-                        if (!success)
-                        {
-                            _totalAmount -= realAmount;
-                        }
-
-                        if (_totalAmount <= 0)
-                        {
-                            ActionFailed();
-                        }
-
-                        if (PrecedingActions.Count == 1)
-                        {
-                            CheckMoveToArroundPos(agent, containerItem);
-                        }
-                    }, containerItem, _propConfig, realAmount);
-                    _totalAmount += amount;
-                    if (_totalAmount >= _amount)
-                    {
-                        _totalAmount = _amount;
-                        break;
-                    }
-                }
+                ActionFailed();
+                return;
             }
+            foreach (var (containerItem, need) in _containerItems)
+            {
+                // Take needed items
+                AddPrecedingAction<TakeItemFromContainer>(agent, null, containerItem, _propConfig, need);
+                _totalAmount += need;
+            }
+            // Move back to shelf
+            CheckMoveToArroundPos(agent, _shopShelfItem);
         }
 
         protected override void DoExecute(Agent agent)
         {
-            if (_totalAmount > 0)
+            if (_totalAmount <= 0)
             {
-                _shopProperty.Restock(_shopShelfItem, _propConfig, _totalAmount, agent);
-                _totalAmount = 0;
+                Debug.LogError($"没有足够的物品 {_propConfig.name} 来补货");
+                ActionFailed();
             }
             else
             {
-                Debug.LogError($"没有足够的物品 {_propConfig.name} 来补货");
+                _shopProperty.Restock(_shopShelfItem, _propConfig, _totalAmount, agent);
+                _totalAmount = 0;
             }
         }
     }

@@ -158,7 +158,6 @@ namespace Citizens
         public PlayerController PlayerController { get; private set; }
         public Inventory Bag { get; private set; }
         public Money Money { get; private set; }
-        public override bool Walkable => false;
 
         public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
         {
