@@ -213,4 +213,33 @@ public class GameItemManager
                 break;
         }
     }
+
+    internal IGameItem CheckDynamicItems(Vector3 pos)
+    {
+        var cellPos = ItemPosToMapPosConverter.Invoke(pos);
+        float dis = float.MaxValue;
+        IGameItem closestItem = null;
+        foreach (var item in _dynamicGameItems)
+        {
+            if (item.Active)
+            {
+                var sqrDistance = (item.Pos - pos).sqrMagnitude;
+                if (sqrDistance < dis)
+                {
+                    dis = sqrDistance;
+                    closestItem = item;
+                }
+            }
+        }
+
+        if (closestItem != null)
+        {
+            var itemCellPos = ItemPosToMapPosConverter.Invoke(closestItem.Pos);
+            if ((cellPos - itemCellPos).sqrMagnitude < 2)
+            {
+                return closestItem;
+            }
+        }
+        return null;
+    }
 }

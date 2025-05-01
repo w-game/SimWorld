@@ -71,6 +71,7 @@
     <Compile Include="Assets/Scripts/AI/AIUtil.cs" />
     <Compile Include="Assets/Scripts/Citizen/Family.cs" />
     <Compile Include="Assets/Scripts/AI/AIController.cs" />
+    <Compile Include="Assets/Scripts/AI/Actions/AgentActions.cs" />
     <Compile Include="Assets/Scripts/Localization/ActionLocalization.cs" />
     <Compile Include="Assets/Scripts/AI/AStar.cs" />
     <Compile Include="Assets/Scripts/AI/InventoryAction.cs" />
@@ -114,6 +115,7 @@
     <Compile Include="Assets/Scripts/Map/MapJob.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/EntertainmentActions.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCraftModel.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/DialogElement.cs" />
     <Compile Include="Assets/Scripts/ActionSystem.cs" />
     <Compile Include="Assets/Scripts/AI/Schedule.cs" />
     <Compile Include="Assets/Scripts/UI/Models/ModelBase.cs" />

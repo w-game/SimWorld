@@ -257,5 +257,19 @@ namespace AI
                 }
             }
         }
+
+        public void StartInteraction(IAction action)
+        {
+            var savedSelf = CurAction;
+            CurAction = null;
+
+            RegisterAction(action, true);
+
+            action.OnCompleted += (completedAction, success) =>
+            {
+                if (savedSelf != null)
+                    CurAction = savedSelf;
+            };
+        }
     }
 }

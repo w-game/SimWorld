@@ -22,6 +22,13 @@ namespace AI
         public static T Get<T>(params object[] args) where T : class, IActionPool
         {
             var type = typeof(T);
+            var action = Get(type, args);
+            return action as T;
+        }
+
+        public static IAction Get(Type arg1, params object[] args)
+        {
+            var type = arg1;
             IActionPool action;
             if (_pools.TryGetValue(type, out var stack) && stack.Count > 0)
             {
@@ -32,7 +39,7 @@ namespace AI
                 action = Activator.CreateInstance(type) as IActionPool;
             }
             action.OnGet(args);
-            return action as T;
+            return action as IAction;
         }
 
         public static void Release(IActionPool action)
@@ -78,9 +85,19 @@ namespace AI
                 Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
                 GameManager.I.selectSign.SetActive(true);
 
+                var actions = new Dictionary<string, List<IAction>>();
+
+                var dynamicItem = GameManager.I.GameItemManager.CheckDynamicItems(mousePos);
+                if (dynamicItem != null)
+                {
+                    var action = ActionPool.Get<CheckInteractionAction>(dynamicItem, typeof(ChatAction));
+                    actions.Add("Human", new List<IAction>() { action });
+                    OnMouseClick?.Invoke(actions, Input.mousePosition);
+                    return;
+                }
+
                 var items = GameManager.I.GameItemManager.GetItemsAtPos(mousePos);
 
-                var actions = new Dictionary<string, List<IAction>>();
                 var isWalkable = true;
                 foreach (var item in items)
                 {

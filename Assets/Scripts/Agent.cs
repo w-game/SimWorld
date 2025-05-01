@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using GameItem;
 using UI.Elements;
@@ -83,6 +84,8 @@ namespace Citizens
         public State Sleep { get; private set; }
         public State Hygiene { get; private set; }
         public Agent Agent { get; private set; }
+
+        public Dictionary<Agent, int> Relationships = new Dictionary<Agent, int>();
 
         public event Action<AgentState> OnAgentStateChangedEvent;
 
@@ -169,6 +172,7 @@ namespace Citizens
             State = new AgentState(this);
             Bag = new Inventory(16);
             Money = new Money(100);
+            Personality = new Personality();
         }
 
         public override void ShowUI()
@@ -449,6 +453,60 @@ namespace Citizens
                     schedules.Remove(scheduleName);
                 }
             }
+        }
+
+        public bool CheckInteraction(Agent agent, Type actionType)
+        {
+            State.Relationships.TryGetValue(agent, out int value);
+            // 根据双方关系度、性格、当前行为等因素计算交互成功率
+            // 例如：如果双方关系度较高，则成功率增加
+            // 如果双方关系不深、性格外向相对内向成功率高
+            // 如果当前行为不忙绿，则成功率增加
+            
+            // 1. 并发性检查：对话只能与并行行为并行
+            // var talkAction = ActionPool.Get<TalkAction>(this, other);
+            // if (!other.CanParticipate(talkAction))
+            // {
+            //     return false;
+            // }
+
+            // 2. 关系度因子：-100~100 映射到 0~1
+            State.Relationships.TryGetValue(agent, out int relation);
+            float relationFactor = Mathf.Clamp01((relation + 100f) / 200f);
+
+            // 3. 心情因子：0~100 映射到 0.5~1.5
+            float myMood = State.Mood != null ? State.Mood.Value : 100f;
+            float otherMood = agent.State.Mood != null ? agent.State.Mood.Value : 100f;
+            float moodFactor = Mathf.Lerp(0.5f, 1.5f, (myMood + otherMood) / 2f / 100f);
+
+            // 4. 兴趣相同加成
+            float hobbyBonus = 0f;
+            if (Personality.Hobbies.Intersect(agent.Personality.Hobbies).Any())
+            {
+                hobbyBonus = 0.1f;
+            }
+
+            // 5. 计算总成功率
+            float baseRate = 0.5f;
+            float successRate = Mathf.Clamp01(baseRate * (0.5f + relationFactor) * moodFactor + hobbyBonus);
+
+            // 6. 随机判定
+            return UnityEngine.Random.value < successRate;
+        }
+
+        private DialogElement _dialogElement;
+        public void ShowConvarsation(string conversation, UnityAction callback)
+        {
+            // 显示对话框
+            var chatUI = GameManager.I.GameItemManager.ItemUIPool.Get<DialogElement>("Prefabs/UI/Elements/DialogElement", Pos + Vector3.up, UI.transform);
+            chatUI.ShowTextByCharacter(conversation, callback);
+            _dialogElement = chatUI;
+        }
+
+        public void HideDialog()
+        {
+            _dialogElement?.Hide();
+            _dialogElement = null;
         }
     }
 }
