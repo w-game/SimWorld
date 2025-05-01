@@ -22,16 +22,15 @@ namespace AI
         private float _elapsedTime;
         private readonly float _duration;
 
-        public Schedule(float startTime, float endTime, List<int> days, ActionBase action, FamilyMember targetMember, SchedulePriority priority = SchedulePriority.Medium)
+        public Schedule(float startTime, float duration, List<int> days, ActionBase action, FamilyMember targetMember, SchedulePriority priority = SchedulePriority.Medium)
         {
             StartTime = startTime;
-            EndTime = endTime;
+            EndTime = startTime + duration;
             Days = days;
             Action = action;
             TargetMember = targetMember;
             Priority = priority;
-            _duration = EndTime >= StartTime ? EndTime - StartTime
-                                             : (24f - StartTime) + EndTime; // wrap‑around
+            _duration = duration;
         }
 
         public void Update(UnityAction callback)
@@ -46,29 +45,16 @@ namespace AI
 
         public bool Check(float currentTime, int day)
         {
-            // Determine which schedule “day” this time belongs to.
-            // If the window spans midnight and we are after 00:00 but before EndTime,
-            // we should use the *previous* day index.
-            int effectiveDay = day;
-            bool timeInWindow;
-
-            if (StartTime <= EndTime)
+            if (Days.Contains(day) && currentTime >= StartTime)
             {
-                timeInWindow = currentTime >= StartTime && currentTime <= EndTime;
+                TargetMember.Agent.Brain.RegisterAction(Action, true);
+                _elapsedTime = 0f;            // reset for Update()
             }
             else
             {
-                // Cross‑midnight window, e.g. 22:00‑02:00
-                timeInWindow = currentTime >= StartTime || currentTime <= EndTime;
-                if (currentTime <= EndTime)           // after midnight – belongs to previous day
-                    effectiveDay = (day + 7) % 7; // wrap to 0‑6
+                return false;
             }
 
-            if (!timeInWindow || !Days.Contains(effectiveDay))
-                return false;
-
-            TargetMember.Agent.Brain.RegisterAction(Action, true);
-            _elapsedTime = 0f;            // reset for Update()
             return true;
         }
     }

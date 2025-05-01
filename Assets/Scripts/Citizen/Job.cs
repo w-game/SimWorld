@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using AI;
 using UI.Elements;
-using UnityEngine;
 using UnityEngine.Events;
 
 namespace Citizens
@@ -193,37 +192,42 @@ namespace Citizens
     public class Employee : Job
     {
         public int WorkDays { get; set; } = 5;
-        public int Salary { get; set; } = 1000;
 
-        public Employee(FamilyMember member) : base(member)
+        public Employee(FamilyMember member, float[] workTime) : base(member)
         {
+            Schedule schedule = new Schedule(
+                workTime[0], workTime[1],
+                new List<int> { 1, 2, 3, 4, 5, 6, 7 },
+                ActionPool.Get<WorkAction>(this), member
+            );
+            member.Agent.RegisterSchedule(schedule, "WorkSchedule");
         }
     }
 
     public class Farmer : Employee
     {
-        public Farmer(FamilyMember member) : base(member)
+        public Farmer(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
     }
 
     public class Cooker : Employee
     {
-        public Cooker(FamilyMember member) : base(member)
+        public Cooker(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
     }
 
     public class Waiter : Employee
     {
-        public Waiter(FamilyMember member) : base(member)
+        public Waiter(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
     }
     
     public class Salesman : Employee
     {
-        public Salesman(FamilyMember member) : base(member)
+        public Salesman(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
     }

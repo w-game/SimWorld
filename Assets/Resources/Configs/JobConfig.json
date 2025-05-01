@@ -2,21 +2,25 @@
     "items": [
         {
             "id": "JOB_WAITER",
+            "type": "Waiter",
             "name": "Waiter",
             "description": "A person who serves food and drinks to customers at a restaurant."
         },
         {
             "id": "JOB_COOKER",
+            "type": "Cooker",   
             "name": "Cooker",
             "description": "A person who prepares and cooks food."
         },
         {
             "id": "JOB_FARMER",
+            "type": "Farmer",
             "name": "Farmer",
             "description": "A person who cultivates land and grows crops."
         },
         {
             "id": "JOB_SALESMAN",
+            "type": "Salesman",
             "name": "Salesman",
             "description": "A person who sells goods or services."
         }

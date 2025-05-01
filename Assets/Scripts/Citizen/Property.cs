@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using AI;
 using GameItem;
 using Map;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Citizens
@@ -14,7 +15,7 @@ namespace Citizens
         public Family Owner { get; private set; }
         public List<Employee> Employees { get; } = new List<Employee>();
         public Dictionary<Type, List<JobUnit>> JobUnits { get; } = new Dictionary<Type, List<JobUnit>>();
-        private float[] _workTime = new float[2] { 8 * 60 * 60, 18 * 60 * 60 };
+        private float[] _workTime = new float[2] { 8 * 60 * 60, 8 * 60 * 60 };
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
         public event Action<Type, JobUnit> OnJobUnitAdded;
 
@@ -30,18 +31,6 @@ namespace Citizens
             Debug.Log($"Property: {House.HouseType} has been created.");
         }
 
-        public void AddEmployee(Employee employee)
-        {
-            Employees.Add(employee);
-            employee.Property = this;
-            Schedule schedule = new Schedule(
-                _workTime[0], _workTime[1],
-                new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                ActionPool.Get<WorkAction>(employee), employee.Member
-                );
-            employee.Member.Agent.RegisterSchedule(schedule, "WorkSchedule");
-        }
-
         protected void AddJobUnit<T>(JobUnit jobUnit) where T : Job
         {
             var type = typeof(T);
@@ -53,10 +42,12 @@ namespace Citizens
             OnJobUnitAdded?.Invoke(type, jobUnit);
         }
 
-        internal void AddApplicant(JobConfig jobConfig, Agent agent)
+        public void AddApplicant(JobConfig jobConfig, Agent agent)
         {
-
-            AddEmployee(new Waiter(agent.Citizen));
+            var employee = Activator.CreateInstance(Type.GetType($"Citizens.{jobConfig.type}"), agent.Citizen, _workTime) as Employee;
+            Employees.Add(employee);
+            employee.Property = this;
+            agent.Citizen.SetJob(employee);
         }
 
         public void BeBought(Agent agent)
