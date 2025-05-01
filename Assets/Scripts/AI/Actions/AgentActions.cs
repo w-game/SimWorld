@@ -26,6 +26,14 @@ namespace AI
                     agent.Brain.StartInteraction(action);
                     _targetAgent.Brain.StartInteraction(action);
                 }
+                else
+                {
+                    _targetAgent.ShowConvarsation("Sorry, I'm busy right now.", () =>
+                    {
+                        _targetAgent.HideDialog();
+                        Done = true;
+                    });
+                }
             });
         }
 
