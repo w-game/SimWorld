@@ -37,9 +37,9 @@ namespace UI.Models
             }
         }
 
-        public void DoJobUnit(Type type, JobUnit jobUnit)
+        public bool DoJobUnit(Type type, JobUnit jobUnit)
         {
-            Job.DoJobUnit(type, jobUnit);
+            return Job.DoJobUnit(type, jobUnit);
         }
     }
 }

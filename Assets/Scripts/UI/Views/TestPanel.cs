@@ -17,24 +17,24 @@ public class TestPanel : MonoBehaviour
             Destroy(item.gameObject);
         }
 
-        testPanel.SetActive(true);
+        // testPanel.SetActive(true);
 
-        var pos = GameManager.I.CurrentAgent.Pos;
-        var chunk = MapManager.I.CartonMap.GetChunk(pos, Chunk.CityLayer);
+        // var pos = GameManager.I.CurrentAgent.Pos;
+        // var chunk = MapManager.I.CartonMap.GetChunk(pos, Chunk.CityLayer);
 
-        if (chunk != null)
-        {
-            var city = chunk.City;
-            if (city != null && GameManager.I.CitizenManager.Companies.TryGetValue(city, out var companies))
-            {
-                Log.LogInfo("TestPanel", $"城市 {city} 的公司数量: {companies.Count}");
-                foreach (var family_company in companies)
-                {
-                    var companyItem = Instantiate(companyPrefab, testPanel.transform);
-                    companyItem.GetComponent<TextMeshProUGUI>().text = family_company.Value.CompanyName;
-                    _companyItems.Add(companyItem.transform);
-                }
-            }
-        }
+        // if (chunk != null)
+        // {
+        //     var city = chunk.City;
+        //     if (city != null && GameManager.I.CitizenManager.Companies.TryGetValue(city, out var companies))
+        //     {
+        //         Log.LogInfo("TestPanel", $"城市 {city} 的公司数量: {companies.Count}");
+        //         foreach (var family_company in companies)
+        //         {
+        //             var companyItem = Instantiate(companyPrefab, testPanel.transform);
+        //             companyItem.GetComponent<TextMeshProUGUI>().text = family_company.Value.CompanyName;
+        //             _companyItems.Add(companyItem.transform);
+        //         }
+        //     }
+        // }
     }
 }

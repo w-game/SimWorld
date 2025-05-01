@@ -139,7 +139,11 @@ namespace Citizens
 
         public void SetJob(Job job)
         {
-            Job = job;
+            if (Job != job)
+            {
+                Job?.Resign();
+                Job = job;
+            }
         }
     }
 }

@@ -92,7 +92,7 @@ namespace Citizens
 
             Health = new State("Health", 100, 0);
             Hunger = new State("Hunger", 100, 0.00463f);
-            Toilet = new State("Toilet", 100, 0.00926f);
+            Toilet = new State("Toilet", 100, 0.00526f);
             Social = new State("Social", 100, 0.00347f);
             Mood = new State("Mood", 100, 0.00231f);
             Sleep = new State("Sleep", 100, 0.00174f);

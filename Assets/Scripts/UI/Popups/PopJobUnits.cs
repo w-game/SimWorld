@@ -21,35 +21,54 @@ namespace UI.Views
             {
                 foreach (var unit in jobUnits.Value)
                 {
-                    var jobUnitElement = Instantiate(jobUnitPrefab, jobUnitContainer);
-                    jobUnitElement.Init((jobUnits.Key, unit), OnDoBtnClicked);
-                    unit.OnJobUnitDone += (jobUnit) =>
-                    {
-                        Destroy(jobUnitElement.gameObject);
-                    };
+                    CreateElement(jobUnits.Key, unit);
                 }
             }
 
             autoAssignSlider.gameObject.SetActive(Model.Job.AutoAssign);
             autoAssignButton.onClick.AddListener(OnAutoAssignButtonClicked);
+
+            Model.Job.Property.OnJobUnitAdded += CreateElement;
+        }
+
+        private void CreateElement(Type type, JobUnit jobUnit)
+        {
+            var jobUnitElement = Instantiate(jobUnitPrefab, jobUnitContainer);
+            jobUnitElement.Init((type, jobUnit), OnDoBtnClicked);
+            jobUnit.OnJobUnitDone += (jobUnit) =>
+            {
+                Destroy(jobUnitElement.gameObject);
+            };
+            jobUnitElement.SetBtnInteractable(!Model.Job.AutoAssign);
         }
 
         private void OnDoBtnClicked((Type, JobUnit) jobUnitData, JobUnitElement jobUnitElement)
         {
-            Model.DoJobUnit(jobUnitData.Item1, jobUnitData.Item2);
-            jobUnitElement.SetBtnInteractable(false);
+            if (Model.DoJobUnit(jobUnitData.Item1, jobUnitData.Item2))
+            {
+                jobUnitElement.SetBtnInteractable(false);
+            }
         }
 
         private void OnAutoAssignButtonClicked()
         {
             Model.Job.AutoAssign = !Model.Job.AutoAssign;
             autoAssignSlider.gameObject.SetActive(Model.Job.AutoAssign);
+            foreach (Transform child in jobUnitContainer)
+            {
+                var jobUnitElement = child.GetComponent<JobUnitElement>();
+                if (jobUnitElement != null)
+                {
+                    jobUnitElement.SetBtnInteractable(!Model.Job.AutoAssign);
+                }
+            }
         }
 
         public override void OnHide()
         {
             base.OnHide();
             autoAssignButton.onClick.RemoveListener(OnAutoAssignButtonClicked);
+            Model.Job.Property.OnJobUnitAdded -= CreateElement;
         }
     }
 }

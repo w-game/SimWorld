@@ -30,7 +30,7 @@ namespace Map
         Vector2Int MinPos { get; }
         Family Owner { get; }
 
-        void SetOwner(Family family);
+        void SetOwner(Family owner);
         bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem;
         bool TryGetFurnitures<T>(out List<T> furnitureItems) where T : FurnitureItem;
     }
@@ -69,17 +69,17 @@ namespace Map
             CalcRooms();
         }
 
-        public void SetOwner(Family family)
+        public void SetOwner(Family owner)
         {
-            Owner = family;
+            Owner = owner;
             foreach (var item in FurnitureItems.Values)
             {
-                item.Owner = family;
+                item.Owner = owner;
             }
 
             foreach (var item in _buildingItems)
             {
-                item.Owner = family;
+                item.Owner = owner;
             }
         }
 

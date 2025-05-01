@@ -9,7 +9,6 @@ namespace Citizens
     public class CitizenManager
     {
         public Dictionary<City, List<Family>> Families { get; } = new Dictionary<City, List<Family>>();
-        public Dictionary<City, Dictionary<Family, Company>> Companies { get; } = new Dictionary<City, Dictionary<Family, Company>>();
 
         private List<string[]> _familyType = new List<string[]>()
         {
@@ -166,7 +165,6 @@ namespace Citizens
                 }
             }
 
-            Companies.Add(city, new Dictionary<Family, Company>());
             if (families.Count == 0)
             {
                 return; // No families to assign jobs
@@ -175,21 +173,13 @@ namespace Citizens
             foreach (var property in cityProperties)
             {
                 var family = families[city.ChunkRand.Next(0, families.Count - 1)];
-                AssignMembersJobs(Companies[city], family, property);
-            }
-
-            foreach (var family in families)
-            {
-                if (!Companies.ContainsKey(city))
-                {
-                    AssignMembersJobs(city, family);
-                }
+                AssignMembersJobs(family, property);
             }
 
             Families.Add(city, families);
         }
 
-        private void AssignMembersJobs(Dictionary<Family, Company> companies, Family family, IHouse house)
+        private void AssignMembersJobs(Family family, IHouse house)
         {
             Property property = null;
             switch (house.HouseType)
@@ -199,27 +189,40 @@ namespace Citizens
                     break;
                 case HouseType.Shop:
                     property = new ShopProperty(house, family);
-                    return;
+                    break;
                 case HouseType.Teahouse:
                     property = new TeahouseProperty(house, family);
                     break;
                 default:
                     break;
             }
-            if (!companies.TryGetValue(family, out var company))
+
+            var adults = family.Members.FindAll(_ => _.Age >= 18);
+            if (adults.Count == 0)
             {
-                company = new Company(family);
-                company.AddProperty(property);
-                companies.Add(family, company);
+                return; // No adults to assign jobs
             }
+
+            var ownerAmount = adults.Count > 1 ? Random.Range(1, adults.Count) : 1;
+
+            if (ownerAmount == 1)
+            {
+                var randomAdult = adults[Random.Range(0, adults.Count)];
+                var owner = new Owner(randomAdult);
+                owner.AddProperty(property);
+                randomAdult.SetJob(owner);
+            }
+            else
+            {
+                foreach (var adult in adults)
+                {
+                    var owner = new Owner(adult);
+                    owner.AddProperty(property);
+                    adult.SetJob(owner);
+                }
+            }
+
             house.SetOwner(family);
-
-            company.AddProperty(property);
-        }
-
-        private void AssignMembersJobs(City city, Family family)
-        {
-
         }
 
         public FamilyMember CreatePlayer()

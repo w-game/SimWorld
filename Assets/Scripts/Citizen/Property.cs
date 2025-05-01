@@ -16,6 +16,7 @@ namespace Citizens
         public Dictionary<Type, List<JobUnit>> JobUnits { get; } = new Dictionary<Type, List<JobUnit>>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 18 * 60 * 60 };
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
+        public event Action<Type, JobUnit> OnJobUnitAdded;
 
         public Property(IHouse house, Family owner)
         {
@@ -49,6 +50,7 @@ namespace Citizens
                 JobUnits[type] = new List<JobUnit>();
             }
             JobUnits[type].Add(jobUnit);
+            OnJobUnitAdded?.Invoke(type, jobUnit);
         }
 
         internal void AddApplicant(JobConfig jobConfig, Agent agent)
@@ -63,10 +65,13 @@ namespace Citizens
             {
                 foreach (var member in Owner.Members)
                 {
-                    if (member.IsAdult)
+                    if (member.IsAdult && member.Job is Owner owner)
                     {
-                        member.SetJob(null);
-                        member.Agent.UnregisterSchedule("WorkSchedule");
+                        owner.RemoveProperty(this);
+                        if (owner.Property == null)
+                        {
+                            member.SetJob(null);
+                        }
                     }
                 }
             }
@@ -76,16 +81,11 @@ namespace Citizens
                 if (member.IsAdult)
                 {
                     var ownerJob = new Owner(member);
-                    ownerJob.Property = this;
-                    member.SetJob(ownerJob);
-                    Schedule schedule = new Schedule(
-                        _workTime[0], _workTime[1],
-                        new List<int> { 1, 2, 3, 4, 5, 6, 7 },
-                        ActionPool.Get<WorkAction>(member.Job), member,
-                        SchedulePriority.High
-                        );
-
-                    member.Agent.RegisterSchedule(schedule, "WorkSchedule");
+                    ownerJob.AddProperty(this);
+                    if (member.Job != null)
+                    {
+                        member.SetJob(ownerJob);
+                    }
                 }
             }
         }
@@ -137,6 +137,7 @@ namespace Citizens
             {
                 var jobUnit = new JobUnit(ActionPool.Get<PlantAction>(farmItem, "PROP_SEED_WHEAT"), jobUnit =>
                 {
+                    Debug.Log($"种植作物：{farmItem.PlantItem.Config.name}");
                     farmItem.PlantItem.OnEventInvoked += OnCropItemEventInvoked;
                 });
                 AddJobUnit<Farmer>(jobUnit);

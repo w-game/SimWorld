@@ -203,7 +203,6 @@ namespace AI
         public void Update()
         {
             var result = CheckNormalState();
-
             if (CurAction != null)
             {
                 CurAction.Execute(_agent);
@@ -211,6 +210,19 @@ namespace AI
             else if (ActiveActions.Count != 0)
             {
                 ChangeCurAction(ActiveActions.Dequeue());
+            }
+            else if (_agent.Citizen.Job is Owner owner)
+            {
+                if ((_agent == GameManager.I.CurrentAgent && _agent.Citizen.Job.AutoAssign) || (_agent != GameManager.I.CurrentAgent))
+                {
+                    if (owner.CurJob == null)
+                    {
+                        owner.Next();
+                        if (owner.CurJob == null)
+                            return;
+                        RegisterAction(owner.CurJob.Action, true);
+                    }
+                }
             }
             else if (!result)
             {

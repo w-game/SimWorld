@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AI;
+using UI.Elements;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -30,9 +31,13 @@ namespace Citizens
             Action = action;
             Action.OnCompleted += (action, success) =>
             {
-                if (!success)
+                if (success)
                 {
-                    Done = false;
+                    Done = true;
+                }
+                else
+                {
+                    // failure case
                     onJobUnitFailed?.Invoke(this);
                 }
             };
@@ -61,9 +66,9 @@ namespace Citizens
             Member = member;
         }
 
-        public JobUnit CheckJobUnit()
+        public virtual JobUnit CheckJobUnit()
         {
-            if (Property.JobUnits.Count == 0)
+            if (Property != null && Property.JobUnits.Count == 0)
             {
                 return null;
             }
@@ -74,20 +79,9 @@ namespace Citizens
                 {
                     if (jobUnit.Value.Count > 0)
                     {
+                        var unit = jobUnit.Value[0];
                         jobUnit.Value.RemoveAt(0);
-                        return jobUnit.Value[0];
-                    }
-                }
-            }
-
-            if (this is Owner)
-            {
-                foreach (var jobUnit in Property.JobUnits)
-                {
-                    if (jobUnit.Value.Count > 0)
-                    {
-                        jobUnit.Value.RemoveAt(0);
-                        return jobUnit.Value[0];
+                        return unit;
                     }
                 }
             }
@@ -103,30 +97,96 @@ namespace Citizens
 
         public void Next()
         {
-            if (AutoAssign)
+            CurJob = CheckJobUnit();
+            if (CurJob != null)
             {
-                CurJob = CheckJobUnit();
-                if (CurJob != null)
-                {
-                    CurJob.OnJobUnitDone += OnJobUnitDone;
-                    OnJobUnitAssigned?.Invoke();
-                }
+                CurJob.OnJobUnitDone += OnJobUnitDone;
+                OnJobUnitAssigned?.Invoke();
             }
         }
 
-        public void DoJobUnit(Type key, JobUnit jobUnit)
+        public bool DoJobUnit(Type key, JobUnit jobUnit)
         {
+            if (CurJob != null) {
+                MessageBox.I.ShowMessage("You are already doing a job.", "Textures/Error", MessageType.Error);
+                return false;
+            }
             CurJob = jobUnit;
             Property.JobUnits[key].Remove(jobUnit);
             CurJob.OnJobUnitDone += OnJobUnitDone;
             OnJobUnitAssigned?.Invoke();
+            Member.Agent.Brain.RegisterAction(CurJob.Action, true);
+            return true;
+        }
+
+        public void Resign()
+        {
+            
         }
     }
 
     public class Owner : Job
     {
+        public List<Property> properties = new List<Property>();
         public Owner(FamilyMember member) : base(member)
         {
+        }
+
+        public void AddProperty(Property property)
+        {
+            properties.Add(property);
+            ChangeProperty();
+        }
+
+        public void RemoveProperty(Property property)
+        {
+            properties.Remove(property);
+            if (Property == property)
+            {
+                ChangeProperty();
+            }
+        }
+
+        private void ChangeProperty()
+        {
+            var property = properties.Find(p => p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
+            if (property != null)
+            {
+                Property = property;
+            }
+            else
+            {
+                property = properties.Find(p => p.JobUnits.Count > 0);
+                if (property != null)
+                {
+                    Property = property;
+                }
+            }
+
+            if (Property == null && properties.Count > 0)
+            {
+                Property = properties[0];
+            }
+        }
+
+        public override JobUnit CheckJobUnit()
+        {
+            if (Property == null || Property.JobUnits.Count == 0)
+            {
+                ChangeProperty();
+                if (Property == null) return null;
+            }
+
+            foreach (var kv in Property.JobUnits)
+            {
+                if (kv.Value.Count > 0)
+                {
+                    var unit = kv.Value[0];
+                    kv.Value.RemoveAt(0);
+                    return unit;
+                }
+            }
+            return null;
         }
     }
 

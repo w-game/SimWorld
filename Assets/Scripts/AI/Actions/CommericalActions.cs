@@ -30,12 +30,6 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            if (agent == GameManager.I.CurrentAgent)
-            {
-                var model = IModel.GetModel<PopJobUnitsModel>(_job);
-                model.ShowUI();
-            }
-
             _job.OnJobUnitAssigned += StartJob;
         }
 
@@ -52,6 +46,12 @@ namespace AI
             ActionName = "Work";
 
             Condition = () => GameManager.I.GameTime.CurrentTime < _job.WorkTime[0] || GameManager.I.GameTime.CurrentTime > _job.WorkTime[1];
+        }
+
+        public override void OnRelease()
+        {
+            base.OnRelease();
+            _job.OnJobUnitAssigned -= StartJob;
         }
     }
 

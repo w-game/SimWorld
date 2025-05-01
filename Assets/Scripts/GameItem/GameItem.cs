@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AI;
 using Citizens;
+using Map;
 using UnityEngine;
 
 namespace GameItem
