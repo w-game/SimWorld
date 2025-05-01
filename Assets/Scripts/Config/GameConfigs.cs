@@ -41,6 +41,15 @@ public class PropConfig : ConfigBase
 {
     public int maxStackSize;
     public Dictionary<string, object> additionals;
+
+    public int GetBasePrice()
+    {
+        if (additionals != null && additionals.ContainsKey("price"))
+        {
+            return int.Parse(additionals["price"].ToString());
+        }
+        return 0;
+    }
 }
 
 [Serializable]

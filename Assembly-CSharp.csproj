@@ -91,6 +91,7 @@
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/CommericalActions.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionMenu.cs" />
+    <Compile Include="Assets/Scripts/PriceSystem.cs" />
     <Compile Include="Assets/Scripts/GameItem/BuildingItem.cs" />
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />

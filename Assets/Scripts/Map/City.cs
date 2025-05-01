@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Map
 {
@@ -23,6 +24,10 @@ namespace Map
         // Cached room configs and occupancy grids
         private List<RoomConfig> _roomConfigs;
 
+        public CityPrice CityPrice { get; private set; }
+        public int Population { get; private set; } = 0;
+        public event UnityAction<int> OnPopulationChanged;
+
         public City(Vector2Int pos, int size, Chunk originChunk, System.Random chunkRand)
         {
             GlobalPos = pos + originChunk.WorldPos; // 转换为全局坐标
@@ -36,6 +41,8 @@ namespace Map
 
             // 创建城市
             CreateCity();
+
+            CityPrice = GameManager.I.PriceSystem.AddCity(this);
         }
 
         private void CreateCity()
@@ -45,6 +52,12 @@ namespace Map
 
             // 在所有受影响的Chunk中放置建筑
             PutRoom();
+        }
+
+        public void ChangePopulation(int amount)
+        {
+            Population += amount;
+            OnPopulationChanged?.Invoke(Population);
         }
 
         private void CreateRoad()

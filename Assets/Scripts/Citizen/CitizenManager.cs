@@ -148,6 +148,8 @@ namespace Citizens
                                 }
                             }
                         }
+
+                        city.ChangePopulation(1);
                     } while (familyType.Count > 0);
 
                     families.Add(family);

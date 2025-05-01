@@ -7,7 +7,10 @@
             "type": "Food",
             "icon": "Textures/Apple",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 1
+            "maxStackSize": 1,
+            "additionals": {
+                "price": 10
+            }
         },
         {
             "id": "PROP_MATERIAL_BRANCH",
@@ -16,7 +19,10 @@
             "type": "Material",
             "icon": "Textures/Branch",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10
+            "maxStackSize": 10,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_MATERIAL_STONE",
@@ -25,7 +31,10 @@
             "type": "Material",
             "icon": "Textures/Stone",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10
+            "maxStackSize": 10,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_RESOURCE_WOOD",
@@ -34,7 +43,10 @@
             "type": "Material",
             "icon": "Textures/Wood",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 5
+            "maxStackSize": 5,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_MATERIAL_PLANK",
@@ -43,7 +55,10 @@
             "type": "Material",
             "icon": "Textures/Flank",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10
+            "maxStackSize": 10,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_FOOD_CARROT",
@@ -52,7 +67,10 @@
             "type": "Food",
             "icon": "Textures/Carrot",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 1
+            "maxStackSize": 1,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_TOOL_AXE",
@@ -63,7 +81,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "chop": 5
+                "chop": 5,
+                "price": 20
             }
         },
         {
@@ -75,7 +94,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "hoe": 5
+                "hoe": 5,
+                "price": 20
             }
         },
         {
@@ -87,7 +107,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "mine": 5
+                "mine": 5,
+                "price": 20
             }
         },
         {
@@ -97,7 +118,10 @@
             "type": "Material",
             "icon": "Textures/Grass",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 50
+            "maxStackSize": 50,
+            "additionals": {
+                "price": 1
+            }
         },
         {
             "id": "PROP_MATERIAL_WHEAT",
@@ -111,7 +135,8 @@
                 "millTime": 5,
                 "millAmount": 3,
                 "seed": "PROP_SEED_WHEAT",
-                "mill": "PROP_MATERIAL_FLOUR"
+                "mill": "PROP_MATERIAL_FLOUR",
+                "price": 5
             }
         },
         {
@@ -123,7 +148,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "plant": "PLANT_WHEAT"
+                "plant": "PLANT_WHEAT",
+                "price": 5
             }
         }, 
         {
@@ -135,7 +161,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 30,
             "additionals": {
-                "seed": "PROP_SEED_CORN"
+                "seed": "PROP_SEED_CORN",
+                "price": 5
             }
         },
         {
@@ -147,7 +174,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "plant": "PLANT_CORN"
+                "plant": "PLANT_CORN",
+                "price": 5
             }
         },
         {
@@ -159,7 +187,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "plant": "PLANT_CARROT"
+                "plant": "PLANT_CARROT",
+                "price": 5
             }
         },
         {
@@ -171,7 +200,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 30,
             "additionals": {
-                "seed": "PROP_SEED_CARROT"
+                "seed": "PROP_SEED_CARROT",
+                "price": 5
             }
         },
         {
@@ -181,7 +211,10 @@
             "type": "Material",
             "icon": "Textures/Flour",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10
+            "maxStackSize": 10,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_TOOL_HANDBUCKET",
@@ -190,7 +223,10 @@
             "type": "Tool",
             "icon": "Textures/HandBucket",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 1
+            "maxStackSize": 1,
+            "additionals": {
+                "price": 5
+            }
         },
         {
             "id": "PROP_MATERIAL_HANDBUCKET_WATER",
@@ -201,7 +237,8 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "water": 1
+                "water": 1,
+                "price": 5
             }
         },
         {
@@ -215,7 +252,8 @@
             "additionals": {
                 "smeltTime": 5,
                 "smeltAmount": 1,
-                "smelt": "PROP_MATERIAL_IRON"
+                "smelt": "PROP_MATERIAL_IRON",
+                "price": 5
             }
         },
         {
@@ -225,7 +263,10 @@
             "type": "Material",
             "icon": "Textures/Iron",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 10
+            "maxStackSize": 10,
+            "additionals": {
+                "price": 30
+            }
         }
     ]
 }

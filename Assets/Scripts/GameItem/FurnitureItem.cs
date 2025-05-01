@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AI;
 using Citizens;
-using UI.Elements;
 using UI.Models;
 using UnityEngine;
 using UnityEngine.Events;
@@ -356,7 +354,8 @@ namespace GameItem
                 this);
             SellItem.Owner = Owner;
             SellItem.Pos += new Vector3(0.5f, 0.49f);
-            Price = 101;
+            Price = GameManager.I.PriceSystem.GetPrice(MapManager.I.GetCityByPos(Pos), config.id);
+            SellItem.UI.SetName($"{config.name} ${Price}");
         }
 
         public void Restock(string id, int amount, Agent agent)

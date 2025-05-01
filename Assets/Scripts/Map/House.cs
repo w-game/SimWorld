@@ -26,6 +26,7 @@ namespace Map
         List<Vector2Int> Blocks { get; }
         Vector2Int Size { get; }
         HouseType HouseType { get; }
+        City City { get; }
         Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; }
         Vector2Int MinPos { get; }
         Family Owner { get; }

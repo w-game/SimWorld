@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public ActionSystem ActionSystem { get; private set; }
     public CitizenManager CitizenManager { get; private set; }
     public GameItemManager GameItemManager { get; private set; }
+    public PriceSystem PriceSystem { get; private set; }
 
     public Agent CurrentAgent { get; private set; }
     public GameObject selectSign;
@@ -28,6 +29,7 @@ public class GameManager : MonoBehaviour
         ActionSystem.Init();
         CitizenManager = new CitizenManager();
         GameItemManager = new GameItemManager(MapManager.I.WorldPosToCellPos);
+        PriceSystem = new PriceSystem();
 
         GameTime = new GameTime();
 
@@ -44,6 +46,7 @@ public class GameManager : MonoBehaviour
     {
         ActionSystem.Update();
         GameTime.Update();
+        PriceSystem.Update();
 
         if (Input.GetKeyDown(KeyCode.E))
         {

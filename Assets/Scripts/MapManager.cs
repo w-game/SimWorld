@@ -29,6 +29,8 @@ public class House : IHouse
 
     public Family Owner { get; private set; }
 
+    public City City { get; private set; }
+
     public House(List<Vector2Int> blocks, HouseType houseType)
     {
         Blocks = blocks;
@@ -413,5 +415,11 @@ public class MapManager : MonoSingleton<MapManager>
         }
 
         return closestPos;
+    }
+
+    public City GetCityByPos(Vector3 pos)
+    {
+        var chunk = CartonMap.GetChunk(pos, Chunk.CityLayer);
+        return chunk != null ? chunk.City : null;
     }
 }
