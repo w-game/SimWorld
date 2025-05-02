@@ -134,7 +134,11 @@
             "additionals": {
                 "millTime": 5,
                 "millAmount": 3,
+                "millSpeed": 2,
                 "seed": "PROP_SEED_WHEAT",
+                "seedAmount": 3,
+                "seedTime": 5,
+                "seedSpeed": 2,
                 "mill": "PROP_MATERIAL_FLOUR",
                 "price": 5
             }
@@ -162,6 +166,9 @@
             "maxStackSize": 30,
             "additionals": {
                 "seed": "PROP_SEED_CORN",
+                "seedAmount": 3,
+                "seedTime": 5,
+                "seedSpeed": 2,
                 "price": 5
             }
         },
@@ -201,6 +208,9 @@
             "maxStackSize": 30,
             "additionals": {
                 "seed": "PROP_SEED_CARROT",
+                "seedAmount": 3,
+                "seedTime": 5,
+                "seedSpeed": 2,
                 "price": 5
             }
         },
@@ -252,6 +262,7 @@
             "additionals": {
                 "smeltTime": 5,
                 "smeltAmount": 1,
+                "smeltSpeed": 2,
                 "smelt": "PROP_MATERIAL_IRON",
                 "price": 5
             }

@@ -129,6 +129,9 @@ namespace GameItem
     public class FarmItem : BuildingItem, ISelectItem
     {
         public PlantItem PlantItem => GameManager.I.GameItemManager.TryGetItemAtPos<PlantItem>(Pos);
+
+        public PropType PropType => PropType.Seed;
+
         public FarmItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
         {
             Tiles = MapManager.I.farmTiles;
@@ -166,7 +169,7 @@ namespace GameItem
                 waterAction,
                 new SystemAction("Plant Seed", a =>
                 {
-                    var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.Seed);
+                    var model = IModel.GetModel<PopSelectSeedModel>(this);
                     model.ShowUI();
                 }),
                 SystemAction

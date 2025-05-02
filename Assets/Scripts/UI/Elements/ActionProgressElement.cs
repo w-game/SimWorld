@@ -17,6 +17,11 @@ namespace UI.Elements
             data.OnCompleted += ReleaseSelf;
         }
 
+        public void Init(UnityAction<float> onProcess)
+        {
+            onProcess += SetProgress;
+        }
+
         public void OnGet()
         {
             fill.fillAmount = 0f;
@@ -24,12 +29,14 @@ namespace UI.Elements
 
         public void OnRelease()
         {
+            if (_action == null)
+                return;
             _action.OnActionProgress -= SetProgress;
             _action.OnCompleted -= ReleaseSelf;
             _action = null;
         }
 
-        private void ReleaseSelf(IAction action, bool success)
+        public void ReleaseSelf(IAction action, bool success)
         {
             GameManager.I.GameItemManager.ItemUIPool.Release(this, "Prefab/ActionProgress");
         }

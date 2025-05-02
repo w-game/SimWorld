@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AI;
 using GameItem;
+using Skill;
 using UI.Elements;
 using Unity.Collections;
 using UnityEngine;
@@ -169,6 +170,8 @@ namespace Citizens
         public PlayerController PlayerController { get; private set; }
         public Inventory Bag { get; private set; }
         public Money Money { get; private set; }
+
+        public List<SkillBase> Skills { get; private set; } = new List<SkillBase>();
 
         public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
         {
@@ -549,6 +552,19 @@ namespace Citizens
             {
                 ActionPool.Get<CheckInteractionAction>(this, typeof(ChatAction), "Chat")
             };
+        }
+
+        public bool CheckSkillLevel<T>(int targetLevel) where T : SkillBase
+        {
+            foreach (var skill in Skills)
+            {
+                if (skill is T tSkill)
+                {
+                    return tSkill.Level >= targetLevel;
+                }
+            }
+
+            return false;
         }
     }
 }

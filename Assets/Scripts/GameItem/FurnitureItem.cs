@@ -177,90 +177,14 @@ namespace GameItem
         }
     }
 
-    public class SeedIncubatorItem : FurnitureItem
-    {
-        public PropItem CultivatingItem { get; private set; }
-        // TODO: 根据温度计算速度
-        public float Temperature { get; private set; }
-        public float CurProgress { get; private set; }
-
-        public event UnityAction<PropConfig> OnFinish;
-        public event UnityAction<float> OnProgress;
-        public event UnityAction OnChange;
-        public bool Done { get; private set; } = false;
-
-        public PropConfig Seed { get; private set; }
-
-        public SeedIncubatorItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
-        public override List<IAction> ActionsOnClick(Agent agent)
-        {
-            var centerPos = Pos - new Vector3(0, 1);
-            var action = ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, centerPos);
-            var system = new SystemAction("Craft Item", a =>
-            {
-                var model = IModel.GetModel<PopSeedIncubatorModel>(this);
-                model.ShowUI();
-            }, action);
-
-            return new List<IAction>()
-            {
-                system
-            };
-        }
-
-        public void ChangeItem(PropItem propItem)
-        {
-            if (propItem == null)
-            {
-                return;
-            }
-
-            CultivatingItem = propItem;
-            var seed = CultivatingItem.Config.additionals["seed"] as string;
-            Seed = ConfigReader.GetConfig<PropConfig>(seed);
-            CurProgress = 0;
-            Done = false;
-            OnChange?.Invoke();
-        }
-
-        public override void Update()
-        {
-            if (CultivatingItem != null && !Done)
-            {
-                CurProgress += GameTime.DeltaTime;
-                OnProgress?.Invoke(CurProgress);
-
-                if (CurProgress >= 100f)
-                {
-                    OnFinish?.Invoke(Seed);
-                    Done = true;
-                }
-            }
-        }
-
-        public void BeTake(Inventory inventory)
-        {
-            if (CultivatingItem != null)
-            {
-                inventory.AddItem(new PropItem(Seed, 1));
-                CultivatingItem = null;
-                Seed = null;
-                CurProgress = 0;
-                Done = false;
-                OnChange?.Invoke();
-            }
-        }
-    }
-
     public class ShopShelfItem : FurnitureItem, ISelectItem
     {
 
         public SellItem SellItem { get; private set; }
         public int Price { get; private set; } = 1;
         public int SellAmount { get; private set; } = 1;
+
+        public PropType PropType => PropType.None;
 
         public event UnityAction<ShopShelfItem, PropConfig> OnSoldEvent;
         public ShopShelfItem(BuildingConfig config, Vector3 pos) : base(config, pos)
@@ -284,7 +208,7 @@ namespace GameItem
 
             var system = new SystemAction("Select items to sell", a =>
             {
-                var model = IModel.GetModel<PopSelectSeedModel>(this, PropType.None);
+                var model = IModel.GetModel<PopSelectSeedModel>(this);
                 model.ShowUI();
             });
 

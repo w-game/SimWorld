@@ -24,7 +24,7 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            _item.ProcessItem(CurTime, agent);
+            _item.ProcessItem(CurTime);
         }
     }
 }

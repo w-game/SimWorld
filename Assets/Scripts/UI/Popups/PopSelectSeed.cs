@@ -11,7 +11,7 @@ namespace UI.Popups
             GameManager.I.CurrentAgent.Bag;
 
         private PopSelectSeedModel SelfModel => (PopSelectSeedModel)base.Model;
-        protected override PropType PropType => SelfModel.PropType;
+        protected override PropType PropType => Model.SelectItem.PropType;
 
         protected override void OnItemClicked(PropItem propItem)
         {
