@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using AI;
 using Citizens;
 using GameItem;
 using UnityEngine;
@@ -189,7 +190,7 @@ public class GameItemManager
             null,
             pos + new Vector2(0.5f, 0.5f),
             GameItemType.Dynamic,
-            GameManager.I.ActionSystem.CreateAIController(),
+            new AIController(),
             member
         );
         agent.ShowUI();

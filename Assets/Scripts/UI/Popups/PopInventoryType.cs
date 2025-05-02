@@ -7,7 +7,6 @@ namespace UI.Popups
 {
     public abstract class PopInventoryType<T> : ViewBase<T> where T : class, IModel
     {
-        [SerializeField] private ItemSlotElement itemSlotPrefab;
         [SerializeField] private Transform itemSlotParent;
         private List<ItemSlotElement> inventorySlots = new List<ItemSlotElement>();
 
@@ -18,7 +17,7 @@ namespace UI.Popups
         {
             for (int i = 0; i < SlotAmount; i++)
             {
-                ItemSlotElement slot = Instantiate(itemSlotPrefab, itemSlotParent);
+                ItemSlotElement slot = UIManager.I.UIPool.Get<ItemSlotElement>("Prefabs/UI/Elements/ItemSlotElement", itemSlotParent.position, itemSlotParent);
                 inventorySlots.Add(slot);
 
                 slot.Init(null, propItem => OnItemClicked(propItem as PropItem));

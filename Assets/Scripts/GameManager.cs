@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
             null,
             Vector3.zero,
             GameItemType.Dynamic,
-            ActionSystem.CreateAIController(),
+            new AIController(),
             CitizenManager.CreatePlayer()
         );
         CurrentAgent.ShowUI();

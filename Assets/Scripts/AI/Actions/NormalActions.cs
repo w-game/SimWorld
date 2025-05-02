@@ -130,6 +130,7 @@ namespace AI
             if (pos != Vector3.zero)
             {
                 var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
+                action.OnRegister(agent);
                 action.OnCompleted += (a, _) => onComplete?.Invoke();
                 PrecedingActions.Add(action);
             }
@@ -151,6 +152,7 @@ namespace AI
                 }
                 var pos = arroundPosList[0];
                 var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
+                action.OnRegister(agent);
                 action.OnCompleted += (a, _) => onComplete?.Invoke();
                 PrecedingActions.Add(action);
             }
@@ -267,38 +269,41 @@ namespace AI
     // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
     public class CheckMoveToTarget : ConditionActionBase
     {
-        public override string ActionName => "Move to here";
-
         public Vector3 TargetPos { get; private set; }
 
         private bool _isMoving = false;
 
         public override void OnRegister(Agent agent)
         {
+
         }
 
         protected override void DoExecute(Agent agent)
         {
             if (_isMoving)
             {
-                agent.MoveToTarget();
+                agent.MoveToTarget(TargetPos);
+                return;
             }
             else
             {
+                agent.CalcMovePaths(TargetPos);
                 _isMoving = true;
-                agent.MoveToTarget(TargetPos);
             }
         }
 
         public override void OnGet(params object[] args)
         {
-            var agent = args[0] as Agent;
+            var agent     = args[0] as Agent;
             var targetPos = (Vector3)args[1];
-            var cellPos = MapManager.I.WorldPosToCellPos(targetPos);
-            TargetPos = new Vector3(cellPos.x + 0.5f, cellPos.y + 0.5f);
-            ActionName = "Move to";
-            Condition = () => _isMoving && agent.CheckArriveTargetPos();
-            _isMoving = false;
+
+            // 对齐到格子中心
+            var cell      = MapManager.I.WorldPosToCellPos(targetPos);
+            TargetPos     = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
+
+            ActionName    = "Move To";
+            // 采用距离判定避免依赖外部路径信息
+            Condition     = () => Vector3.Distance(agent.Pos, TargetPos) < 0.1f;
         }
     }
 

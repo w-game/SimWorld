@@ -40,7 +40,7 @@ namespace Citizens
                 null,
                 randomPos + new Vector2(0.5f, 0.5f),
                 GameItemType.Dynamic,
-                GameManager.I.ActionSystem.CreateAIController(),
+                new AIController(),
                 member
             );
 

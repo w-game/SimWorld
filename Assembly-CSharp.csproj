@@ -85,6 +85,7 @@
     <Compile Include="Assets/Scripts/AI/Actions/BuildingCraftActions.cs" />
     <Compile Include="Assets/Scripts/PlayerController.cs" />
     <Compile Include="Assets/Scripts/UIManager.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopTradeModel.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopBuildingCraftModel.cs" />
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/JobUnitElement.cs" />
@@ -109,16 +110,19 @@
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopSeedIncubatorModel.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/NormalActions.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopCountSelectorModel.cs" />
     <Compile Include="Assets/TIles/OceanTile.cs" />
     <Compile Include="Assets/Scripts/UI/ElementBase.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopHouseDetailsModel.cs" />
     <Compile Include="Assets/Scripts/Map/MapJob.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/EntertainmentActions.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopCountSelector.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCraftModel.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/DialogElement.cs" />
     <Compile Include="Assets/Scripts/ActionSystem.cs" />
     <Compile Include="Assets/Scripts/AI/Schedule.cs" />
     <Compile Include="Assets/Scripts/UI/Models/ModelBase.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopTrade.cs" />
     <Compile Include="Assets/Scripts/Map/AStar.cs" />
     <Compile Include="Assets/Scripts/GameItemManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionProgressElement.cs" />
@@ -177,6 +181,7 @@
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets/Textures/Sprout Lands - Sprites - premium pack/read_me.txt" />
     <None Include="Assets/TextMesh Pro/Shaders/SDFFunctions.hlsl" />
+    <None Include="Assets/Shaders/BlurShadow.shader" />
     <None Include="Assets/Shaders/DirectionalShadow.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader" />
     <None Include="Assets/TextMesh Pro/Sprites/EmojiOne Attribution.txt" />

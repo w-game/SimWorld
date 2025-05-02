@@ -3,12 +3,17 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
 
+public interface IUIPoolable : IPoolable
+{
+}
+
 public class UIManager : MonoSingleton<UIManager>
 {
     public Camera mainCamera;
     public CinemachineCamera cinemachineCamera;
 
     public static event UnityAction<Vector3> OnMouseBtnClicked;
+    public ObjectPool UIPool { get; } = new ObjectPool(30);
 
     internal Vector3 MousePosToWorldPos()
     {

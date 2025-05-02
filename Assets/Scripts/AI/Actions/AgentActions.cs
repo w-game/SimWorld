@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Citizens;
+using UI.Models;
 using UnityEngine;
 
 namespace AI
@@ -10,9 +12,9 @@ namespace AI
         private Type _action;
         public override void OnGet(params object[] args)
         {
-            ActionName = "Chat";
             _targetAgent = args[0] as Agent;
             _action = args[1] as Type;
+            ActionName = args[2] as string;
         }
 
         public override void OnRegister(Agent agent)
@@ -128,6 +130,70 @@ namespace AI
             _state = ChatState.Finished;
             _agentOne.HideDialog();
             _agentTwo.HideDialog();
+        }
+    }
+
+    public class TradeAction : ConditionActionBase
+    {
+        private Agent _agentOne;
+        private Agent _agentTwo;
+
+        private List<PropItem> _soldItems = new List<PropItem>();
+
+        private bool _end = false;
+
+        public override void OnGet(params object[] args)
+        {
+            ActionName = "Trade";
+            _agentOne = args[0] as Agent;
+            _agentTwo = args[1] as Agent;
+
+            _agentOne.HideDialog();
+            _agentTwo.HideDialog();
+
+            var model = IModel.GetModel<PopTradeModel>(this);
+            model.ShowUI();
+
+            Condition = () => _end;
+        }
+
+        public void SellItem(PropItem item, int amount)
+        {
+            _agentOne.Bag.RemoveItem(item.Config, amount);
+            _agentTwo.Bag.AddItem(item.Config, amount);
+            var city = MapManager.I.GetCityByPos(_agentOne.Pos);
+            var price = GameManager.I.PriceSystem.GetPrice(city, item.Config.id);
+            _agentTwo.Money.Subtract(price);
+            _agentOne.Money.Add(price);
+            _soldItems.Add(item);
+        }
+
+        public void EndTrade()
+        {
+            _end = true;
+            _agentOne.HideDialog();
+            _agentTwo.HideDialog();
+
+            var shopProperty = _agentTwo.Citizen.Job.Property as ShopProperty;
+            foreach (var item in _soldItems)
+            {
+                var containerItem = shopProperty.ContainerItems.Find(x => x.Inventory.Items.Count < x.Inventory.MaxSize);
+                if (containerItem == null)
+                {
+                    return;
+                }
+                _agentTwo.Brain.RegisterAction(ActionPool.Get<PutIntoContainer>(item, containerItem), false);
+            }
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            CheckMoveToArroundPos(agent, _agentOne == agent ? _agentTwo : _agentOne);
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+
         }
     }
 }

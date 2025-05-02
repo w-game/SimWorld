@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace UI.Elements
 {
-    public class ItemSlotElement : MonoBehaviour
+    public class ItemSlotElement : MonoBehaviour, IPoolable
     {
         [SerializeField] private Image itemIcon;
         [SerializeField] private Button itemButton;
@@ -18,7 +18,17 @@ namespace UI.Elements
             UpdateItemSlot(propItem, -1);
             itemButton.onClick.AddListener(() => onClick(PropItem));
         }
-        
+
+        public void OnGet()
+        {
+            
+        }
+
+        public void OnRelease()
+        {
+            Clear();
+        }
+
         public void UpdateItemSlot(PropItemBase propItem, int count = -1)
         {
             if (propItem == null)

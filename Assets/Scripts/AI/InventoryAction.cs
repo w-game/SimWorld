@@ -97,4 +97,29 @@ namespace AI
             }
         }
     }
+
+    public class PutIntoContainer : SingleActionBase
+    {
+        private PropItem _propItem;
+        private ContainerItem _containerItem;
+
+        public override void OnGet(params object[] args)
+        {
+            _propItem = args[0] as PropItem;
+            _containerItem = args[1] as ContainerItem;
+            ActionName = "Put Into Container";
+            ActionSpeed = 999f;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            CheckMoveToArroundPos(agent, _containerItem);
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            agent.Bag.RemoveItem(_propItem);
+            _containerItem.Inventory.AddItem(_propItem);
+        }
+    }
 }

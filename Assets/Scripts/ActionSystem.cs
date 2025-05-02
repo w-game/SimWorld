@@ -1,7 +1,5 @@
-
 using System;
 using System.Collections.Generic;
-using GameItem;
 using Map;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -26,9 +24,8 @@ namespace AI
             return action as T;
         }
 
-        public static IAction Get(Type arg1, params object[] args)
+        public static IAction Get(Type type, params object[] args)
         {
-            var type = arg1;
             IActionPool action;
             if (_pools.TryGetValue(type, out var stack) && stack.Count > 0)
             {
@@ -44,6 +41,7 @@ namespace AI
 
         public static void Release(IActionPool action)
         {
+            if (action == null) return;
             action.OnRelease(); // default resets state
             var type = action.GetType();
             if (!_pools.TryGetValue(type, out var stack))
@@ -63,70 +61,80 @@ namespace AI
 
         }
 
-        public AIController CreateAIController()
+        private static readonly Vector3 SIGN_OFFSET = new Vector3(0.5f, 0.5f, 0);
+
+        /// <summary>Moves the selection sign to the centre of the given cell.</summary>
+        private static void UpdateSelectSign(Vector2Int cellPos)
         {
-            return new AIController();
+            GameManager.I.selectSign.transform.position =
+                new Vector3(cellPos.x, cellPos.y, 0) + SIGN_OFFSET;
+        }
+
+        /// <summary>Builds the click‐action map for the given world position.</summary>
+        private Dictionary<string, List<IAction>> BuildActions(Vector3 worldPos, Vector2Int cellPos)
+        {
+            var actions = new Dictionary<string, List<IAction>>();
+
+            // 1) Dynamic (moving) item takes priority.
+            var dynamicItem = GameManager.I.GameItemManager.CheckDynamicItems(worldPos);
+            if (dynamicItem != null)
+            {
+                var human = new List<IAction>
+                {
+                    
+                };
+                human.AddRange(dynamicItem.ActionsOnClick(GameManager.I.CurrentAgent));
+                actions["Human"] = human;
+                return actions;              // early‑return: nothing else matters
+            }
+
+            // 2) Static items at this location.
+            bool isWalkable = true;
+            foreach (var item in GameManager.I.GameItemManager.GetItemsAtPos(worldPos))
+            {
+                actions[item.ConfigBase.name] = item.ActionsOnClick(GameManager.I.CurrentAgent);
+                if (!item.Walkable) isWalkable = false;
+            }
+
+            // 3) Terrain / ground actions.
+            var blockType = MapManager.I.CheckBlockType(worldPos);
+            if (isWalkable && blockType != BlockType.Ocean)
+            {
+                if (!actions.ContainsKey("Ground"))
+                    actions["Ground"] = new List<IAction>();
+                actions["Ground"].Add(
+                    ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, worldPos));
+            }
+
+            var extraGround = BlockTypeToActions(worldPos, blockType);
+            if (extraGround.Count > 0)
+            {
+                if (!actions.ContainsKey("Ground"))
+                    actions["Ground"] = new List<IAction>();
+                actions["Ground"].AddRange(extraGround);
+            }
+
+            return actions;
         }
 
         internal void Update()
         {
-            if (BuildingManager.I.CraftMode)
+            // Ignore input while crafting or when the pointer is over UI.
+            if (BuildingManager.I.CraftMode || EventSystem.current.IsPointerOverGameObject())
                 return;
 
-            var mousePos = UIManager.I.MousePosToWorldPos();
-            var cellPos = MapManager.I.WorldPosToCellPos(mousePos);
-            GameManager.I.selectSign.transform.position = new Vector3(cellPos.x, cellPos.y, 0) + new Vector3(0.5f, 0.5f, 0);
+            var mouseWorldPos = UIManager.I.MousePosToWorldPos();
+            var cellPos       = MapManager.I.WorldPosToCellPos(mouseWorldPos);
 
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (EventSystem.current.IsPointerOverGameObject())
-                    return;
+            UpdateSelectSign(cellPos);
 
-                Log.LogInfo("ActionSystem", "MousePos: " + cellPos);
-                GameManager.I.selectSign.SetActive(true);
+            if (!Input.GetMouseButtonDown(0)) return;
 
-                var actions = new Dictionary<string, List<IAction>>();
+            var actions = BuildActions(mouseWorldPos, cellPos);
+            if (actions.Count == 0) return;
 
-                var dynamicItem = GameManager.I.GameItemManager.CheckDynamicItems(mousePos);
-                if (dynamicItem != null)
-                {
-                    var action = ActionPool.Get<CheckInteractionAction>(dynamicItem, typeof(ChatAction));
-                    actions.Add("Human", new List<IAction>() { action });
-                    OnMouseClick?.Invoke(actions, Input.mousePosition);
-                    return;
-                }
-
-                var items = GameManager.I.GameItemManager.GetItemsAtPos(mousePos);
-
-                var isWalkable = true;
-                foreach (var item in items)
-                {
-                    var itemActions = item.ActionsOnClick(GameManager.I.CurrentAgent);
-                    actions[item.ConfigBase.name] = itemActions;
-                    if (!item.Walkable)
-                    {
-                        isWalkable = false;
-                    }
-                }
-
-                var blockType = MapManager.I.CheckBlockType(mousePos);
-                if (isWalkable && blockType != BlockType.Ocean)
-                {
-                    actions.Add("Ground", new List<IAction>() { ActionPool.Get<CheckMoveToTarget>(GameManager.I.CurrentAgent, mousePos) });
-                }
-
-                var groundActions = BlockTypeToActions(mousePos, blockType);
-                if (groundActions.Count > 0)
-                {
-                    if (!actions.ContainsKey("Ground"))
-                    {
-                        actions["Ground"] = new List<IAction>();
-                    }
-                    actions["Ground"].AddRange(groundActions);
-                }
-
-                OnMouseClick?.Invoke(actions, Input.mousePosition);
-            }
+            GameManager.I.selectSign.SetActive(true);
+            OnMouseClick?.Invoke(actions, Input.mousePosition);
         }
 
         private List<IAction> BlockTypeToActions(Vector3 pos, BlockType blockType)

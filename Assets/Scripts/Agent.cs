@@ -118,27 +118,33 @@ namespace Citizens
 
     public class Money
     {
+        public Agent Agent { get; private set; }
         public int Amount { get; private set; }
 
-        public Money(int amount)
+        public Money(int amount, Agent agent)
         {
+            Agent = agent;
             Amount = amount;
         }
 
         public void Add(int amount)
         {
             Amount += amount;
+            if (Agent == GameManager.I.CurrentAgent)
+                MessageBox.I.ShowMessage($"Got {amount} money", "Textures/Money", MessageType.Info);
         }
 
         public void Subtract(int amount)
         {
             Amount -= amount;
+            if (Agent == GameManager.I.CurrentAgent)
+                MessageBox.I.ShowMessage($"Got {amount} money", "Textures/Money", MessageType.Info);
         }
     }
 
     public class Agent : GameItemBase<ConfigBase>
     {
-        public float MoveSpeed { get; private set; } = 5f;
+        public float MoveSpeed { get; private set; } = 2f;
         public int SightRange { get; private set; } = 8;
 
         public FamilyMember Citizen { get; private set; }
@@ -171,7 +177,7 @@ namespace Citizens
             Owner = Citizen.Family;
             State = new AgentState(this);
             Bag = new Inventory(16);
-            Money = new Money(100);
+            Money = new Money(100, this);
             Personality = new Personality();
         }
 
@@ -254,33 +260,44 @@ namespace Citizens
             PlayerController.MoveTo(target);
         }
 
-        public void MoveToTarget(Vector2 pos)
+        private Vector3? _targetPos;
+        public void CalcMovePaths(Vector2 targetWorldPos)
         {
-            if (!MapManager.I.IsWalkable(pos)) return;
+            if (!MapManager.I.IsWalkable(targetWorldPos)) return;
 
-            var cellPos = MapManager.I.WorldPosToCellPos(Pos);
-            var targetCellPos = MapManager.I.WorldPosToCellPos(pos);
-            _paths = AStar.FindPath(cellPos, targetCellPos, (pos) =>
+            var startCell = MapManager.I.WorldPosToCellPos(Pos);
+            var targetCell = MapManager.I.WorldPosToCellPos(targetWorldPos);
+
+            _paths = AStar.FindPath(startCell, targetCell, p => MapManager.I.IsWalkable(new Vector3(p.x, p.y)));
+
+            // 0 或 1 说明已经在目标格，保持 _pathIndex = -1
+            if (_paths != null && _paths.Count > 1)
             {
-                return MapManager.I.IsWalkable(new Vector3(pos.x, pos.y));
-            });
-        }
-
-        public void MoveToTarget()
-        {
-            if (_paths == null || _paths.Count == 0) return;
-            var targetPosition = new Vector3(_paths[0].x + 0.5f, _paths[0].y + 0.5f);
-            Pos = Vector3.MoveTowards(Pos, targetPosition, MoveSpeed * Time.deltaTime);
-
-            if (Vector3.Distance(Pos, targetPosition) < 0.1f)
-            {
-                _paths.RemoveAt(0);
+                var cell = _paths[1];
+                _targetPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
             }
         }
 
-        public bool CheckArriveTargetPos()
+        public void MoveToTarget(Vector2 pos)
         {
-            return _paths == null || _paths.Count == 0;
+            if (_paths == null)
+            {
+                if (Vector3.Distance(Pos, pos) > 0.05f)
+                {
+                    Pos = Vector3.MoveTowards(Pos, pos, MoveSpeed * Time.deltaTime);
+                }
+                return;
+            }
+
+            if (_paths[0] != MapManager.I.WorldPosToCellPos(Pos))
+            {
+                CalcMovePaths(pos);
+                if (_paths == null) return;
+            }
+
+            if (_targetPos == null) return;
+
+            Pos = Vector3.MoveTowards(Pos, _targetPos.Value, MoveSpeed * Time.deltaTime);
         }
 
         private FoodItem GetFoodItem()
@@ -402,7 +419,7 @@ namespace Citizens
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
-            throw new NotImplementedException();
+            return new List<IAction>();
         }
 
         internal PropConfig GetOrder(Agent consumer)
@@ -462,7 +479,7 @@ namespace Citizens
             // 例如：如果双方关系度较高，则成功率增加
             // 如果双方关系不深、性格外向相对内向成功率高
             // 如果当前行为不忙绿，则成功率增加
-            
+
             // 1. 并发性检查：对话只能与并行行为并行
             // var talkAction = ActionPool.Get<TalkAction>(this, other);
             // if (!other.CanParticipate(talkAction))
@@ -507,6 +524,23 @@ namespace Citizens
         {
             _dialogElement?.Hide();
             _dialogElement = null;
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            if (Citizen.Job is Owner owner && owner.Property is ShopProperty)
+            {
+                return new List<IAction>()
+                {
+                    ActionPool.Get<CheckInteractionAction>(this, typeof(ChatAction), "Chat"),
+                    ActionPool.Get<CheckInteractionAction>(this, typeof(TradeAction), "Trade")
+                };
+            }
+
+            return new List<IAction>()
+            {
+                ActionPool.Get<CheckInteractionAction>(this, typeof(ChatAction), "Chat")
+            };
         }
     }
 }

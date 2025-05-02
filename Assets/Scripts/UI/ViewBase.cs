@@ -23,7 +23,7 @@ namespace UI
 
     public abstract class ViewBase<T> : MonoBehaviour, IView where T : class, IModel
     {
-        [SerializeField] private Button closeBtn;
+        [SerializeField] protected Button closeBtn;
 
         public T Model { get; set; }
 
