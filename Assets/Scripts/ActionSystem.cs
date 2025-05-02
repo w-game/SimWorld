@@ -77,12 +77,9 @@ namespace AI
 
             // 1) Dynamic (moving) item takes priority.
             var dynamicItem = GameManager.I.GameItemManager.CheckDynamicItems(worldPos);
-            if (dynamicItem != null)
+            if (dynamicItem != null && dynamicItem != GameManager.I.CurrentAgent)
             {
-                var human = new List<IAction>
-                {
-                    
-                };
+                var human = new List<IAction>();
                 human.AddRange(dynamicItem.ActionsOnClick(GameManager.I.CurrentAgent));
                 actions["Human"] = human;
                 return actions;              // early‑return: nothing else matters
