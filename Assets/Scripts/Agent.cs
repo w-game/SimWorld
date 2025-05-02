@@ -144,7 +144,7 @@ namespace Citizens
 
     public class Agent : GameItemBase<ConfigBase>
     {
-        public float MoveSpeed { get; private set; } = 2f;
+        public float MoveSpeed { get; private set; } = 3f;
         public int SightRange { get; private set; } = 8;
 
         public FamilyMember Citizen { get; private set; }
@@ -260,8 +260,9 @@ namespace Citizens
             PlayerController.MoveTo(target);
         }
 
-        private Vector3? _targetPos;
-        public void CalcMovePaths(Vector2 targetWorldPos)
+        private Vector3? _nextPos;
+        private Vector2Int? _targetCellPos;
+        public void CalcMovePaths(Vector3 targetWorldPos)
         {
             if (!MapManager.I.IsWalkable(targetWorldPos)) return;
 
@@ -270,34 +271,33 @@ namespace Citizens
 
             _paths = AStar.FindPath(startCell, targetCell, p => MapManager.I.IsWalkable(new Vector3(p.x, p.y)));
 
-            // 0 或 1 说明已经在目标格，保持 _pathIndex = -1
             if (_paths != null && _paths.Count > 1)
             {
                 var cell = _paths[1];
-                _targetPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
+                _nextPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
+                _targetCellPos = targetCell;
             }
         }
 
-        public void MoveToTarget(Vector2 pos)
+        public void MoveToTarget(Vector3 pos)
         {
             if (_paths == null)
             {
-                if (Vector3.Distance(Pos, pos) > 0.05f)
+                if (Vector3.SqrMagnitude(Pos - pos) > 0.0025f)
                 {
                     Pos = Vector3.MoveTowards(Pos, pos, MoveSpeed * Time.deltaTime);
                 }
                 return;
             }
+            if (_nextPos == null || _targetCellPos == null) return;
 
-            if (_paths[0] != MapManager.I.WorldPosToCellPos(Pos))
+            if (_paths[0] != MapManager.I.WorldPosToCellPos(Pos) || _targetCellPos.Value != MapManager.I.WorldPosToCellPos(pos))
             {
                 CalcMovePaths(pos);
                 if (_paths == null) return;
             }
 
-            if (_targetPos == null) return;
-
-            Pos = Vector3.MoveTowards(Pos, _targetPos.Value, MoveSpeed * Time.deltaTime);
+            Pos = Vector3.MoveTowards(Pos, _nextPos.Value, MoveSpeed * Time.deltaTime);
         }
 
         private FoodItem GetFoodItem()

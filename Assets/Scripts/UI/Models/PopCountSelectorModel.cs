@@ -17,10 +17,11 @@ namespace UI.Models
         public ICountSelect CountSelect => Data[0] as ICountSelect;
         public int Count { get; set; }
 
-        public PopCountSelectorModel()
+        protected override void OnShow()
         {
-            Count = CountSelect.MaxCount;
+            Count = CountSelect.MaxCount;            
         }
+
 
         public void Confirm()
         {

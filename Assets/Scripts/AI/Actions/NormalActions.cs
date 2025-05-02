@@ -144,14 +144,7 @@ namespace AI
         {
             if (item != null)
             {
-                var arroundPosList = item.ArroundPosList();
-                if (arroundPosList.Count == 0)
-                {
-                    Done = true;
-                    return;
-                }
-                var pos = arroundPosList[0];
-                var action = ActionPool.Get<CheckMoveToTarget>(agent, pos);
+                var action = ActionPool.Get<CheckMoveToTargetDynamicAction>(agent, item);
                 action.OnRegister(agent);
                 action.OnCompleted += (a, _) => onComplete?.Invoke();
                 PrecedingActions.Add(action);
@@ -269,9 +262,9 @@ namespace AI
     // 检查是否需要移动到目标点的动作，如果当前位置不在目标附近，则执行移动
     public class CheckMoveToTarget : ConditionActionBase
     {
-        public Vector3 TargetPos { get; private set; }
+        public Vector3 TargetPos { get; protected set; }
 
-        private bool _isMoving = false;
+        protected bool _isMoving = false;
 
         public override void OnRegister(Agent agent)
         {
@@ -294,6 +287,7 @@ namespace AI
 
         public override void OnGet(params object[] args)
         {
+            _isMoving = false;
             var agent     = args[0] as Agent;
             var targetPos = (Vector3)args[1];
 
@@ -304,6 +298,40 @@ namespace AI
             ActionName    = "Move To";
             // 采用距离判定避免依赖外部路径信息
             Condition     = () => Vector3.Distance(agent.Pos, TargetPos) < 0.1f;
+        }
+    }
+
+    public class CheckMoveToTargetDynamicAction : CheckMoveToTarget
+    {
+        private IGameItem _targetItem;
+        public override void OnGet(params object[] args)
+        {
+            _isMoving = false;
+            var agent = args[0] as Agent;
+            _targetItem = args[1] as IGameItem;
+
+            CalcTargetPos();
+
+            ActionName = "Move To";
+            Condition = () => Vector3.Distance(agent.Pos, TargetPos) < 0.1f;
+        }
+
+        private void CalcTargetPos()
+        {
+            var arroundPosList = _targetItem.ArroundPosList();
+            if (arroundPosList.Count == 0)
+            {
+                return;
+            }
+            var pos = arroundPosList[0];
+            var cell = MapManager.I.WorldPosToCellPos(pos);
+            TargetPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            CalcTargetPos();
+            base.DoExecute(agent);
         }
     }
 

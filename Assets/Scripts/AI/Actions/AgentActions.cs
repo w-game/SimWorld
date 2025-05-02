@@ -23,7 +23,6 @@ namespace AI
             {
                 if (_targetAgent.CheckInteraction(agent, _action))
                 {
-                    // 使用新的 StartInteraction 方法，注册同一个交互行为到双方
                     var action = ActionPool.Get(_action, agent, _targetAgent);
                     agent.Brain.StartInteraction(action);
                     _targetAgent.Brain.StartInteraction(action);
@@ -79,9 +78,6 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            // Move both agents into range before starting
-            // (Assumes CheckMoveToArroundPos is inherited and available)
-            CheckMoveToArroundPos(agent, _agentOne == agent ? _agentTwo : _agentOne);
         }
 
         protected override void DoExecute(Agent agent)
@@ -153,6 +149,7 @@ namespace AI
 
             var model = IModel.GetModel<PopTradeModel>(this);
             model.ShowUI();
+            _end = false;
 
             Condition = () => _end;
         }
@@ -188,7 +185,7 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _agentOne == agent ? _agentTwo : _agentOne);
+            
         }
 
         protected override void DoExecute(Agent agent)

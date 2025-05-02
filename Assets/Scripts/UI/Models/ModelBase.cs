@@ -52,11 +52,17 @@ namespace UI.Models
             {
                 var view = PopStack.Instance.Push<T>(this, $"Prefabs/UI/Popups/{Path}");
                 SetView(view);
+                OnShow();
                 view.OnShow();
             }
             else if (ViewType == ViewType.Element)
             {
             }
+        }
+
+        protected virtual void OnShow()
+        {
+            
         }
 
         public void HideUI()
