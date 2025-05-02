@@ -145,7 +145,9 @@ namespace Citizens
     public class Agent : GameItemBase<ConfigBase>
     {
         public float MoveSpeed { get; private set; } = 3f;
-        public int SightRange { get; private set; } = 8;
+        public int SightRange { get; private set; } = 9;
+        private List<Vector2Int> _sights = new List<Vector2Int>();
+        public int MaxScanCount { get; private set; } = 5;
 
         public FamilyMember Citizen { get; private set; }
         public AgentState State { get; private set; }
@@ -179,6 +181,14 @@ namespace Citizens
             Bag = new Inventory(16);
             Money = new Money(100, this);
             Personality = new Personality();
+
+            for (int i = -SightRange / 2; i <= SightRange / 2; i++)
+            {
+                for (int j = -SightRange / 2; j <= SightRange / 2; j++)
+                {
+                    _sights.Add(new Vector2Int((int)pos.x, (int)pos.y));
+                }
+            }
         }
 
         public override void ShowUI()
@@ -427,18 +437,16 @@ namespace Citizens
             throw new NotImplementedException();
         }
 
-        internal List<IGameItem> ScanAllItemsAround()
+        public List<IGameItem> ScanAllItemsAround()
         {
             List<IGameItem> foundItems = new List<IGameItem>();
-
-            for (int i = 0; i < SightRange; i++)
+            for (int i = 0; i <= MaxScanCount; i++)
             {
-                for (int j = 0; j < SightRange; j++)
-                {
-                    var pos = new Vector2(Pos.x + i, Pos.y + j);
-                    var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
-                    foundItems.AddRange(items);
-                }
+                var idx = UnityEngine.Random.Range(0, _sights.Count);
+                var sight = _sights[idx];
+                var pos = new Vector3(sight.x + Pos.x, sight.y + Pos.y);
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+                foundItems.AddRange(items);
             }
             return foundItems;
         }

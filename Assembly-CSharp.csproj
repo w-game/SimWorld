@@ -108,6 +108,7 @@
     <Compile Include="Assets/Scripts/DayLightSystem.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopBuildingCraft.cs" />
     <Compile Include="Assets/Scripts/GameItem/FurnitureItem.cs" />
+    <Compile Include="Assets/Scripts/Util/QuadTree.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopSeedIncubatorModel.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/NormalActions.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCountSelectorModel.cs" />

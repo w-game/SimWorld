@@ -23,6 +23,9 @@ namespace AI
 
         private WorkAction _workAction;
 
+        private float _scanInterval = 1f;
+        private float _scanTimer = 0f;
+
         public void SetAgent(Agent agent)
         {
             _agent = agent;
@@ -226,6 +229,13 @@ namespace AI
             }
             else if (!result)
             {
+                if (_scanTimer < _scanInterval)
+                {
+                    _scanTimer += Time.deltaTime;
+                    return;
+                }
+                _scanTimer = 0f;
+                _scanInterval = UnityEngine.Random.Range(1f, 5f);
                 var type = MapManager.I.CheckMapAera(_agent.Pos);
                 var actions = Behavior.ScanEnvironment(_agent);
                 var (action, score) = Behavior.Evaluate(_agent, actions, type);
