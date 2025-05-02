@@ -20,7 +20,8 @@ namespace AI
 
             if (_job.CurJob == null)
             {
-                _job.Next();
+                if (_job.AutoAssign)
+                    _job.Next();
             }
             else
             {

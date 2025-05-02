@@ -63,6 +63,7 @@ namespace Citizens
         public Job(FamilyMember member)
         {
             Member = member;
+            AutoAssign = member.Agent == GameManager.I.CurrentAgent ? false : true;
         }
 
         public virtual JobUnit CheckJobUnit()
