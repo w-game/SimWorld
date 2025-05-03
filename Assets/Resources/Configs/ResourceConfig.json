@@ -6,7 +6,7 @@
             "description": "A tall tree.",
             "type": "Tree",
             "icon": "Textures/Tree_0",
-            "prefab": "Prefabs/GameItems/PlantItem",
+            "prefab": "Prefabs/GameItems/TreeItem",
             "matureDays": 15,
             "stages": [
                 "Textures/Tree_0",

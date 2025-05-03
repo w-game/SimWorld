@@ -192,12 +192,12 @@ namespace AI
                 ActionName = "Harvest";
             }
 
-            ActionSpeed = 50f;
+            ActionSpeed = 2f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            CheckMoveToArroundPos(agent, _plantItem.Pos);
+            CheckMoveToArroundPos(agent, _plantItem.Pos, () => { Target = _plantItem.Pos; });
         }
 
         protected override void DoExecute(Agent agent)

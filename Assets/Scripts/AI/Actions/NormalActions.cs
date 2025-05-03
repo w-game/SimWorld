@@ -446,6 +446,12 @@ namespace AI
 
         private ToiletItem _toiletItem;
 
+        public override void OnGet(params object[] args)
+        {
+            ActionName = "Toilet";
+            ActionSpeed = 10f;
+        }
+
         public override void OnRegister(Agent agent)
         {
             if (agent.Citizen.Family.Houses.Count == 0)
@@ -480,12 +486,6 @@ namespace AI
                 agent.State.Toilet.Increase(100);
                 Done = true;
             }
-        }
-
-        public override void OnGet(params object[] args)
-        {
-            ActionName = "Toilet";
-            ActionSpeed = 10f;
         }
     }
 
@@ -584,8 +584,8 @@ namespace AI
             ActionName = "Sleep";
             _bedItem = args[0] as BedItem;
 
-            ProgressSpeed = 100f;
-            TotalTimes = 5;
+            ProgressSpeed = 1f;
+            TotalTimes = 100;
         }
 
         public override void OnRegister(Agent agent)

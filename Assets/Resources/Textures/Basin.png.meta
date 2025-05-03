@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b2289b7243b7d47048b8c385f1275cce
+guid: a9168ec20964749d381d2c42e030e5f3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8587992310136545082
-    second: Stove2_0
+      213: -3806815869119038784
+    second: Basin_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,9 +49,9 @@ TextureImporter:
   spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 9
-  spritePivot: {x: 0.25, y: 0.35}
-  spritePixelsToUnits: 24
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.3}
+  spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -100,23 +100,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Stove
+      name: Basin_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 2
-        width: 42
-        height: 20
-      alignment: 9
-      pivot: {x: 0.25, y: 0.35}
+        x: 0
+        y: 4
+        width: 32
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6c0668cbe7251d880800000000000000
-      internalID: -8587992310136545082
+      spriteID: 0caf6dbe2297b2bc0800000000000000
+      internalID: -3806815869119038784
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Stove: -8587992310136545082
+      Basin_0: -3806815869119038784
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -78,12 +78,13 @@
     <Compile Include="Assets/Scripts/UI/Popups/PopInventoryType.cs" />
     <Compile Include="Assets/Scripts/Config/ConfigReader.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/PlantActions.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Agent/AgentState.cs" />
     <Compile Include="Assets/Scripts/UI/PopStack.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItemUI.cs" />
     <Compile Include="Assets/Scripts/Citizen/Job.cs" />
-    <Compile Include="Assets/Scripts/Agent.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/BuildingCraftActions.cs" />
     <Compile Include="Assets/Scripts/PlayerController.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Agent/AgentNPC.cs" />
     <Compile Include="Assets/Scripts/UIManager.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopTradeModel.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopBuildingCraftModel.cs" />
@@ -98,6 +99,7 @@
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Agent/DynamicItem.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/SystemActions.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ProducePanelElement.cs" />
     <Compile Include="Assets/Scripts/UI/Views/MainView.cs" />
@@ -155,6 +157,7 @@
     <Compile Include="Assets/Scripts/UI/Popups/PopSeedIncubator.cs" />
     <Compile Include="Assets/Scripts/Map/CartonMap.cs" />
     <Compile Include="Assets/Scripts/Map/City.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Agent/Agent.cs" />
     <Compile Include="Assets/Textures/Sprout Lands - Sprites - premium pack/Tilesets/ground tiles/water frames/WaterTile.cs" />
     <Compile Include="Assets/Scripts/UI/Models/MainViewModel.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopSchdule.cs" />

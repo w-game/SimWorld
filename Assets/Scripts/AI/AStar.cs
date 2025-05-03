@@ -23,7 +23,20 @@ namespace AI
         }
 
         private static readonly Vector2Int[] Directions = {
-            Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right
+            Vector2Int.up, Vector2Int.down, Vector2Int.left, Vector2Int.right,
+            new Vector2Int(1, 1), new Vector2Int(1, -1), new Vector2Int(-1, 1), new Vector2Int(-1, -1)
+        };
+
+        static Dictionary<Vector2Int, float> _costs = new Dictionary<Vector2Int, float>()
+        {
+            { Vector2Int.up, 1 },
+            { Vector2Int.down, 1 },
+            { Vector2Int.left, 1 },
+            { Vector2Int.right, 1 },
+            { new Vector2Int(1, 1), Mathf.Sqrt(2) },
+            { new Vector2Int(1, -1), Mathf.Sqrt(2) },
+            { new Vector2Int(-1, 1), Mathf.Sqrt(2) },
+            { new Vector2Int(-1, -1), Mathf.Sqrt(2) }
         };
 
         public static List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal, System.Func<Vector2Int, bool> isWalkable, int maxSteps = 5000, int maxRange = 30)
@@ -57,10 +70,22 @@ namespace AI
                 {
                     Vector2Int neighborPos = current.Position + dir;
 
+                    if (dir == new Vector2Int(1, 1) && (!isWalkable(current.Position + Vector2Int.right) || !isWalkable(current.Position + Vector2Int.up)))
+                        continue;
+                    
+                    if (dir == new Vector2Int(-1, -1) && (!isWalkable(current.Position + Vector2Int.left) || !isWalkable(current.Position + Vector2Int.down)))
+                        continue;
+
+                    if (dir == new Vector2Int(1, -1) && (!isWalkable(current.Position + Vector2Int.right) || !isWalkable(current.Position + Vector2Int.down)))
+                        continue;
+
+                    if (dir == new Vector2Int(-1, 1) && (!isWalkable(current.Position + Vector2Int.left) || !isWalkable(current.Position + Vector2Int.up)))
+                        continue;
+
                     if (closedSet.Contains(neighborPos) || !isWalkable(neighborPos))
                         continue;
 
-                    float tentativeG = current.G + 1;
+                    float tentativeG = current.G + _costs[dir];
                     var existing = openSet.Find(n => n.Position == neighborPos);
 
                     if (existing == null)

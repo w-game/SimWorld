@@ -38,10 +38,21 @@ public class PlayerController : GameItemUI
         rb.MovePosition(target);
     }
 
+
     public void FixedUpdate()
     {
         var curPos = transform.position;
         var dir = curPos - _lastPos;
+
+        bool xy = Mathf.Abs(dir.x) > Mathf.Abs(dir.y);
+        if (xy)
+        {
+            dir.y = 0;
+        }
+        else
+        {
+            dir.x = 0;
+        }
 
         animator.SetFloat("Horizontal", dir.x > 0 ? 1 : (dir.x < 0 ? -1 : 0));
         animator.SetFloat("Vertical", dir.y > 0 ? 1 : (dir.y < 0 ? -1 : 0));

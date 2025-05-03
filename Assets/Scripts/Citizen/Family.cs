@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AI;
+using GameItem;
 using Map;
 using UnityEngine;
 

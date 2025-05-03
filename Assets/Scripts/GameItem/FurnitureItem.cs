@@ -55,7 +55,7 @@ namespace GameItem
         {
             return new List<IAction>()
             {
-                ActionPool.Get<SleepAction>(GameManager.I.CurrentAgent.State.Sleep, this),
+                ActionPool.Get<SleepAction>(this),
             };
         }
     }
@@ -356,6 +356,36 @@ namespace GameItem
     {
         public CounterItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
+        }
+    }
+
+    public class HygieneItem : FurnitureItem
+    {
+        public HygieneItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return new List<IAction>()
+            {
+                // system
+            };
+        }
+    }
+
+    public class BasinItem : HygieneItem
+    {
+        public BasinItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return new List<IAction>()
+            {
+                // system
+            };
         }
     }
 }

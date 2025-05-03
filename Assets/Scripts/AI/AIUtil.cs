@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using AI;
-using Citizens;
+using GameItem;
 using Map;
 
 public class Behavior

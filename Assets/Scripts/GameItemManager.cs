@@ -10,7 +10,8 @@ using UnityEngine;
 public class GameItemManager
 {
     private static Dictionary<Vector2Int, List<IGameItem>> _staticGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
-    private static List<IGameItem> _dynamicGameItems = new List<IGameItem>();
+    private static Dictionary<Vector2Int, List<IGameItem>> _dynamicGameItems = new Dictionary<Vector2Int, List<IGameItem>>();
+    private static Dictionary<IGameItem, Vector2Int> _dynamicGameItemsChunkPos = new Dictionary<IGameItem, Vector2Int>();
 
     private static readonly float HideUISqrDistance = 64f * 64f;
     private static readonly float DestroySqrDistance = 64f * 64f;
@@ -105,7 +106,11 @@ public class GameItemManager
 
     private static void RegisterDynamicGameItem(IGameItem gameItem)
     {
-        _dynamicGameItems.Add(gameItem);
+        var chunkPos = GetDynamicItemChunkPos(gameItem.Pos);
+        if (!_dynamicGameItems.ContainsKey(chunkPos))
+            _dynamicGameItems[chunkPos] = new List<IGameItem>();
+        _dynamicGameItems[chunkPos].Add(gameItem);
+        _dynamicGameItemsChunkPos[gameItem] = chunkPos;
     }
 
     private static void UnregisterStaticGameItem(IGameItem gameItem)
@@ -124,7 +129,14 @@ public class GameItemManager
 
     private static void UnregisterDynamicGameItem(IGameItem gameItem)
     {
-        _dynamicGameItems.Remove(gameItem);
+        var chunkPos = GetDynamicItemChunkPos(gameItem.Pos);
+        if (_dynamicGameItems.ContainsKey(chunkPos))
+        {
+            _dynamicGameItems[chunkPos].Remove(gameItem);
+            if (_dynamicGameItems[chunkPos].Count == 0)
+                _dynamicGameItems.Remove(chunkPos);
+            _dynamicGameItemsChunkPos.Remove(gameItem);
+        }
     }
 
     public List<IGameItem> GetItemsAtPos(Vector3 pos)
@@ -215,12 +227,26 @@ public class GameItemManager
         }
     }
 
-    internal IGameItem CheckDynamicItems(Vector3 pos)
+    private static Vector2Int GetDynamicItemChunkPos(Vector3 pos)
     {
+        var oldChunkPos = new Vector2Int(
+            Mathf.FloorToInt(pos.x / 32),
+            Mathf.FloorToInt(pos.y / 32)
+        );
+        return oldChunkPos;
+    }
+
+    public IGameItem CheckDynamicItems(Vector3 pos)
+    {
+        var chunkPos = GetDynamicItemChunkPos(pos);
+        var _dynamicItemsInChunk = _dynamicGameItems.ContainsKey(chunkPos) ? _dynamicGameItems[chunkPos] : null;
+        if (_dynamicItemsInChunk == null)
+            return null;
+
         var cellPos = ItemPosToMapPosConverter.Invoke(pos);
         float dis = float.MaxValue;
         IGameItem closestItem = null;
-        foreach (var item in _dynamicGameItems)
+        foreach (var item in _dynamicItemsInChunk)
         {
             if (item.Active)
             {
@@ -242,5 +268,40 @@ public class GameItemManager
             }
         }
         return null;
+    }
+    
+    public List<IGameItem> GetDynamicItems(Vector3 pos, Vector2Int offset = default)
+    {
+        var chunkPos = GetDynamicItemChunkPos(pos) + offset;
+        if (_dynamicGameItems.ContainsKey(chunkPos))
+        {
+            return _dynamicGameItems[chunkPos];
+        }
+        return new List<IGameItem>();
+    }
+
+    public static List<IGameItem> UpdateDynamicItems(IGameItem item, Vector3 newPos)
+    {
+        var oldChunkPos = _dynamicGameItemsChunkPos[item];
+        var newChunkPos = GetDynamicItemChunkPos(newPos);
+
+        if (oldChunkPos != newChunkPos)
+        {
+            if (_dynamicGameItems.ContainsKey(oldChunkPos))
+            {
+                _dynamicGameItems[oldChunkPos].Remove(item);
+                if (_dynamicGameItems[oldChunkPos].Count == 0)
+                    _dynamicGameItems.Remove(oldChunkPos);
+            }
+
+            if (!_dynamicGameItems.ContainsKey(newChunkPos))
+            {
+                _dynamicGameItems[newChunkPos] = new List<IGameItem>();
+            }
+            _dynamicGameItems[newChunkPos].Add(item);
+            _dynamicGameItemsChunkPos[item] = newChunkPos;
+        }
+
+        return _dynamicGameItems[newChunkPos];
     }
 }

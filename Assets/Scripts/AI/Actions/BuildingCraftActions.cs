@@ -18,14 +18,6 @@ public class CraftBuildingItemAction : SingleActionBase
 
     public override void OnRegister(Agent agent)
     {
-        var availablePoses = _item.ArroundPosList();
-        if (availablePoses.Count == 0)
-        {
-            Debug.LogError("No available position for building");
-            Done = true;
-            return;
-        }
-
         foreach (var pos in _item.OccupiedPositions)
         {
             var items = GameManager.I.GameItemManager.GetItemsAtPos(new Vector3(pos.x, pos.y) + _item.Pos);
@@ -38,8 +30,7 @@ public class CraftBuildingItemAction : SingleActionBase
             }
         }
 
-        var targetPos = availablePoses[0];
-        AddPrecedingAction<CheckMoveToTarget>(agent, agent, targetPos);
+        CheckMoveToArroundPos(agent, _item.Pos, () => { Target = _item.Pos; });
     }
 
     protected override void DoExecute(Agent agent)

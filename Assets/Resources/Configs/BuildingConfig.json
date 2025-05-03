@@ -284,6 +284,20 @@
             "additionals": {
                 "capacity": 20
             }
+        },
+        {
+            "id": "BUILDING_BASIN",
+            "name": "Basin",
+            "description": "A basin for washing.",
+            "type": "Basin",
+            "icon": "Textures/Basin",
+            "prefab": "Prefabs/GameItems/FurnitureItem",
+            "size": [1, 1],
+            "requiredResources": {
+                "PROP_MATERIAL_PLANK": 20,
+                "PROP_MATERIAL_IRON": 10
+            },
+            "buildSpeed": 8
         }
     ]
 }

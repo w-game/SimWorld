@@ -36,7 +36,7 @@ namespace Citizens
 
             var randomPos = new Vector2(Random.Range(house.MinPos.x + 1, house.MinPos.x + house.Size.x - 2), Random.Range(house.MinPos.y + 1, house.MinPos.y + house.Size.y - 2));
 
-            var agent = GameItemManager.CreateGameItem<Agent>(
+            var agent = GameItemManager.CreateGameItem<AgentNPC>(
                 null,
                 randomPos + new Vector2(0.5f, 0.5f),
                 GameItemType.Dynamic,

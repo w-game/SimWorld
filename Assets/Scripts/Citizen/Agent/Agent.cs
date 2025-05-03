@@ -2,119 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AI;
-using GameItem;
+using Citizens;
 using Skill;
 using UI.Elements;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace Citizens
+namespace GameItem
 {
-    public class State
-    {
-        public string Name { get; private set; }
-        public float Value { get; private set; }
-        public float Speed { get; private set; }
-
-        public State(string name, float value, float speed)
-        {
-            Name = name;
-            Value = value;
-            Speed = speed;
-        }
-
-        public void Update()
-        {
-            Value -= Speed * GameTime.DeltaTime;
-            if (Value < 0)
-            {
-                Value = 0;
-            }
-        }
-
-        public virtual float CheckState(float mood)
-        {
-            float urgency = Mathf.Clamp01((100 - Value) / 100f);
-            float utility = 100 - Value;
-            float moodModifier = Mathf.Lerp(0.5f, 1.5f, mood / 100f);
-            float finalScore = utility * (1 + urgency * 0.5f) * moodModifier;
-            return finalScore;
-        }
-
-        internal void Increase(float increment)
-        {
-            Value += increment;
-            if (Value > 100)
-            {
-                Value = 100;
-            }
-        }
-    }
-
-    public class SleepState : State
-    {
-        public SleepState(string name, float value, float speed) : base(name, value, speed)
-        {
-        }
-
-        public override float CheckState(float mood)
-        {
-            float time = GameManager.I.GameTime.TimeInHours;
-            float nightBoost = (time >= 20f || time < 6f) ? 1.25f : 1f; // 晚上8点到早上6点之间加成
-            float urgency = Mathf.Clamp01((100 - Value) / 100f);
-            float utility = 100 - Value;
-            float moodModifier = Mathf.Lerp(0.5f, 1.5f, mood / 100f);
-            float finalScore = utility * (1 + urgency * 0.5f) * moodModifier * nightBoost;
-            return finalScore;
-        }
-    }
-
     public class Personality
     {
         public List<string> Hobbies { get; private set; } = new List<string>();
-    }
-
-    public class AgentState
-    {
-        public State Health { get; private set; }
-        public State Hunger { get; private set; }
-        public State Toilet { get; private set; }
-        public State Social { get; private set; }
-        public State Mood { get; private set; }
-        public State Sleep { get; private set; }
-        public State Hygiene { get; private set; }
-        public Agent Agent { get; private set; }
-
-        public Dictionary<Agent, int> Relationships = new Dictionary<Agent, int>();
-
-        public event Action<AgentState> OnAgentStateChangedEvent;
-
-        public AgentState(Agent agent)
-        {
-            Agent = agent;
-
-            Health = new State("Health", 100, 0);
-            Hunger = new State("Hunger", 100, 0.00463f);
-            Toilet = new State("Toilet", 100, 0.00526f);
-            Social = new State("Social", 100, 0.00347f);
-            Mood = new State("Mood", 100, 0.00231f);
-            Sleep = new State("Sleep", 100, 0.00174f);
-            Hygiene = new State("Hygiene", 100, 0.00116f);
-        }
-
-        // 模拟状态随时间的消耗（例如每秒消耗一定值）
-        public void UpdateState()
-        {
-            Hunger.Update();
-            Toilet.Update();
-            Sleep.Update();
-            Hygiene.Update();
-            Social.Update();
-            Mood.Update();
-
-            OnAgentStateChangedEvent?.Invoke(this);
-        }
     }
 
     public class Money
@@ -143,7 +41,7 @@ namespace Citizens
         }
     }
 
-    public class Agent : GameItemBase<ConfigBase>
+    public class Agent : DynamicItem
     {
         public float MoveSpeed { get; private set; } = 3f;
         public int SightRange { get; private set; } = 9;
@@ -249,10 +147,12 @@ namespace Citizens
             if (GameManager.I.CurrentAgent != this) return;
             float moveX = Input.GetAxis("Horizontal");
             float moveY = Input.GetAxis("Vertical");
+
             if (moveX == 0 && moveY == 0)
             {
                 return;
             }
+
             Vector2 target = PlayerController.Rb.position + new Vector2(moveX, moveY) * MoveSpeed * Time.fixedDeltaTime;
 
             if (!MapManager.I.IsWalkable(target))
@@ -313,19 +213,6 @@ namespace Citizens
             Pos = Vector3.MoveTowards(Pos, _nextPos.Value, MoveSpeed * Time.deltaTime);
         }
 
-        private FoodItem GetFoodItem()
-        {
-            foreach (var item in Bag.Items)
-            {
-                if (item.Config.id.Contains("PROP_FOOD"))
-                {
-
-                }
-            }
-
-            return null;
-        }
-
         private T BFSItem<T>() where T : IGameItem
         {
             var visitedPositions = new HashSet<Vector2>();
@@ -344,8 +231,7 @@ namespace Citizens
                 }
 
                 // 向周围位置扩散（限定最大距离避免无穷扩散）
-                foreach (var dir in new Vector2[] {
-            Vector2.up, Vector2.down, Vector2.left, Vector2.right })
+                foreach (var dir in new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right })
                 {
                     Vector2 nextPos = currentPos + dir;
                     if (!visitedPositions.Contains(nextPos)
@@ -359,16 +245,29 @@ namespace Citizens
             return default;
         }
 
+        private Dictionary<Type, IGameItem> _gameItems = new Dictionary<Type, IGameItem>();
+        private Vector3 _lastScanPos;
+
         public T GetGameItem<T>() where T : class, IGameItem
         {
-            var item = BFSItem<T>();
-            if (typeof(T) == typeof(FoodItem))
+            if (_gameItems.TryGetValue(typeof(T), out var item) && (item.Pos - Pos).sqrMagnitude < SightRange * SightRange)
             {
-                var foodItem = GetFoodItem();
-                return foodItem as T;
+                // 如果物品在视野范围内，直接返回
+                if (item is T tItem)
+                    return tItem;
+            }
+            else if ((Pos - _lastScanPos).sqrMagnitude > SightRange * SightRange)
+            {
+                var foundItem = BFSItem<T>();
+                if (foundItem != null)
+                {
+                    _gameItems[typeof(T)] = foundItem;
+                    return foundItem as T;
+                }
+                _lastScanPos = Pos;
             }
 
-            return item;
+            return null;
         }
 
         public TableItem FindNearestTableItem()
@@ -440,17 +339,41 @@ namespace Citizens
             throw new NotImplementedException();
         }
 
-        public List<IGameItem> ScanAllItemsAround()
+        public List<IGameItem> ScanAllItemsAround(bool scanAll = false)
         {
             List<IGameItem> foundItems = new List<IGameItem>();
-            for (int i = 0; i <= MaxScanCount; i++)
+
+            var visitedPositions = new HashSet<Vector2>();
+            var queue = new Queue<Vector2>();
+            queue.Enqueue(Pos);
+            visitedPositions.Add(Pos);
+
+            while (queue.Count > 0)
             {
-                var idx = UnityEngine.Random.Range(0, _sights.Count);
-                var sight = _sights[idx];
-                var pos = new Vector3(sight.x + Pos.x, sight.y + Pos.y);
-                var items = GameManager.I.GameItemManager.GetItemsAtPos(pos);
+                Vector2 currentPos = queue.Dequeue();
+                // 检查当前位置是否有目标物品
+                var items = GameManager.I.GameItemManager.GetItemsAtPos(currentPos);
                 foundItems.AddRange(items);
+
+                // 向周围位置扩散（限定最大距离避免无穷扩散）
+                foreach (var dir in new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right })
+                {
+                    Vector2 nextPos = currentPos + dir;
+                    if (!visitedPositions.Contains(nextPos)
+                        && Vector2.Distance(nextPos, Pos) <= SightRange)
+                    {
+                        visitedPositions.Add(nextPos);
+                        queue.Enqueue(nextPos);
+                    }
+                }
             }
+
+            if (!scanAll)
+            {
+                foundItems.Shuffle();
+                foundItems = foundItems.Take(MaxScanCount).ToList();
+            }
+
             return foundItems;
         }
 

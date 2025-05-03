@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Citizens;
+using GameItem;
 using UI.Models;
 using UnityEngine;
 

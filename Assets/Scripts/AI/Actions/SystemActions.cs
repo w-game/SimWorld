@@ -1,4 +1,4 @@
-using Citizens;
+using GameItem;
 using UnityEngine.Events;
 
 namespace AI
