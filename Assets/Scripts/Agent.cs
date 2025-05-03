@@ -171,7 +171,7 @@ namespace Citizens
         public Inventory Bag { get; private set; }
         public Money Money { get; private set; }
 
-        public List<SkillBase> Skills { get; private set; } = new List<SkillBase>();
+        public Dictionary<Type, SkillBase> Skills { get; private set; } = new Dictionary<Type, SkillBase>();
 
         public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
         {
@@ -556,15 +556,26 @@ namespace Citizens
 
         public bool CheckSkillLevel<T>(int targetLevel) where T : SkillBase
         {
-            foreach (var skill in Skills)
+            if (Skills.TryGetValue(typeof(T), out var skill))
             {
-                if (skill is T tSkill)
-                {
-                    return tSkill.Level >= targetLevel;
-                }
+                return skill.Level >= targetLevel;
             }
 
             return false;
+        }
+        
+        public T GetSkill<T>() where T : SkillBase
+        {
+            if (Skills.TryGetValue(typeof(T), out var skill))
+            {
+                return skill as T;
+            }
+            else
+            {
+                var newSkill = Activator.CreateInstance<T>();
+                Skills[typeof(T)] = newSkill;
+                return newSkill;
+            }
         }
     }
 }

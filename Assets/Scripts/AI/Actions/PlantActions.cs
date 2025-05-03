@@ -2,6 +2,7 @@
 using Citizens;
 using GameItem;
 using Map;
+using Skill;
 using UI.Elements;
 using UnityEngine;
 
@@ -34,6 +35,7 @@ namespace AI
                 _house);
             farmItem.Owner = agent.Owner;
             farmItem.ShowUI();
+            agent.GetSkill<PlantSkill>().AddExp(10);
         }
     }
 
@@ -59,6 +61,7 @@ namespace AI
         {
             _farmItem.BePlant(_seedId);
             agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(_seedId), 1);
+            agent.GetSkill<PlantSkill>().AddExp(10);
         }
     }
 
@@ -161,6 +164,7 @@ namespace AI
             agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
             agent.Bag.AddItem(new PropItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1));
             _farmItem.BeWatered();
+            agent.GetSkill<PlantSkill>().AddExp(10);
         }
     }
 
@@ -209,6 +213,7 @@ namespace AI
             }
 
             GameItemManager.DestroyGameItem(_plantItem);
+            agent.GetSkill<PlantSkill>().AddExp(20);
         }
     }
 
@@ -244,6 +249,7 @@ namespace AI
         protected override void DoExecute(Agent agent)
         {
             _plantItem.Weeding();
+            agent.GetSkill<PlantSkill>().AddExp(10);
         }
     }
 }
