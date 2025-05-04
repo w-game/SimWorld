@@ -158,7 +158,12 @@ namespace AI
                 case "Health":
                     break;
                 case "Hunger":
-                    ResolveHungerBehavior();
+                    var foodItem = _agent.GetGameItem<FoodItem>();
+                    if (foodItem != null && foodItem.Owner == _agent.Owner)
+                    {
+                        RegisterAction(ActionPool.Get<EatAction>(foodItem), true);
+                        return true;
+                    }
                     break;
                 case "Toilet":
                     var toiletAction = ActionPool.Get<ToiletAction>(_agent.State.Toilet);
@@ -178,7 +183,7 @@ namespace AI
                     break;
             }
 
-            return true;
+            return false;
         }
 
         private void ResolveHungerBehavior()
@@ -239,7 +244,7 @@ namespace AI
                 var type = MapManager.I.CheckMapAera(_agent.Pos);
                 var actions = Behavior.ScanEnvironment(_agent);
                 var (action, score) = Behavior.Evaluate(_agent, actions, type);
-                if (action != null)
+                if (action != null && score > 100f)
                 {
                     RegisterAction(action, true);
                 }
@@ -248,7 +253,8 @@ namespace AI
                     var prob = UnityEngine.Random.Range(0, 100);
                     if (prob < 50)
                     {
-                        // RegisterAction(new IdleAction(null), true);
+                        
+                        RegisterAction(ActionPool.Get<IdleAction>(), true);
                     }
                     else if (prob < 90)
                     {

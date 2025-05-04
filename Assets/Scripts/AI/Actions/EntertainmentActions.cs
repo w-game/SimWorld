@@ -11,7 +11,10 @@ namespace AI
 
         public override void OnGet(params object[] args)
         {
-            _item = args[0] as IGameItem;
+            if (args.Length > 0)
+            {
+                _item = args[0] as IGameItem;
+            }
             ActionName = "Idle";
             ActionSpeed = 50f;
         }
@@ -34,7 +37,7 @@ namespace AI
                                 Random.Range(-3f, 3f));
                             var targetPos = agent.Pos + offset;
 
-                            if (MapManager.I.TryGetBuildingItem(targetPos, out var item))
+                            if (MapManager.I.TryGetBuildingItem(targetPos, out var item) && MapManager.I.IsWalkable(targetPos))
                             {
                                 if (item.House == buildingItem.House)
                                 {

@@ -278,6 +278,28 @@
             "additionals": {
                 "price": 30
             }
+        },
+        {
+            "id": "PROP_FOOD_MANTOU",
+            "name": "Mantou",
+            "description": "A steamed bun.",
+            "type": "Food",
+            "icon": "Textures/Mantou",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 5,
+            "additionals": {
+                "price": 10,
+                "materials": [
+                    {
+                        "id": "PROP_MATERIAL_FLOUR",
+                        "amount": 2
+                    },
+                    {
+                        "id": "PROP_MATERIAL_HANDBUCKET_WATER",
+                        "amount": 1
+                    }
+                ]
+            }
         }
     ]
 }

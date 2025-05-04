@@ -27,6 +27,10 @@
                 {
                     "id": "BUILDING_CHAIR",
                     "pos": [7, 2]
+                },
+                {
+                    "id": "BUILDING_STOVE",
+                    "pos": [5, 5]
                 }
             ],
             "width": 9,

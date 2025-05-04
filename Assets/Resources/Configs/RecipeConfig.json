@@ -1,0 +1,11 @@
+{
+    "items": [
+        {
+            "id" : "RECIPE_BREAD",
+            "name" : "Bread",
+            "description" : "A loaf of bread.",
+            "icon" : "Assets/Resources/Icons/Recipe/Bread.png",
+            "type" : "Food"
+        }
+    ]
+}

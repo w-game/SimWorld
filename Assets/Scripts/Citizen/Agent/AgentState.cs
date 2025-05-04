@@ -25,7 +25,7 @@ namespace Citizens
             Agent = agent;
 
             Health = new State("Health", 100, 0, Agent);
-            Hunger = new HungerState("Hunger", 100, 0.00463f, Agent);
+            Hunger = new State("Hunger", 100, 0.00463f, Agent);
             Toilet = new ToiletState("Toilet", 100, 0.00526f, Agent);
             Social = new SocialState("Social", 100, 0.00347f, Agent);
             Mood = new State("Mood", 100, 0.00231f, Agent);
@@ -87,37 +87,6 @@ namespace Citizens
             {
                 Value = 100;
             }
-        }
-    }
-
-    public class HungerState : State
-    {
-        public HungerState(string name, float value, float speed, Agent agent) : base(name, value, speed, agent)
-        {
-        }
-
-        public override float CheckState(float mood)
-        {
-            var foodItem = Agent.GetGameItem<FoodItem>();
-            if (foodItem == null)
-            {
-                var stoveItem = Agent.GetGameItem<StoveItem>();
-
-                if (stoveItem == null)
-                {
-                    return 0f; // 没有食物或炉子，效用为0
-                }
-                else if (stoveItem.Owner == Agent.Owner || stoveItem.Owner == null)
-                {
-                    return base.CheckState(mood);
-                }
-                else
-                {
-                    return 0f; // 有炉子但不是自己的，效用为0
-                }
-            }
-
-            return base.CheckState(mood);
         }
     }
 

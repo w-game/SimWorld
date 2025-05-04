@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Map;
+using Newtonsoft.Json.Linq;
 
 [Serializable]
 public class ConfigBase
@@ -41,6 +42,29 @@ public class PropConfig : ConfigBase
 {
     public int maxStackSize;
     public Dictionary<string, object> additionals;
+
+    [NonSerialized]
+    private CraftMaterialConfig[] _materials;
+    public CraftMaterialConfig[] Materials
+    {
+        get
+        {
+            if (_materials != null) return _materials;
+
+            if (additionals != null &&
+                additionals.TryGetValue("materials", out var obj) &&
+                obj is JArray jArr)                  // ConfigReader 默认把数组解析成 JArray
+            {
+                _materials = jArr.ToObject<CraftMaterialConfig[]>();
+            }
+            else
+            {
+                _materials = Array.Empty<CraftMaterialConfig>();
+            }
+
+            return _materials;
+        }
+    }
 
     public int GetBasePrice()
     {

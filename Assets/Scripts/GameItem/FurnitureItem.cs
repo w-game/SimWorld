@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using AI;
-using Citizens;
 using UI.Models;
 using UnityEngine;
 using UnityEngine.Events;
@@ -128,6 +127,42 @@ namespace GameItem
         public void SetUsing(Agent agent)
         {
             Using = agent;
+        }
+
+        public override List<IAction> ItemActions(IGameItem agent)
+        {
+            if (agent is Agent a)
+            {
+                var configs = ConfigReader.GetAllConfigs<PropConfig>();
+                var foodConfigs = configs.FindAll(c => c.type == "Food");
+
+                foreach (var c in foodConfigs)
+                {
+                    if (c.Materials.Length == 0)
+                        continue;
+
+                    var canCook = true;
+                    foreach (var material in c.Materials)
+                    {
+                        var amount = a.Bag.CheckItemAmount(material.id);
+                        if (amount < material.amount)
+                        {
+                            canCook = false;
+                            break;
+                        }
+                    }
+
+                    if (canCook)
+                    {
+                        return new List<IAction>()
+                        {
+                            ActionPool.Get<CookAction>(this, c)
+                        };
+                    }
+                }
+            }
+
+            return new List<IAction>();
         }
     }
 

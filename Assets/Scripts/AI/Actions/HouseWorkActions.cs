@@ -13,34 +13,56 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            // if (_stoveItem == null && agent.Citizen.Family.Houses[0].TryGetFurniture<StoveItem>(out var stoveItem))
-            // {
-            //     _stoveItem = stoveItem;
-            // }
+            if (_config == null)
+            {
+                var configs = ConfigReader.GetAllConfigs<PropConfig>();
+                var foodConfigs = configs.FindAll(c => c.type == "Food");
+                foodConfigs.ForEach(c =>
+                {
+                    foreach (var material in c.Materials)
+                    {
+                        var amount = agent.Bag.CheckItemAmount(material.id);
+                        if (amount < material.amount)
+                        {
+                            break;
+                        }
+                    }
 
-            // PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _stoveItem.Pos));
+                    _config = c;
+                });
+
+                if (_config == null)
+                {
+                    Done = true;
+                    return;
+                }
+            }
+
+            CheckMoveToArroundPos(agent, _stoveItem, () => { Target = _stoveItem.Pos; });
         }
 
         protected override void DoExecute(Agent agent)
         {
+            foreach (var material in _config.Materials)
+            {
+                agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(material.id), material.amount);
+            }
 
+            agent.Bag.AddItem(_config, 1);
         }
 
         public override float Evaluate(Agent agent, HouseType houseType)
         {
-            switch (houseType)
-            {
-                case HouseType.House:
-                    return agent.State.Hunger.CheckState(agent.State.Mood.Value);
-            }
-
-            return base.Evaluate(agent, houseType);
+            return agent.State.Hunger.CheckState(agent.State.Mood.Value);
         }
 
         public override void OnGet(params object[] args)
         {
             _stoveItem = args[0] as StoveItem;
-            _config = args[1] as PropConfig;
+            if (args.Length > 1)
+                _config = args[1] as PropConfig;
+
+            ActionName = "Cook";
 
             ActionSpeed = 10f;
         }
