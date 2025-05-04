@@ -82,7 +82,6 @@ namespace AI
                 var human = new List<IAction>();
                 human.AddRange(dynamicItem.ActionsOnClick(GameManager.I.CurrentAgent));
                 actions["Human"] = human;
-                return actions;              // early‑return: nothing else matters
             }
 
             // 2) Static items at this location.

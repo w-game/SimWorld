@@ -301,6 +301,8 @@ namespace GameItem
         {
             if (SellItem != null)
             {
+                SellAmount += amount;
+                SellAmount = SellAmount > config.maxStackSize ? config.maxStackSize : SellAmount;
                 return;
             }
 
@@ -315,6 +317,8 @@ namespace GameItem
             SellItem.Pos += new Vector3(0.5f, 0.49f);
             Price = GameManager.I.PriceSystem.GetPrice(MapManager.I.GetCityByPos(Pos), config.id);
             SellItem.UI.SetName($"{config.name} ${Price}");
+
+            SellAmount = amount;
         }
 
         public void Restock(string id, int amount, Agent agent)
@@ -346,13 +350,6 @@ namespace GameItem
         {
             var capacity = config.additionals["capacity"] as int? ?? 10;
             Inventory = new Inventory(capacity);
-            var configs = ConfigReader.GetAllConfigs<PropConfig>();
-            foreach (var propConfig in configs)
-            {
-                if (propConfig.type != PropType.Seed.ToString())
-                    continue;
-                Inventory.AddItem(propConfig, propConfig.maxStackSize);
-            }
         }
 
         public override List<IAction> ActionsOnClick(Agent agent)
@@ -384,6 +381,11 @@ namespace GameItem
             }
 
             return 0;
+        }
+
+        public void AddItem(PropConfig propConfig, int amount)
+        {
+            Inventory.AddItem(propConfig, amount);
         }
     }
 

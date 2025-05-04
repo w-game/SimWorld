@@ -9,7 +9,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "price": 10
+                "price": 12
             }
         },
         {
@@ -21,7 +21,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "price": 5
+                "price": 2
             }
         },
         {
@@ -33,7 +33,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "price": 5
+                "price": 2
             }
         },
         {
@@ -45,7 +45,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 5,
             "additionals": {
-                "price": 5
+                "price": 4
             }
         },
         {
@@ -57,7 +57,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "price": 5
+                "price": 8
             }
         },
         {
@@ -69,7 +69,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "price": 5
+                "price": 14
             }
         },
         {
@@ -82,7 +82,7 @@
             "maxStackSize": 1,
             "additionals": {
                 "chop": 5,
-                "price": 20
+                "price": 50
             }
         },
         {
@@ -95,7 +95,7 @@
             "maxStackSize": 1,
             "additionals": {
                 "hoe": 5,
-                "price": 20
+                "price": 40
             }
         },
         {
@@ -108,7 +108,7 @@
             "maxStackSize": 1,
             "additionals": {
                 "mine": 5,
-                "price": 20
+                "price": 60
             }
         },
         {
@@ -140,7 +140,7 @@
                 "seedTime": 5,
                 "seedSpeed": 2,
                 "mill": "PROP_MATERIAL_FLOUR",
-                "price": 5
+                "price": 12
             }
         },
         {
@@ -153,7 +153,7 @@
             "maxStackSize": 10,
             "additionals": {
                 "plant": "PLANT_WHEAT",
-                "price": 5
+                "price": 8
             }
         }, 
         {
@@ -169,7 +169,7 @@
                 "seedAmount": 3,
                 "seedTime": 5,
                 "seedSpeed": 2,
-                "price": 5
+                "price": 16
             }
         },
         {
@@ -182,7 +182,7 @@
             "maxStackSize": 10,
             "additionals": {
                 "plant": "PLANT_CORN",
-                "price": 5
+                "price": 12
             }
         },
         {
@@ -195,7 +195,7 @@
             "maxStackSize": 10,
             "additionals": {
                 "plant": "PLANT_CARROT",
-                "price": 5
+                "price": 10
             }
         },
         {
@@ -211,7 +211,7 @@
                 "seedAmount": 3,
                 "seedTime": 5,
                 "seedSpeed": 2,
-                "price": 5
+                "price": 14
             }
         },
         {
@@ -223,7 +223,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "price": 5
+                "price": 8
             }
         },
         {
@@ -235,7 +235,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
             "additionals": {
-                "price": 5
+                "price": 15
             }
         },
         {
@@ -264,7 +264,7 @@
                 "smeltAmount": 1,
                 "smeltSpeed": 2,
                 "smelt": "PROP_MATERIAL_IRON",
-                "price": 5
+                "price": 15
             }
         },
         {
@@ -276,7 +276,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
-                "price": 30
+                "price": 40
             }
         },
         {
@@ -288,7 +288,7 @@
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 5,
             "additionals": {
-                "price": 10,
+                "price": 25,
                 "materials": [
                     {
                         "id": "PROP_MATERIAL_FLOUR",

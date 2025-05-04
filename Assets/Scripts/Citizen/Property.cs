@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using AI;
 using GameItem;
 using Map;
-using NUnit.Framework;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Citizens
@@ -244,14 +242,15 @@ namespace Citizens
         {
         }
     }
-
+    
     public class ShopProperty : Property
     {
         private float _restockRate = 0.5f;
         public List<ContainerItem> ContainerItems { get; } = new List<ContainerItem>();
         private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
-        
+
         private List<ShopShelfItem> ShopShelfItemsInRestocking = new List<ShopShelfItem>();
+
         public ShopProperty(IHouse house, Family owner) : base(house, owner)
         {
             foreach (var furniture in House.FurnitureItems)
@@ -265,6 +264,15 @@ namespace Citizens
                 else if (furniture.Value is ContainerItem containerItem)
                 {
                     ContainerItems.Add(containerItem);
+
+                    var configs = ConfigReader.GetAllConfigs<PropConfig>();
+                    var seedAndCropConfigs = configs.FindAll(c => c.type == "Seed" || c.type == "Crop");
+
+                    for (int i = 0; i < containerItem.Inventory.MaxSize; i++)
+                    {
+                        var propConfig = seedAndCropConfigs[UnityEngine.Random.Range(0, seedAndCropConfigs.Count)];
+                        containerItem.AddItem(propConfig, propConfig.maxStackSize);
+                    }
                 }
             }
 

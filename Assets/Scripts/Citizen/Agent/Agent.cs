@@ -37,7 +37,7 @@ namespace GameItem
         {
             Amount -= amount;
             if (Agent == GameManager.I.CurrentAgent)
-                MessageBox.I.ShowMessage($"Got {amount} money", "Textures/Money", MessageType.Info);
+                MessageBox.I.ShowMessage($"Cost {amount} money", "Textures/Money", MessageType.Info);
         }
     }
 
