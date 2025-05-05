@@ -210,6 +210,10 @@ namespace AI
                 var propItem = GameItemManager.CreateGameItem<PropGameItem>(confg, _plantItem.Pos, GameItemType.Static, count);
                 propItem.Owner = agent.Owner;
                 propItem.ShowUI();
+                if (propItem.UI is PropGameItemUI propUI)
+                {
+                    propUI.CanBeTake = true;
+                }
             }
 
             GameItemManager.DestroyGameItem(_plantItem);
