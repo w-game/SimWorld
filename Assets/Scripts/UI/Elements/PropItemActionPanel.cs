@@ -37,7 +37,7 @@ namespace UI.Elements
                 {
                     var createdPropItem = GameItemManager.CreateGameItem<PropGameItem>(propItem.Config, GameManager.I.CurrentAgent.Pos, GameItemType.Static, count);
                     createdPropItem.Owner = GameManager.I.CurrentAgent.Owner;
-                    slotElement.OnItemRemoved(count);
+                    GameManager.I.CurrentAgent.Bag.RemoveItem(propItem.Config as PropConfig, count);
                 };
                 model.ShowUI(countSelectData);
             });

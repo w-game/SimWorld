@@ -287,9 +287,11 @@ namespace GameItem
         {
             if (SellItem != null)
             {
-                agent.Bag.AddItem(SellItem.Config, SellAmount);
-                agent.Money.Subtract(Price);
-                OnSold();
+                if (agent.Bag.AddItem(SellItem.Config, SellAmount))
+                {
+                    agent.Money.Subtract(Price);
+                    OnSold();
+                }
             }
         }
 

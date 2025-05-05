@@ -118,7 +118,7 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            agent.Bag.RemoveItem(_propItem);
+            agent.Bag.RemoveItem(_propItem.Config, _propItem.Quantity);
             _containerItem.Inventory.AddItem(_propItem);
         }
     }

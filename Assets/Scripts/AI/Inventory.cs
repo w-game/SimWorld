@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameItem;
+using UI.Elements;
 using UnityEngine.Events;
 
 public class PropItemBase
@@ -15,9 +16,9 @@ public class PropItemBase
         Quantity = quantity;
     }
 
-    public void AddQuantity(int quantity)
+    public void AddQuantity(int delta)
     {
-        Quantity += quantity;
+        Quantity = Math.Max(0, Quantity + delta);
     }
 }
 
@@ -62,6 +63,34 @@ public class Inventory
 
     public event UnityAction<PropItem, int> OnInventoryChanged;
 
+    /// <summary>Try stacking the given quantity into existing stacks and return the remaining amount.</summary>
+    private int StackIntoExisting(PropConfig config, int quantity)
+    {
+        foreach (var propItem in Items)
+        {
+            if (propItem.Config != config || propItem.Quantity >= config.maxStackSize)
+                continue;
+
+            var space   = config.maxStackSize - propItem.Quantity;
+            var delta   = Math.Min(space, quantity);
+            propItem.AddQuantity(delta);
+            OnInventoryChanged?.Invoke(propItem,  delta);
+            quantity -= delta;
+
+            if (quantity == 0)
+                break;
+        }
+        return quantity;
+    }
+
+    /// <summary>Create a new stack and invoke change event.</summary>
+    private void CreateNewStack(PropConfig config, int quantity)
+    {
+        var newItem = new PropItem(config, quantity);
+        Items.Add(newItem);
+        OnInventoryChanged?.Invoke(newItem, quantity);
+    }
+
     public Inventory(int maxSize)
     {
         MaxSize = maxSize;
@@ -74,85 +103,44 @@ public class Inventory
 
     public bool AddItem(PropConfig config, int quantity = 1)
     {
-        var propItems = Items.FindAll(i => i.Config == config);
-        if (propItems.Count > 0)
+        // First try to merge into existing stacks.
+        var remaining = StackIntoExisting(config, quantity);
+
+        // If inventory is already full and nothing could be merged, fail fast.
+        if (remaining > 0 && Items.Count >= MaxSize)
         {
-            foreach (var propItem in propItems)
-            {
-                if (propItem.Quantity + quantity > config.maxStackSize)
-                {
-                    continue;
-                }
-                propItem.AddQuantity(quantity);
-                OnInventoryChanged?.Invoke(propItem, quantity);
-                return true;
-            }
+            MessageBox.I.ShowMessage("Inventory is full.", "");
+            return false;
         }
 
-        if (Items.Count < MaxSize)
-        {
-            if (quantity > config.maxStackSize)
+        // Create new stacks while we still have space and items left.
+            while (remaining > 0 && Items.Count < MaxSize)
             {
-                var totalQuantity = quantity;
-                var itemCount = totalQuantity / config.maxStackSize;
-                if (totalQuantity % config.maxStackSize > 0)
-                {
-                    itemCount++;
-                }
-                for (int i = 0; i < itemCount; i++)
-                {
-                    var q = totalQuantity > config.maxStackSize ? config.maxStackSize : totalQuantity;
-                    totalQuantity -= q;
-                    var newItem = new PropItem(config, q);
-                    Items.Add(newItem);
-                    OnInventoryChanged?.Invoke(newItem, q);
-                }
+                var q = Math.Min(remaining, config.maxStackSize);
+                CreateNewStack(config, q);
+                remaining -= q;
             }
-            else
-            {
-                var newItem = new PropItem(config, quantity);
-                Items.Add(newItem);
-                OnInventoryChanged?.Invoke(newItem, quantity);
-            }
-            return true;
-        }
 
-        return false;
+        // Return true only if every item was added.
+        return remaining == 0;
     }
 
     public void RemoveItem(PropConfig config, int quantity = 1)
     {
-        var propItems = Items.FindAll(i => i.Config.id == config.id);
-        foreach (var propItem in propItems)
+        var targets = Items.Where(i => i.Config.id == config.id).ToList();
+        foreach (var propItem in targets)
         {
-            if (propItem.Quantity > quantity)
-            {
-                propItem.AddQuantity(-quantity);
-                OnInventoryChanged?.Invoke(propItem, -quantity);
-                return;
-            }
-            else
-            {
-                Items.Remove(propItem);
-                OnInventoryChanged?.Invoke(propItem, -propItem.Quantity);
-                return;
-            }
-        }
-    }
+            var delta = Math.Min(quantity, propItem.Quantity);
+            propItem.AddQuantity(-delta);
+            quantity -= delta;
 
-    public void RemoveItem(PropItem item, int quantity = 1)
-    {
-        if (item.Quantity > quantity)
-        {
-            item.AddQuantity(-quantity);
-            OnInventoryChanged?.Invoke(item, -quantity);
-            return;
-        }
-        else
-        {
-            Items.Remove(item);
-            OnInventoryChanged?.Invoke(item, -item.Quantity);
-            return;
+            if (propItem.Quantity == 0)
+                Items.Remove(propItem);
+
+            OnInventoryChanged?.Invoke(propItem, -delta);
+
+            if (quantity == 0)
+                return;
         }
     }
 
@@ -164,21 +152,11 @@ public class Inventory
 
     public int CheckItemAmount(string id)
     {
-        var items = Items.FindAll(i => i.Config.id == id);
-        return items.Sum(i => i.Quantity);
+        return Items.Where(i => i.Config.id == id).Sum(i => i.Quantity);
     }
 
-    public int GetItem(PropConfig propConfig)
-    {
-        var propItems = Items.FindAll(i => i.Config.id == propConfig.id);
-
-        int totalAmount = 0;
-        foreach (var propItem in propItems)
-        {
-            totalAmount += propItem.Quantity;
-        }
-        return totalAmount;
-    }
+    public int GetItem(PropConfig propConfig) =>
+        Items.Where(i => i.Config.id == propConfig.id).Sum(i => i.Quantity);
 
     internal PropItem GetItemHasEffect(string type)
     {

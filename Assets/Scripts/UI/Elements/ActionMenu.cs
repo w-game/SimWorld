@@ -26,18 +26,25 @@ public class ActionMenu : MonoBehaviour
 
     void Update()
     {
-        if (_isActionMenuVisible)
+        if (!_isActionMenuVisible || panel.rect.width == 0)
+            return;
+
+        Vector2 screenPoint = UIManager.I.WorldPosToScreenPos(_menuPosition);
+        Vector2 localPoint;
+        RectTransform canvasRect = panel.GetComponentInParent<Canvas>().GetComponent<RectTransform>();
+
+        // 将屏幕坐标转换为 Canvas 内部的局部坐标（更稳定）
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPoint, null, out localPoint);
+
+        // 添加偏移（例如右移 20）
+        localPoint += new Vector2(panel.rect.width / 2, -panel.rect.height / 2);
+
+        panel.anchoredPosition = localPoint;
+
+        float maxDistance = Mathf.Max(panel.rect.width, panel.rect.height) + 200f;
+        if (Vector3.Distance(Input.mousePosition, panel.position) > maxDistance)
         {
-            if (panel.rect.width == 0) return;
-
-            panel.transform.position =
-                UIManager.I.WorldPosToScreenPos(_menuPosition) +
-                new Vector3(panel.rect.width / 2, -panel.rect.height / 2, 0);
-
-            if (Vector3.Distance(Input.mousePosition, panel.transform.position) > panel.rect.width)
-            {
-                HideEventMenu();
-            }
+            HideEventMenu();
         }
     }
 
@@ -71,10 +78,11 @@ public class ActionMenu : MonoBehaviour
             var slotGO = new GameObject("Slot", typeof(RectTransform));
             var slot = slotGO.transform as RectTransform;
             slot.SetParent(panel.transform);
+            slot.localScale = Vector3.one;
             var slotGroup = slot.AddComponent<VerticalLayoutGroup>();
             slotGroup.childControlWidth = true;
             slotGroup.childForceExpandWidth = true;
-            slotGroup.childControlHeight = false;
+            slotGroup.childControlHeight = true;
             slotGroup.childForceExpandHeight = false;
             slotGroup.spacing = 10;
             slotGroup.padding = new RectOffset(20, 0, 0, 0);
