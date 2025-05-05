@@ -4,7 +4,7 @@
             "id": "PROP_FOOD_APPLE",
             "name": "Apple",
             "description": "A delicious red apple.",
-            "type": "Food",
+            "type": "Fruit",
             "icon": "Textures/Apple",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,
@@ -53,23 +53,11 @@
             "name": "Plank",
             "description": "A wooden plank.",
             "type": "Material",
-            "icon": "Textures/Flank",
+            "icon": "Textures/Plank",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
             "additionals": {
                 "price": 8
-            }
-        },
-        {
-            "id": "PROP_FOOD_CARROT",
-            "name": "Carrot",
-            "description": "A fresh carrot.",
-            "type": "Food",
-            "icon": "Textures/Carrot",
-            "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 1,
-            "additionals": {
-                "price": 14
             }
         },
         {
@@ -115,7 +103,7 @@
             "id": "PROP_MATERIAL_GRASS",
             "name": "Grass",
             "description": "A piece of grass.",
-            "type": "Material",
+            "type": "Crop",
             "icon": "Textures/Grass",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 50,
@@ -218,7 +206,7 @@
             "id": "PROP_MATERIAL_FLOUR",
             "name": "Flour",
             "description": "A bag of flour.",
-            "type": "Material",
+            "type": "Ingredient",
             "icon": "Textures/Flour",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 10,
@@ -242,7 +230,7 @@
             "id": "PROP_MATERIAL_HANDBUCKET_WATER",
             "name": "Water",
             "description": "A bucket of water.",
-            "type": "Material",
+            "type": "Tool",
             "icon": "Textures/HandWaterBucket",
             "prefab": "Prefabs/GameItems/PropItem",
             "maxStackSize": 1,

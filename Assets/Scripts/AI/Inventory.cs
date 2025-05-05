@@ -46,11 +46,13 @@ public enum PropType
     Food,
     Seed,
     Material,
-    Tool,
-    Equipment,
-    Weapon,
+    Fruit,
     Crop,
-    Ore
+    Tool,
+    ProcessedCrop,
+    Weapon,
+    Ore,
+    Ingredient
 }
 
 public class Inventory

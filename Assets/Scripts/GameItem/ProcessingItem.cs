@@ -179,7 +179,7 @@ namespace GameItem
 
         protected override string Time => "millTime";
 
-        public override PropType PropType => PropType.Crop;
+        public override PropType PropType => PropType.Ore;
 
         protected override string Speed => "millSpeed";
 
@@ -201,7 +201,7 @@ namespace GameItem
         protected override string TargetId => "smelt";
         protected override string Amound => "smeltAmount";
         protected override string Time => "smeltTime";
-        public override PropType PropType => PropType.Ore;
+        public override PropType PropType => PropType.Material;
         protected override string Speed => "smeltSpeed";
 
         public FurnaceItem(BuildingConfig config, Vector3 pos) : base(config, pos)

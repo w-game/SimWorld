@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Map;
 using Newtonsoft.Json.Linq;
+using UnityEngine;
 
 [Serializable]
 public class ConfigBase
@@ -41,6 +42,7 @@ public class BuildingRequiredItem
 public class PropConfig : ConfigBase
 {
     public int maxStackSize;
+    public string category;
     public Dictionary<string, object> additionals;
 
     [NonSerialized]
@@ -110,7 +112,7 @@ public class RoomConfig : ConfigBase
 public class RoomFurniture
 {
     public string id;
-    public int[] pos;
+    public Vector2Int pos;
 }
 
 [Serializable]

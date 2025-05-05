@@ -99,6 +99,7 @@
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/InventoryContainerElement.cs" />
     <Compile Include="Assets/Scripts/Citizen/Agent/DynamicItem.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/SystemActions.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ProducePanelElement.cs" />
@@ -185,6 +186,7 @@
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets/Textures/Sprout Lands - Sprites - premium pack/read_me.txt" />
     <None Include="Assets/TextMesh Pro/Shaders/SDFFunctions.hlsl" />
+    <None Include="Assets/Resources/Configs/RoomLayoutDebug.txt" />
     <None Include="Assets/Shaders/BlurShadow.shader" />
     <None Include="Assets/Shaders/DirectionalShadow.shader" />
     <None Include="Assets/TextMesh Pro/Shaders/TMP_SDF-Surface.shader" />

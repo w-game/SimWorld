@@ -9,8 +9,6 @@ namespace UI.Popups
 
         public int MaxCount { get; private set; }
 
-        protected override int SlotAmount => GameManager.I.CurrentAgent.Bag.MaxSize;
-
         protected override Inventory Inventory => GameManager.I.CurrentAgent.Bag;
 
         protected override PropType PropType => PropType.None;

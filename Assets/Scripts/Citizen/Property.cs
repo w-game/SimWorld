@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using GameItem;
 using Map;
@@ -266,7 +267,7 @@ namespace Citizens
                     ContainerItems.Add(containerItem);
 
                     var configs = ConfigReader.GetAllConfigs<PropConfig>();
-                    var seedAndCropConfigs = configs.FindAll(c => c.type == "Seed" || c.type == "Crop");
+                    var seedAndCropConfigs = configs.FindAll(c => c.type == "Seed" || c.type == "Crop" || c.type == "Ingredient");
 
                     for (int i = 0; i < containerItem.Inventory.MaxSize; i++)
                     {
@@ -278,28 +279,54 @@ namespace Citizens
 
             // 查询仓库中可上架的种类
             var containerItems = ContainerItems.FindAll(c => c.Inventory.Items.Count > 0);
+            Dictionary<PropConfig, int> propConfigCount = new Dictionary<PropConfig, int>();
             HashSet<PropConfig> propConfigs = new HashSet<PropConfig>();
             foreach (var containerItem in containerItems)
             {
                 foreach (var item in containerItem.Inventory.Items)
                 {
                     propConfigs.Add(item.Config);
+                    if (propConfigCount.ContainsKey(item.Config))
+                    {
+                        propConfigCount[item.Config] += item.Quantity;
+                    }
+                    else
+                    {
+                        propConfigCount[item.Config] = item.Quantity;
+                    }
                 }
             }
+
+            var propConfigList = propConfigs.ToList();
+            Queue<PropConfig> configQueue = new Queue<PropConfig>(propConfigList);
 
             // 候选货物架
             var shelfItems = _shopShelfItems.FindAll(s => s.SellItem == null);
 
-            foreach (var propConfig in propConfigs)
+            foreach (var shelfItem in shelfItems)
             {
-                if (shelfItems.Count == 0)
-                {
-                    break;
-                }
-                var shelfItem = shelfItems[0];
-                shelfItems.RemoveAt(0);
+                bool assigned = false;
+                int tryCount = 0;
 
-                CheckRestock(shelfItem, propConfig);
+                while (tryCount < configQueue.Count)
+                {
+                    var propConfig = configQueue.Dequeue();
+                    var remainAmount = propConfigCount.GetValueOrDefault(propConfig, 0);
+                    var gap = Mathf.Min(remainAmount, propConfig.maxStackSize);
+
+                    if (gap > 0)
+                    {
+                        propConfigCount[propConfig] -= gap;
+                        var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
+                        AddJobUnit<Salesman>(jobUnit);
+                        assigned = true;
+                    }
+
+                    configQueue.Enqueue(propConfig); // 放回队尾形成轮换
+                    tryCount++;
+
+                    if (assigned) break;
+                }
             }
 
             JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_SALESMAN"), 1);

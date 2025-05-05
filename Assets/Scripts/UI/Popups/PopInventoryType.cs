@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UI.Elements;
 using UI.Models;
 using UnityEngine;
@@ -7,55 +6,15 @@ namespace UI.Popups
 {
     public abstract class PopInventoryType<T> : ViewBase<T> where T : class, IModel
     {
-        [SerializeField] private Transform itemSlotParent;
-        private List<ItemSlotElement> inventorySlots = new List<ItemSlotElement>();
-
-        protected abstract int SlotAmount { get; }
+        [SerializeField] private InventoryContainerElement containerItemPanel;
         protected abstract Inventory Inventory { get; }
         protected abstract PropType PropType { get; }
+
         public override void OnShow()
         {
-            for (int i = 0; i < SlotAmount; i++)
-            {
-                ItemSlotElement slot = UIManager.I.UIPool.Get<ItemSlotElement>("Prefabs/UI/Elements/ItemSlotElement", itemSlotParent.position, itemSlotParent);
-                inventorySlots.Add(slot);
-
-                slot.Init(null, propItem => OnItemClicked(propItem as PropItem));
-            }
-
-            UpdateBag(null, 0);
-            Inventory.OnInventoryChanged += UpdateBag;
-        }
-
-        private void UpdateBag(PropItem propItem, int quantity)
-        {
-            int inventoryIdx = 0;
-            for (int i = 0; i < inventorySlots.Count; i++)
-            {
-                inventorySlots[i].Clear();
-            }
-            
-            for (int i = 0; i < Inventory.Items.Count; i++)
-            {
-                var item = Inventory.Items[i];
-                if (PropType == PropType.None)
-                {
-                    inventorySlots[i].UpdateItemSlot(item, item.Quantity);
-                }
-                else if (item.Type == PropType)
-                {
-                    inventorySlots[inventoryIdx].UpdateItemSlot(item, item.Quantity);
-                    inventoryIdx++;
-                }
-            }
+            containerItemPanel.Init(Inventory, PropType, propItem => OnItemClicked(propItem as PropItem));
         }
 
         protected abstract void OnItemClicked(PropItem propItem);
-
-        public override void OnHide()
-        {
-            base.OnHide();
-            GameManager.I.CurrentAgent.Bag.OnInventoryChanged -= UpdateBag;
-        }
     }
 }

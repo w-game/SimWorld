@@ -51,7 +51,7 @@ public class UIManager : MonoSingleton<UIManager>
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            var model = new PopBagModel();
+            var model = IModel.GetModel<PopBagModel>(this);
             model.ShowUI();
         }
 

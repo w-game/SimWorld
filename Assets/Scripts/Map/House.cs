@@ -151,7 +151,7 @@ namespace Map
 
             foreach (var furniture in RoomConfig.furnitures)
             {
-                var pos = new Vector2Int(furniture.pos[0], furniture.pos[1]) + MinPos;
+                var pos = new Vector2Int(furniture.pos.x, furniture.pos.y) + MinPos;
 
                 var config = ConfigReader.GetConfig<BuildingConfig>(furniture.id);
                 var type = Type.GetType($"GameItem.{config.type}Item");

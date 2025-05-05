@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AI;
@@ -316,7 +317,7 @@ namespace GameItem
             SellItem.Owner = Owner;
             SellItem.Pos += new Vector3(0.5f, 0.49f);
             Price = GameManager.I.PriceSystem.GetPrice(MapManager.I.GetCityByPos(Pos), config.id);
-            SellItem.UI.SetName($"{config.name} ${Price}");
+            SellItem.UI.SetName($"${Price}");
 
             SellAmount = amount;
         }
@@ -348,12 +349,31 @@ namespace GameItem
         public Inventory Inventory { get; private set; }
         public ContainerItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
-            var capacity = config.additionals["capacity"] as int? ?? 10;
-            Inventory = new Inventory(capacity);
+            if (int.TryParse(config.additionals["capacity"].ToString(), out var capacity))
+            {
+                Inventory = new Inventory(capacity);
+            }
+            else
+            {
+                Inventory = new Inventory(10);
+            }
         }
 
         public override List<IAction> ActionsOnClick(Agent agent)
         {
+            if (agent is Agent a)
+            {
+                var system = new SystemAction("Open Container", a =>
+                {
+                    var model = IModel.GetModel<PopBagModel>(this);
+                    model.ShowUI();
+                });
+
+                return new List<IAction>()
+                {
+                    system
+                };
+            }
             return new List<IAction>()
             {
                 // system
