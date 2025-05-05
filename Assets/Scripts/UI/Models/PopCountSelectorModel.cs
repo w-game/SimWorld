@@ -1,20 +1,37 @@
+using System;
 using UI.Popups;
 
 namespace UI.Models
 {
-    public interface ICountSelect
+    public class CountSelectData
     {
-        string Title { get; }
-        int MaxCount { get; }
-        void Confirm(int count);
-        void Cancel();
+        public string Title { get; }
+        public int MaxCount { get; }
+        public event Action<int> ConfirmEvent;
+        public event Action CancelEvent;
+
+        public CountSelectData(string title, int maxCount)
+        {
+            Title = title;
+            MaxCount = maxCount;
+        }
+
+        public void Confirm(int count)
+        {
+            ConfirmEvent?.Invoke(count);
+        }
+
+        public void Cancel()
+        {
+            CancelEvent?.Invoke();
+        }
     }
     public class PopCountSelectorModel : ModelBase<PopCountSelector>
     {
         public override string Path => "PopCountSelector";
         public override ViewType ViewType => ViewType.Popup;
 
-        public ICountSelect CountSelect => Data[0] as ICountSelect;
+        public CountSelectData CountSelect => Data[0] as CountSelectData;
         public int Count { get; set; }
 
         protected override void OnShow()
@@ -25,6 +42,7 @@ namespace UI.Models
 
         public void Confirm()
         {
+            if (Count < 1) return;
             CountSelect.Confirm(Count);
         }
 

@@ -4,11 +4,9 @@ using UI.Models;
 
 namespace UI.Popups
 {
-    public class PopTrade : PopInventoryType<PopTradeModel>, ICountSelect
+    public class PopTrade : PopInventoryType<PopTradeModel>
     {
         public string Title => "Sell Count";
-
-        public int MaxCount { get; private set; }
 
         protected override Inventory Inventory => GameManager.I.CurrentAgent.Bag;
 
@@ -42,9 +40,11 @@ namespace UI.Popups
         protected override void OnItemClicked(PropItem propItem, ItemSlotElement slotElement)
         {
             _selectedItem = propItem;
-            MaxCount = propItem.Quantity;
+            var countSelectData = new CountSelectData(Title, propItem.Quantity);
+            countSelectData.ConfirmEvent += Confirm;
+            countSelectData.CancelEvent += Cancel;
             var model = IModel.GetModel<PopCountSelectorModel>();
-            model.ShowUI(this);
+            model.ShowUI();
         }
 
         public override void OnHide()

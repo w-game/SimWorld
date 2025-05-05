@@ -78,5 +78,21 @@ namespace UI.Elements
             OnPointerExitEvent = null;
             itemButton.onClick.RemoveAllListeners();
         }
+
+        public void OnItemRemoved(int count)
+        {
+            if (PropItem != null)
+            {
+                PropItem.AddQuantity(-count);
+                if (PropItem.Quantity <= 0)
+                {
+                    Clear();
+                }
+                else
+                {
+                    UpdateItemSlot(PropItem, PropItem.Quantity);
+                }
+            }
+        }
     }
 }

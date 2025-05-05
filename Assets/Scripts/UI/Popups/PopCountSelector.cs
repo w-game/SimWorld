@@ -25,7 +25,6 @@ namespace UI.Popups
         private void OnCancelButtonClicked()
         {
             Model.Cancel();
-            Close();
         }
 
         public void OnValueChanged(float value)

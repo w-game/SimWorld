@@ -124,7 +124,7 @@ namespace AI
 
             UpdateSelectSign(cellPos);
 
-            if (!Input.GetMouseButtonDown(0)) return;
+            if (!Input.GetMouseButtonDown(1)) return;
 
             var actions = BuildActions(mouseWorldPos, cellPos);
             if (actions.Count == 0) return;

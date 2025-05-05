@@ -116,6 +116,7 @@
     <Compile Include="Assets/Scripts/Util/QuadTree.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopSeedIncubatorModel.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/NormalActions.cs" />
+    <Compile Include="Assets/Scripts/GameItem/PropGameItemUI.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCountSelectorModel.cs" />
     <Compile Include="Assets/TIles/OceanTile.cs" />
     <Compile Include="Assets/Scripts/UI/ElementBase.cs" />

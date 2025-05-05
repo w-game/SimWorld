@@ -44,7 +44,7 @@ namespace UI.Elements
 
             ReleaseSlotInfoPanel();
             ActionPanel.transform.position = slotElement.transform.position + new Vector3(50, -50, 0);
-            ActionPanel.Init(propItem.Config);
+            ActionPanel.Init(slotElement);
         }
 
         private void OnSlotPointerEnter(ItemSlotElement slotElement)

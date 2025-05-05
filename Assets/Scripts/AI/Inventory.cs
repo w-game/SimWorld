@@ -69,7 +69,7 @@ public class Inventory
 
     public bool AddItem(PropItem item)
     {
-        return AddItem(item.Config as PropConfig, item.Quantity);
+        return AddItem(item.Config, item.Quantity);
     }
 
     public bool AddItem(PropConfig config, int quantity = 1)
@@ -91,9 +91,29 @@ public class Inventory
 
         if (Items.Count < MaxSize)
         {
-            var newItem = new PropItem(config, quantity);
-            Items.Add(newItem);
-            OnInventoryChanged?.Invoke(newItem, quantity);
+            if (quantity > config.maxStackSize)
+            {
+                var totalQuantity = quantity;
+                var itemCount = totalQuantity / config.maxStackSize;
+                if (totalQuantity % config.maxStackSize > 0)
+                {
+                    itemCount++;
+                }
+                for (int i = 0; i < itemCount; i++)
+                {
+                    var q = totalQuantity > config.maxStackSize ? config.maxStackSize : totalQuantity;
+                    totalQuantity -= q;
+                    var newItem = new PropItem(config, q);
+                    Items.Add(newItem);
+                    OnInventoryChanged?.Invoke(newItem, q);
+                }
+            }
+            else
+            {
+                var newItem = new PropItem(config, quantity);
+                Items.Add(newItem);
+                OnInventoryChanged?.Invoke(newItem, quantity);
+            }
             return true;
         }
 

@@ -1,5 +1,3 @@
-using System;
-using Citizens;
 using GameItem;
 using UnityEngine;
 
@@ -23,9 +21,9 @@ public class PlayerController : GameItemUI
         if (other.gameObject.CompareTag("GameItem"))
         {
             var ui = other.GetComponent<GameItemUI>();
-            if (ui != null)
+            if (ui is PropGameItemUI propGameItemUI && propGameItemUI.CanBeTake)
             {
-                if (ui.GameItem is PropGameItem propGameItem)
+                if (propGameItemUI.GameItem is PropGameItem propGameItem)
                 {
                     propGameItem.CheckPickUp(_agent);
                 }

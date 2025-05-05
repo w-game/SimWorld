@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using GameItem;
+using UI.Models;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -8,9 +10,10 @@ namespace UI.Elements
     public class PropItemActionPanel : MonoBehaviour, IUIPoolable
     {
         private List<PropItemActionElement> _actionElements = new List<PropItemActionElement>();
-        public void Init(ConfigBase config)
+        public void Init(ItemSlotElement slotElement)
         {
-            switch (config.type)
+            var propItem = slotElement.PropItem;
+            switch (propItem.Config.type)
             {
                 case "Food":
                     CreateElement("Eat", () =>
@@ -28,6 +31,15 @@ namespace UI.Elements
             CreateElement("Drop", () =>
             {
                 // Handle drop action
+                var model = IModel.GetModel<PopCountSelectorModel>();
+                var countSelectData = new CountSelectData("Drop", propItem.Quantity);
+                countSelectData.ConfirmEvent += (count) =>
+                {
+                    var createdPropItem = GameItemManager.CreateGameItem<PropGameItem>(propItem.Config, GameManager.I.CurrentAgent.Pos, GameItemType.Static, count);
+                    createdPropItem.Owner = GameManager.I.CurrentAgent.Owner;
+                    slotElement.OnItemRemoved(count);
+                };
+                model.ShowUI(countSelectData);
             });
         }
         
@@ -37,7 +49,7 @@ namespace UI.Elements
             actionElement.Init(actionName, onClick);
             _actionElements.Add(actionElement);
         }
-
+    
         public void OnGet()
         {
 
