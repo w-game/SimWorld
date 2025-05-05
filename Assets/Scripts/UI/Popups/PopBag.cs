@@ -19,9 +19,9 @@ namespace UI.Popups
             if (Model.containerItem != null)
             {
                 chestContainerPanel.gameObject.SetActive(true);
-                chestContainerPanel.Init(Model.containerItem.Inventory, PropType, propItem =>
+                chestContainerPanel.Init(Model.containerItem.Inventory, PropType, (propItem, slotElement) =>
                 {
-                    OnItemClicked(propItem as PropItem);
+                    OnItemClicked(propItem as PropItem, slotElement);
                 });
             }
             else
@@ -30,12 +30,9 @@ namespace UI.Popups
             }
         }
 
-        protected override void OnItemClicked(PropItem propItem)
+        protected override void OnItemClicked(PropItem propItem, ItemSlotElement slotElement)
         {
-            // if (config is PropConfig propConfig)
-            // {
-
-            // }
+            
         }
 
         public override void OnHide()

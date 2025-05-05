@@ -34,10 +34,10 @@ namespace UI.Popups
                 ItemSlotElement slot = Instantiate(craftItemPrefab, craftItemParent);
                 craftItemSlots.Add(slot);
                 config.icon = ConfigReader.GetConfig<PropConfig>(config.id).icon;
-                slot.Init(new CraftPropItem(config, 1), OnItemClicked, null);
+                slot.Init(new CraftPropItem(config, 1), OnItemClicked);
             }
 
-            OnItemClicked(craftItemSlots[0].PropItem);
+            OnItemClicked(craftItemSlots[0].PropItem, null);
 
             craftButton.onClick.AddListener(OnCraftButtonClicked);
             GameManager.I.CurrentAgent.Bag.OnInventoryChanged += UpdateCraftButton;
@@ -48,10 +48,10 @@ namespace UI.Popups
             if (_selectedItem == null)
                 return;
 
-            OnItemClicked(_selectedItem);
+            OnItemClicked(_selectedItem, null);
         }
 
-        private void OnItemClicked(PropItemBase propItem)
+        private void OnItemClicked(PropItemBase propItem, ItemSlotElement slotElement)
         {
             _selectedItem = propItem as CraftPropItem;
 

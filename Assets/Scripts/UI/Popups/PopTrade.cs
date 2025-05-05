@@ -1,4 +1,5 @@
 using AI;
+using UI.Elements;
 using UI.Models;
 
 namespace UI.Popups
@@ -38,12 +39,12 @@ namespace UI.Popups
             }
         }
 
-        protected override void OnItemClicked(PropItem propItem)
+        protected override void OnItemClicked(PropItem propItem, ItemSlotElement slotElement)
         {
             _selectedItem = propItem;
             MaxCount = propItem.Quantity;
-            var model = IModel.GetModel<PopCountSelectorModel>(this);
-            model.ShowUI();
+            var model = IModel.GetModel<PopCountSelectorModel>();
+            model.ShowUI(this);
         }
 
         public override void OnHide()

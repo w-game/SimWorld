@@ -148,8 +148,8 @@ namespace AI
             _agentOne.HideDialog();
             _agentTwo.HideDialog();
 
-            var model = IModel.GetModel<PopTradeModel>(this);
-            model.ShowUI();
+            var model = IModel.GetModel<PopTradeModel>();
+            model.ShowUI(this);
             _end = false;
 
             Condition = () => _end;

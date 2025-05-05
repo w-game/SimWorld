@@ -76,8 +76,8 @@ namespace GameItem
             var actions = base.ActionsOnClick(agent);
             actions.Add(new SystemAction("View Room Details", a =>
             {
-                var model = IModel.GetModel<PopHouseDetailsModel>(House);
-                model.ShowUI();
+                var model = IModel.GetModel<PopHouseDetailsModel>();
+                model.ShowUI(House);
             }));
             return actions;
         }
@@ -155,8 +155,8 @@ namespace GameItem
 
             var SystemAction = new SystemAction("View Room Details", a =>
             {
-                var model = IModel.GetModel<PopHouseDetailsModel>(House);
-                model.ShowUI();
+                var model = IModel.GetModel<PopHouseDetailsModel>();
+                model.ShowUI(House);
             });
 
             if (PlantItem != null)
@@ -169,8 +169,8 @@ namespace GameItem
                 waterAction,
                 new SystemAction("Plant Seed", a =>
                 {
-                    var model = IModel.GetModel<PopSelectSeedModel>(this);
-                    model.ShowUI();
+                    var model = IModel.GetModel<PopSelectSeedModel>();
+                    model.ShowUI(this);
                 }),
                 SystemAction
             };

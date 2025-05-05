@@ -152,8 +152,8 @@ namespace GameItem
             {
                 new SystemAction(actionName, a =>
                 {
-                    var model = IModel.GetModel<PopSelectSeedModel>(this);
-                    model.ShowUI();
+                    var model = IModel.GetModel<PopSelectSeedModel>();
+                    model.ShowUI(this);
                 })
             };
         }
@@ -233,8 +233,8 @@ namespace GameItem
             var valid = GameManager.I.CurrentAgent.CheckSkillLevel<PlantSkill>(3);
             var action = new SystemAction(GameManager.I.CurrentAgent.CheckSkillLevel<PlantSkill>(3) ? actionName : actionName + " (Plant Skill Lv.3)", a =>
                             {
-                                var model = IModel.GetModel<PopSelectSeedModel>(this);
-                                model.ShowUI();
+                                var model = IModel.GetModel<PopSelectSeedModel>();
+                                model.ShowUI(this);
                             });
             action.Enable = valid;
             return new List<IAction> { action };

@@ -12,38 +12,29 @@ namespace UI.Elements
         [SerializeField] private Image itemIcon;
         [SerializeField] private Button itemButton;
         [SerializeField] private TextMeshProUGUI itemCountText;
-        private Transform _slotParent;
-        private SlotInfoPanel _slotInfoPanel;
+        public event Action<ItemSlotElement> OnPointerEnterEvent;
+        public event Action<ItemSlotElement> OnPointerExitEvent;
 
         public PropItemBase PropItem { get; private set; }
-        public void Init(PropItemBase propItem, UnityAction<PropItemBase> onClick, Transform slotParent)
+        public void Init(PropItemBase propItem, UnityAction<PropItemBase, ItemSlotElement> onClick)
         {
-            _slotParent = slotParent;
             UpdateItemSlot(propItem, -1);
-            itemButton.onClick.AddListener(() => onClick(PropItem));
+            itemButton.onClick.AddListener(() => onClick(PropItem, this));
         }
 
         public void OnGet()
         {
-            
+
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (_slotParent == null || PropItem == null || _slotInfoPanel != null)
-                return;
-            Vector3 pos = transform.position;
-            pos += new Vector3(50, -50, 0);
-            _slotInfoPanel = UIManager.I.GetElement<SlotInfoPanel>("Prefabs/UI/Elements/SlotInfoPanel", pos, _slotParent);
-            _slotInfoPanel.UpdateInfo(PropItem.Config as PropConfig);
+            OnPointerEnterEvent?.Invoke(this);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (_slotParent == null || PropItem == null || _slotInfoPanel == null)
-                return;
-            UIManager.I.ReleaseElement(_slotInfoPanel, "Prefabs/UI/Elements/SlotInfoPanel");
-            _slotInfoPanel = null;
+            OnPointerExitEvent?.Invoke(this);
         }
 
         public void OnRelease()
@@ -75,11 +66,6 @@ namespace UI.Elements
             {
                 itemCountText.gameObject.SetActive(false);
             }
-
-            if (_slotInfoPanel != null)
-            {
-                _slotInfoPanel.UpdateInfo(propItem.Config as PropConfig);
-            }
         }
 
         internal void Clear()
@@ -88,12 +74,9 @@ namespace UI.Elements
             itemIcon.gameObject.SetActive(false);
             itemCountText.gameObject.SetActive(false);
             itemButton.interactable = false;
-
-            if (_slotInfoPanel != null)
-            {
-                UIManager.I.ReleaseElement(_slotInfoPanel, "Prefabs/UI/Elements/SlotInfoPanel");
-                _slotInfoPanel = null;
-            }
+            OnPointerEnterEvent = null;
+            OnPointerExitEvent = null;
+            itemButton.onClick.RemoveAllListeners();
         }
     }
 }

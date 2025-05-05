@@ -5,29 +5,27 @@ namespace UI.Models
     public interface IModel
     {
         private static List<IModel> Models { get; } = new List<IModel>();
-        public static IModel GetModel<Y>(params object[] data) where Y : IModel, new()
+        public static IModel GetModel<Y>() where Y : IModel, new()
         {
             foreach (var model in Models)
             {
                 if (model is Y yModel)
                 {
-                    yModel.Data = data;
                     return yModel;
                 }
             }
 
             var newModel = new Y();
-            newModel.Data = data;
             Models.Add(newModel);
             return newModel;
         }
         
         string Path { get; }
         ViewType ViewType { get; }
-        object[] Data { get; set; }
+        object[] Data { get; }
         IView View { get; set; }
         void HideUI();
-        void ShowUI();
+        void ShowUI(params object[] data);
         void SetView(IView view);
     }
 
@@ -35,16 +33,18 @@ namespace UI.Models
     {
         public abstract string Path { get; }
         public abstract ViewType ViewType { get; }
-        public object[] Data { get; set; }
+        public object[] Data { get; private set; }
         public IView View { get; set; }
 
-        public void ShowUI()
+        public void ShowUI(params object[] data)
         {
             if (View != null)
             {
                 View.self.SetActive(true);
                 return;
             }
+
+            Data = data;
             if (ViewType == ViewType.View)
             {
             }

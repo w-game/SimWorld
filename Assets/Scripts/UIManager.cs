@@ -52,14 +52,14 @@ public class UIManager : MonoSingleton<UIManager>
 
         if (Input.GetKeyDown(KeyCode.B))
         {
-            var model = IModel.GetModel<PopBagModel>(this);
+            var model = IModel.GetModel<PopBagModel>();
             model.ShowUI();
         }
 
         if (Input.GetKeyDown(KeyCode.J))
         {
-            var model = IModel.GetModel<PopJobUnitsModel>(GameManager.I.CurrentAgent.Citizen.Job);
-            model.ShowUI();
+            var model = IModel.GetModel<PopJobUnitsModel>();
+            model.ShowUI(GameManager.I.CurrentAgent.Citizen.Job);
         }
     }
 

@@ -244,8 +244,8 @@ namespace GameItem
 
             var system = new SystemAction("Select items to sell", a =>
             {
-                var model = IModel.GetModel<PopSelectSeedModel>(this);
-                model.ShowUI();
+                var model = IModel.GetModel<PopSelectSeedModel>();
+                model.ShowUI(this);
             });
 
             return new List<IAction>()
@@ -365,8 +365,8 @@ namespace GameItem
             {
                 var system = new SystemAction("Open Container", a =>
                 {
-                    var model = IModel.GetModel<PopBagModel>(this);
-                    model.ShowUI();
+                    var model = IModel.GetModel<PopBagModel>();
+                    model.ShowUI(this);
                 });
 
                 return new List<IAction>()

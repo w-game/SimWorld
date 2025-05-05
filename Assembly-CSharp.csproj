@@ -83,6 +83,7 @@
     <Compile Include="Assets/Scripts/UI/PopStack.cs" />
     <Compile Include="Assets/Scripts/GameItem/GameItemUI.cs" />
     <Compile Include="Assets/Scripts/Citizen/Job.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/PropItemActionElement.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/BuildingCraftActions.cs" />
     <Compile Include="Assets/Scripts/PlayerController.cs" />
     <Compile Include="Assets/Scripts/Citizen/Agent/AgentNPC.cs" />
@@ -133,6 +134,7 @@
     <Compile Include="Assets/Scripts/GameItemManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionProgressElement.cs" />
     <Compile Include="Assets/Scripts/AI/Inventory.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/PropItemActionPanel.cs" />
     <Compile Include="Assets/Scripts/GameItem/ProcessingItem.cs" />
     <Compile Include="Assets/Scripts/UI/Views/ActionListElement.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopJobUnitsModel.cs" />

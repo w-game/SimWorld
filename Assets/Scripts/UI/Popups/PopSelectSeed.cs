@@ -1,3 +1,4 @@
+using UI.Elements;
 using UI.Models;
 using UnityEngine;
 
@@ -10,7 +11,7 @@ namespace UI.Popups
 
         protected override PropType PropType => Model.SelectItem.PropType;
 
-        protected override void OnItemClicked(PropItem propItem)
+        protected override void OnItemClicked(PropItem propItem, ItemSlotElement slotElement)
         {
             if (propItem == null)
                 return;
