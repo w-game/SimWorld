@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -21,7 +20,7 @@ namespace UI.Elements
                 ItemSlotElement slot = UIManager.I.UIPool.Get<ItemSlotElement>("Prefabs/UI/Elements/ItemSlotElement", transform.position, transform);
                 _inventorySlots.Add(slot);
 
-                slot.Init(null, onItemClicked);
+                slot.Init(null, onItemClicked, transform);
             }
 
             Inventory.OnInventoryChanged += UpdateBag;
@@ -30,13 +29,15 @@ namespace UI.Elements
 
         private void UpdateBag(PropItem propItem, int quantity)
         {
-            int inventoryIdx = 0;
-            for (int i = 0; i < _inventorySlots.Count; i++)
+            ClearSlots();
+            for (int i = 0; i < Inventory.MaxSize; i++)
             {
-                _inventorySlots[i].Clear();
+                var slot = UIManager.I.UIPool.Get<ItemSlotElement>("Prefabs/UI/Elements/ItemSlotElement", transform.position, transform);
+                _inventorySlots.Add(slot);
             }
 
-            for (int i = 0; i < Inventory.Items.Count; i++)
+            int inventoryIdx = 0;
+            for (int i = inventoryIdx; i < Inventory.Items.Count; i++)
             {
                 var item = Inventory.Items[i];
                 if (_filterType == PropType.None)
@@ -54,6 +55,16 @@ namespace UI.Elements
         internal void OnHide()
         {
             Inventory.OnInventoryChanged -= UpdateBag;
+            ClearSlots();
+        }
+
+        private void ClearSlots()
+        {
+            foreach (var slot in _inventorySlots)
+            {
+                UIManager.I.UIPool.Release(slot, "Prefabs/UI/Elements/ItemSlotElement");
+            }
+            _inventorySlots.Clear();
         }
     }
 }

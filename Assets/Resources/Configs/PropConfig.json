@@ -128,7 +128,19 @@
                 "seedTime": 5,
                 "seedSpeed": 2,
                 "mill": "PROP_MATERIAL_FLOUR",
-                "price": 12
+                "price": 12,
+                "effects": [
+                    {
+                        "id": "Hunger",
+                        "name": "Hunger",
+                        "value": 1
+                    },
+                    {
+                        "id": "Mood",
+                        "name": "Mood",
+                        "value": -10
+                    }
+                ]
             }
         },
         {
@@ -157,7 +169,14 @@
                 "seedAmount": 3,
                 "seedTime": 5,
                 "seedSpeed": 2,
-                "price": 16
+                "price": 16,
+                "effects": [
+                    {
+                        "id": "Hunger",
+                        "name": "Hunger",
+                        "value": 10
+                    }
+                ]
             }
         },
         {
@@ -183,7 +202,14 @@
             "maxStackSize": 10,
             "additionals": {
                 "plant": "PLANT_CARROT",
-                "price": 10
+                "price": 10,
+                "effects": [
+                    {
+                        "id": "Hunger",
+                        "name": "Hunger",
+                        "value": 5
+                    }
+                ]
             }
         },
         {
@@ -285,6 +311,35 @@
                     {
                         "id": "PROP_MATERIAL_HANDBUCKET_WATER",
                         "amount": 1
+                    }
+                ]
+            }
+        },
+        {
+            "id": "PROP_FOOD_STEW",
+            "name": "Stew",
+            "description": "A bowl of stew.",
+            "type": "Food",
+            "icon": "Textures/Stew",
+            "prefab": "Prefabs/GameItems/PropItem",
+            "maxStackSize": 1,
+            "additionals": {
+                "price": 30,
+                "materials": [
+                    {
+                        "id": "PROP_MATERIAL_CARROT",
+                        "amount": 2
+                    },
+                    {
+                        "id": "PROP_MATERIAL_HANDBUCKET_WATER",
+                        "amount": 1
+                    }
+                ],
+                "effects": [
+                    {
+                        "id": "Hunger",
+                        "name": "Hunger",
+                        "value": 20
                     }
                 ]
             }

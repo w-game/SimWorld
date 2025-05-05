@@ -179,7 +179,7 @@ namespace GameItem
 
         protected override string Time => "millTime";
 
-        public override PropType PropType => PropType.Ore;
+        public override PropType PropType => PropType.Crop;
 
         protected override string Speed => "millSpeed";
 

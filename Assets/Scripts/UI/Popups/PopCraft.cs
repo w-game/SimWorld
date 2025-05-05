@@ -34,7 +34,7 @@ namespace UI.Popups
                 ItemSlotElement slot = Instantiate(craftItemPrefab, craftItemParent);
                 craftItemSlots.Add(slot);
                 config.icon = ConfigReader.GetConfig<PropConfig>(config.id).icon;
-                slot.Init(new CraftPropItem(config, 1), OnItemClicked);
+                slot.Init(new CraftPropItem(config, 1), OnItemClicked, null);
             }
 
             OnItemClicked(craftItemSlots[0].PropItem);

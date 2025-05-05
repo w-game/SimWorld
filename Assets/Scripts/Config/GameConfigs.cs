@@ -68,6 +68,28 @@ public class PropConfig : ConfigBase
         }
     }
 
+    private EffectConfig[] _effects;
+    public EffectConfig[] Effects
+    {
+        get
+        {
+            if (_effects != null) return _effects;
+
+            if (additionals != null &&
+                additionals.TryGetValue("effects", out var obj) &&
+                obj is JArray jArr)
+            {
+                _effects = jArr.ToObject<EffectConfig[]>();
+            }
+            else
+            {
+                _effects = Array.Empty<EffectConfig>();
+            }
+
+            return _effects;
+        }
+    }
+
     public int GetBasePrice()
     {
         if (additionals != null && additionals.ContainsKey("price"))
@@ -76,6 +98,14 @@ public class PropConfig : ConfigBase
         }
         return 0;
     }
+}
+
+[Serializable]
+public class EffectConfig
+{
+    public string id;
+    public string name;
+    public float value;
 }
 
 [Serializable]

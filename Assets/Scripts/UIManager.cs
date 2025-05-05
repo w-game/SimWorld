@@ -1,3 +1,4 @@
+using System;
 using UI.Models;
 using Unity.Cinemachine;
 using UnityEngine;
@@ -60,5 +61,15 @@ public class UIManager : MonoSingleton<UIManager>
             var model = IModel.GetModel<PopJobUnitsModel>(GameManager.I.CurrentAgent.Citizen.Job);
             model.ShowUI();
         }
+    }
+
+    public T GetElement<T>(string prefabPath, Vector3 pos, Transform parent) where T : MonoBehaviour, IUIPoolable
+    {
+        return UIPool.Get<T>(prefabPath, pos, parent);
+    }
+
+    internal void ReleaseElement<T>(T instance, string prefabPath) where T : MonoBehaviour, IUIPoolable
+    {
+        UIPool.Release(instance, prefabPath);
     }
 }

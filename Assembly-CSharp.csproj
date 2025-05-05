@@ -74,6 +74,7 @@
     <Compile Include="Assets/Scripts/AI/Actions/AgentActions.cs" />
     <Compile Include="Assets/Scripts/Localization/ActionLocalization.cs" />
     <Compile Include="Assets/Scripts/AI/AStar.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/SlotInfoPanel.cs" />
     <Compile Include="Assets/Scripts/AI/InventoryAction.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopInventoryType.cs" />
     <Compile Include="Assets/Scripts/Config/ConfigReader.cs" />
@@ -122,6 +123,7 @@
     <Compile Include="Assets/Scripts/AI/Actions/EntertainmentActions.cs" />
     <Compile Include="Assets/Scripts/UI/Popups/PopCountSelector.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCraftModel.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/EffectElement.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/DialogElement.cs" />
     <Compile Include="Assets/Scripts/ActionSystem.cs" />
     <Compile Include="Assets/Scripts/AI/Schedule.cs" />

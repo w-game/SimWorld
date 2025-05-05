@@ -16,5 +16,11 @@ namespace UI.Popups
         }
 
         protected abstract void OnItemClicked(PropItem propItem);
+
+        public override void OnHide()
+        {
+            base.OnHide();
+            containerItemPanel.OnHide();
+        }
     }
 }
