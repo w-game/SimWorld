@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f8f210c39b41b449786c49219a320707
+guid: 1a08a772054784048bf4f28c1e343fa0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -5431199336932481288
-    second: Wooden_House_Walls_Tilset_14_0
+      213: 3360614041366590770
+    second: slot_bg_selected_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -74,7 +74,7 @@ TextureImporter:
     buildTarget: DefaultTexturePlatform
     maxTextureSize: 2048
     resizeAlgorithm: 0
-    textureFormat: 4
+    textureFormat: -1
     textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Wooden_House_Walls_Tilset_14_0
+      name: slot_bg_selected_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8f66dc19af080a4b0800000000000000
-      internalID: -5431199336932481288
+      spriteID: 23578d25aac43ae20800000000000000
+      internalID: 3360614041366590770
       vertices: []
       indices: 
       edges: []
@@ -134,8 +134,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      Wooden_House_Walls_Tilset_14_0: -5431199336932481288
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
