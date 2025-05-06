@@ -28,7 +28,8 @@ public class PropItem : PropItemBase
     public PropType Type { get; private set; }
     public PropItem(ConfigBase config, int quantity = 1) : base(config, quantity)
     {
-        Type = (PropType)Enum.Parse(typeof(PropType), config.type);
+        var propConfig = config as PropConfig;
+        Type = propConfig != null ? propConfig.type : PropType.None;
     }
 }
 
@@ -153,6 +154,11 @@ public class Inventory
     public int CheckItemAmount(string id)
     {
         return Items.Where(i => i.Config.id == id).Sum(i => i.Quantity);
+    }
+
+    public int CheckItemAmount(PropType type)
+    {
+        return Items.Where(i => i.Type == type).Sum(i => i.Quantity);
     }
 
     public int GetItem(PropConfig propConfig) =>

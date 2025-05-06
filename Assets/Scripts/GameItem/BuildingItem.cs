@@ -118,6 +118,14 @@ namespace GameItem
         }
     }
 
+    public class FrontDoorItem : BuildingItem
+    {
+        public FrontDoorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        {
+            Tiles = new List<TileBase> { MapManager.I.doorTile };
+        }
+    }
+
     public class CommercialItem : BuildingItem
     {
         public CommercialItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)

@@ -39,7 +39,7 @@ namespace AI
             { new Vector2Int(-1, -1), Mathf.Sqrt(2) }
         };
 
-        public static List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal, System.Func<Vector2Int, bool> isWalkable, int maxSteps = 5000, int maxRange = 30)
+        public static List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal, System.Func<Vector2Int, bool> isWalkable, int maxSteps = 20000, int maxRange = 30)
         {
             if (Mathf.Abs(goal.x - start.x) > maxRange || Mathf.Abs(goal.y - start.y) > maxRange)
             {

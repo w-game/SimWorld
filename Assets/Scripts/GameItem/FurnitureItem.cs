@@ -135,7 +135,7 @@ namespace GameItem
             if (agent is Agent a)
             {
                 var configs = ConfigReader.GetAllConfigs<PropConfig>();
-                var foodConfigs = configs.FindAll(c => c.type == "Food");
+                var foodConfigs = configs.FindAll(c => c.type == PropType.Food);
 
                 foreach (var c in foodConfigs)
                 {
@@ -218,7 +218,6 @@ namespace GameItem
 
         public SellItem SellItem { get; private set; }
         public int Price { get; private set; } = 1;
-        public int SellAmount { get; private set; } = 1;
 
         public PropType PropType => PropType.None;
 
@@ -232,9 +231,9 @@ namespace GameItem
         {
             var actions = new List<IAction>();
 
-            if (Owner != agent.Owner)
+            if (Owner != agent.Owner && SellItem != null)
             {
-                actions.Add(ActionPool.Get<BuyAction>(this, agent.Money.Amount >= Price));
+                actions.Add(ActionPool.Get<BuyAction>(this, SellItem.PropItem.Quantity, agent.Money.Amount >= Price));
             }
 
             if (SellItem != null)
@@ -261,36 +260,40 @@ namespace GameItem
             {
                 agent.MoveToArroundPos(this, () =>
                 {
-                    Restock(id, amount, agent);
+                    Restock(id, amount);
+                    agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(id), amount);
                 });
             }
             else
             {
-                Restock(id, amount, agent);
+                Restock(id, amount);
+                agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(id), amount);
             }
 
         }
 
-        public void OnSold()
+        public void OnSold(int amount)
         {
             if (SellItem != null)
             {
-                GameItemManager.DestroyGameItem(SellItem);
+                SellItem.AddCount(-amount);
                 OnSoldEvent?.Invoke(this, SellItem.Config);
 
-                if (SellItem.PropItem.Quantity == 0)
+                if (SellItem.PropItem.Quantity <= 0)
+                {
                     SellItem = null;
+                }
             }
         }
 
-        public void Buy(Agent agent)
+        public void Buy(Agent agent, int amount)
         {
             if (SellItem != null)
             {
-                if (agent.Bag.AddItem(SellItem.Config, SellAmount))
+                if (agent.Bag.AddItem(SellItem.Config, amount))
                 {
                     agent.Money.Subtract(Price);
-                    OnSold();
+                    OnSold(amount);
                 }
             }
         }
@@ -300,16 +303,15 @@ namespace GameItem
             SellItem = null;
         }
 
-        public void Restock(PropConfig config, int amount, Agent agent)
+        public void Restock(PropConfig config, int amount)
         {
             if (SellItem != null)
             {
-                SellAmount += amount;
-                SellAmount = SellAmount > config.maxStackSize ? config.maxStackSize : SellAmount;
+                amount = amount > config.maxStackSize ? config.maxStackSize : amount;
+                SellItem.AddCount(amount);
                 return;
             }
 
-            agent.Bag.RemoveItem(config, amount);
             SellItem = GameItemManager.CreateGameItem<SellItem>(
                 config,
                 Pos,
@@ -320,13 +322,11 @@ namespace GameItem
             SellItem.Pos += new Vector3(0.5f, 0.49f);
             Price = GameManager.I.PriceSystem.GetPrice(MapManager.I.GetCityByPos(Pos), config.id);
             SellItem.UI.SetName($"${Price}");
-
-            SellAmount = amount;
         }
 
-        public void Restock(string id, int amount, Agent agent)
+        public void Restock(string id, int amount)
         {
-            Restock(ConfigReader.GetConfig<PropConfig>(id), amount, agent);
+            Restock(ConfigReader.GetConfig<PropConfig>(id), amount);
         }
     }
 

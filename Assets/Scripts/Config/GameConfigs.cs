@@ -41,8 +41,8 @@ public class BuildingRequiredItem
 [Serializable]
 public class PropConfig : ConfigBase
 {
+    public new PropType type;
     public int maxStackSize;
-    public string category;
     public Dictionary<string, object> additionals;
 
     [NonSerialized]

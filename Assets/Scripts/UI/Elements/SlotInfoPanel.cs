@@ -38,7 +38,7 @@ namespace UI.Elements
             }
 
             itemNameText.text = config.name;
-            typeText.text = config.type.ToUpper();
+            typeText.text = config.type.ToString().ToUpper();
             itemDescriptionText.text = config.description;
 
             foreach (var effect in config.Effects)

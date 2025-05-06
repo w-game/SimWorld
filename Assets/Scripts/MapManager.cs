@@ -6,8 +6,6 @@ using GameItem;
 using Map;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using System.Diagnostics;
-using UnityEngine.Profiling;
 
 public enum MapLayer
 {
@@ -30,6 +28,10 @@ public class House : IHouse
     public Family Owner { get; private set; }
 
     public City City { get; private set; }
+
+    public List<Vector2Int> CommercialPos => new List<Vector2Int>();
+
+    public Vector2Int DoorPos => new Vector2Int(Blocks[0].x + 1, Blocks[0].y);
 
     public House(List<Vector2Int> blocks, HouseType houseType)
     {

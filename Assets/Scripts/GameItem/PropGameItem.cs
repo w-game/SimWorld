@@ -10,8 +10,6 @@ namespace GameItem
 {
     public class PropGameItem : GameItemBase<PropConfig>
     {
-        public int Count { get; private set; } = 1;
-
         private Agent _agent;
         private bool _isPickedUp = false;
         protected event UnityAction<bool> OnTakedEvent;
@@ -19,7 +17,6 @@ namespace GameItem
 
         public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
         {
-            Count = count;
             PropItem = new PropItem(config, count);
             Walkable = true;
         }
@@ -29,6 +26,15 @@ namespace GameItem
             base.ShowUI();
             UI.SetRenderer(Config.icon);
             UI.SetName(Config.name);
+        }
+
+        public void AddCount(int count)
+        {
+            PropItem.AddQuantity(count);
+            if (PropItem.Quantity <= 0)
+            {
+                GameItemManager.DestroyGameItem(this);
+            }
         }
 
         public override List<IAction> ItemActions(IGameItem agent)

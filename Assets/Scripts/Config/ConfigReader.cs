@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Newtonsoft.Json;
+using System.Linq;
 
 /// <summary>
 /// Generic JSON‑based configuration loader.
@@ -86,6 +87,15 @@ public class ConfigReader
 
         // Safe because we only store instances of T under this key.
         return list.ConvertAll(c => (T)c);
+    }
+
+    public static List<T> GetAllConfigs<T>(Func<T, bool> action) where T : ConfigBase
+    {
+        if (!_configs.TryGetValue(typeof(T), out var list))
+            throw new Exception($"{typeof(T).Name} not loaded. Did you call LoadConfigs()?");
+
+        // Safe because we only store instances of T under this key.
+        return list.ConvertAll(c => (T)c).Where(action).ToList();
     }
 
     #region Helper wrapper used by JsonUtility

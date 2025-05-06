@@ -254,6 +254,8 @@ namespace Citizens
 
         public ShopProperty(IHouse house, Family owner) : base(house, owner)
         {
+            var configs = ConfigReader.GetAllConfigs<PropConfig>(c => c.type == PropType.Seed || c.type == PropType.Crop || c.type == PropType.Ingredient);
+
             foreach (var furniture in House.FurnitureItems)
             {
                 if (furniture.Value is ShopShelfItem shopShelfItem)
@@ -266,67 +268,18 @@ namespace Citizens
                 {
                     ContainerItems.Add(containerItem);
 
-                    var configs = ConfigReader.GetAllConfigs<PropConfig>();
-                    var seedAndCropConfigs = configs.FindAll(c => c.type == "Seed" || c.type == "Crop" || c.type == "Ingredient");
-
                     for (int i = 0; i < containerItem.Inventory.MaxSize; i++)
                     {
-                        var propConfig = seedAndCropConfigs[UnityEngine.Random.Range(0, seedAndCropConfigs.Count)];
+                        var propConfig = configs[UnityEngine.Random.Range(0, configs.Count)];
                         containerItem.AddItem(propConfig, propConfig.maxStackSize);
                     }
                 }
             }
 
-            // 查询仓库中可上架的种类
-            var containerItems = ContainerItems.FindAll(c => c.Inventory.Items.Count > 0);
-            Dictionary<PropConfig, int> propConfigCount = new Dictionary<PropConfig, int>();
-            HashSet<PropConfig> propConfigs = new HashSet<PropConfig>();
-            foreach (var containerItem in containerItems)
+            foreach (var shelfItem in _shopShelfItems)
             {
-                foreach (var item in containerItem.Inventory.Items)
-                {
-                    propConfigs.Add(item.Config);
-                    if (propConfigCount.ContainsKey(item.Config))
-                    {
-                        propConfigCount[item.Config] += item.Quantity;
-                    }
-                    else
-                    {
-                        propConfigCount[item.Config] = item.Quantity;
-                    }
-                }
-            }
-
-            var propConfigList = propConfigs.ToList();
-            Queue<PropConfig> configQueue = new Queue<PropConfig>(propConfigList);
-
-            // 候选货物架
-            var shelfItems = _shopShelfItems.FindAll(s => s.SellItem == null);
-
-            foreach (var shelfItem in shelfItems)
-            {
-                bool assigned = false;
-                int tryCount = 0;
-
-                while (tryCount < configQueue.Count)
-                {
-                    var propConfig = configQueue.Dequeue();
-                    var remainAmount = propConfigCount.GetValueOrDefault(propConfig, 0);
-                    var gap = Mathf.Min(remainAmount, propConfig.maxStackSize);
-
-                    if (gap > 0)
-                    {
-                        propConfigCount[propConfig] -= gap;
-                        var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
-                        AddJobUnit<Salesman>(jobUnit);
-                        assigned = true;
-                    }
-
-                    configQueue.Enqueue(propConfig); // 放回队尾形成轮换
-                    tryCount++;
-
-                    if (assigned) break;
-                }
+                var propConfig = configs[UnityEngine.Random.Range(0, configs.Count)];
+                shelfItem.Restock(propConfig, propConfig.maxStackSize);
             }
 
             JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_SALESMAN"), 1);
@@ -375,7 +328,8 @@ namespace Citizens
 
         public void Restock(ShopShelfItem shopShelfItem, PropConfig propConfig, int totalAmount, Agent agent)
         {
-            shopShelfItem.Restock(propConfig, totalAmount, agent);
+            shopShelfItem.Restock(propConfig, totalAmount);
+            agent.Bag.RemoveItem(propConfig, totalAmount);
             ShopShelfItemsInRestocking.Remove(shopShelfItem);
             CheckRestock(shopShelfItem, propConfig);
         }

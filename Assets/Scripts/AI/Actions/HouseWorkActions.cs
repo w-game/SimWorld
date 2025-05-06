@@ -16,7 +16,7 @@ namespace AI
             if (_config == null)
             {
                 var configs = ConfigReader.GetAllConfigs<PropConfig>();
-                var foodConfigs = configs.FindAll(c => c.type == "Food");
+                var foodConfigs = configs.FindAll(c => c.type == PropType.Food);
                 foodConfigs.ForEach(c =>
                 {
                     foreach (var material in c.Materials)

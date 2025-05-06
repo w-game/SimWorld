@@ -80,7 +80,7 @@ namespace GameItem
             Owner = Citizen.Family;
             State = new AgentState(this);
             Bag = new Inventory(16);
-            Money = new Money(100, this);
+            Money = new Money(1000, this);
             Personality = new Personality();
 
             for (int i = -SightRange / 2; i <= SightRange / 2; i++)

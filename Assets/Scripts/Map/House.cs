@@ -30,6 +30,8 @@ namespace Map
         Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; }
         Vector2Int MinPos { get; }
         Family Owner { get; }
+        List<Vector2Int> CommercialPos { get; }
+        public Vector2Int DoorPos { get; }
 
         void SetOwner(Family owner);
         bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem;
@@ -55,6 +57,8 @@ namespace Map
         private List<BuildingItem> _buildingItems = new List<BuildingItem>(); // 房屋内的建筑物
         public List<Vector2Int> CommercialPos { get; private set; } = new List<Vector2Int>(); // 商业位置
         public Family Owner { get; private set; }
+
+        public Vector2Int DoorPos { get; private set; } // 门的位置
 
         public CartonHouse(List<Vector2Int> blocks, RoomConfig config, Vector2Int minPos, City city, System.Random chunkRand)
         {
@@ -86,6 +90,7 @@ namespace Map
 
         private void CalcRooms()
         {
+            DoorPos = MinPos + new Vector2Int(Size.x / 2, Size.y / 2);
             for (int i = 0; i < RoomConfig.width; i++)
             {
                 for (int j = 0; j < RoomConfig.height; j++)
@@ -140,6 +145,16 @@ namespace Map
                             GameItemType.Static,
                             this
                         );
+                    } 
+                    else if (RoomConfig.layout[i + j * RoomConfig.width] == 5)
+                    {
+                        buildingItem = GameItemManager.CreateGameItem<FrontDoorItem>(
+                            ConfigReader.GetConfig<BuildingConfig>("BUILDING_DOOR"),
+                            new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0),
+                            GameItemType.Static,
+                            this
+                        );
+                        DoorPos = pos;
                     }
 
                     if (buildingItem != null)

@@ -240,6 +240,18 @@ namespace AI
                     return;
                 }
                 _scanTimer = 0f;
+
+                if (_agent is AgentNPC npc)
+                {
+                    var shoppingAction = npc.CheckShopping();
+                    Debug.Log($"购物行为: {shoppingAction?.ActionName}");
+                    if (shoppingAction != null)
+                    {
+                        RegisterAction(shoppingAction, true);
+                        return;
+                    }
+                }
+
                 _scanInterval = UnityEngine.Random.Range(1f, 5f);
                 var type = MapManager.I.CheckMapAera(_agent.Pos);
                 var actions = Behavior.ScanEnvironment(_agent);
