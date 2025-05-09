@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AI;
 using Citizens;
@@ -50,20 +51,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            // CurrentAgent.RegisterSchedule(
-            //     new Schedule(
-            //         20 * 60 * 60,
-            //         29 * 60 * 60,
-            //         new List<int>() { 1, 2, 3, 4, 5, 6, 7 },
-            //         new SleepAction(CurrentAgent.State.Sleep),
-            //         CurrentAgent.Citizen));
-
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_ORE"), 5);
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 5);
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_CORN"), 5);
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_WHEAT"), 5);
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 5);
-            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_FOOD_STEW"), 1);
+            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_FLOUR"), 5);
         }
     }
 
@@ -100,5 +88,10 @@ public class GameManager : MonoBehaviour
         }
 
         CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>(config.id), 1);
+    }
+
+    public bool CheckCurrentAgent(Agent agent)
+    {
+        return CurrentAgent == agent;
     }
 }

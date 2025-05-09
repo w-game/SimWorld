@@ -17,28 +17,46 @@ namespace AI
             {
                 var configs = ConfigReader.GetAllConfigs<PropConfig>();
                 var foodConfigs = configs.FindAll(c => c.type == PropType.Food);
-                foodConfigs.ForEach(c =>
+                var canCookConfigs = foodConfigs.Where(c => c.Materials != null && c.Materials.All(m =>
                 {
-                    foreach (var material in c.Materials)
-                    {
-                        var amount = agent.Bag.CheckItemAmount(material.id);
-                        if (amount < material.amount)
-                        {
-                            break;
-                        }
-                    }
+                    return m.id == "PROP_MATERIAL_HANDBUCKET_WATER" || agent.Bag.CheckItemAmount(m.id) >= m.amount;
+                })).ToList();
 
-                    _config = c;
-                });
-
-                if (_config == null)
+                if (canCookConfigs.Count > 0)
+                {
+                    _config = canCookConfigs[Random.Range(0, canCookConfigs.Count)];
+                }
+                else
                 {
                     Done = true;
                     return;
                 }
-            }
 
-            CheckMoveToArroundPos(agent, _stoveItem, () => { Target = _stoveItem.Pos; });
+                if (_config.Materials.Any(material => material.id == "PROP_MATERIAL_HANDBUCKET_WATER"))
+                {
+                    if (agent.Bag.CheckItemAmount("PROP_MATERIAL_HANDBUCKET_WATER") > 0)
+                    {
+                        CheckMoveToArroundPos(agent, _stoveItem, () => { Target = _stoveItem.Pos; });
+                    }
+                    else
+                    {
+                        var house = agent.Citizen.Family.Houses[0];
+                        if (house.TryGetFurniture<BucketItem>(out var bucketItem) && bucketItem.WaterQuantity > 0)
+                        {
+                            AddPrecedingAction<DrawWaterAction>(agent, bucketItem);
+                        }
+                        else
+                        {
+                            AddPrecedingAction<DrawWaterAction>(agent, null, null);
+                        }
+                        CheckMoveToArroundPos(agent, _stoveItem, () => { Target = _stoveItem.Pos; });
+                    }
+                }
+            }
+            else
+            {
+                CheckMoveToArroundPos(agent, _stoveItem, () => { Target = _stoveItem.Pos; });
+            }
         }
 
         protected override void DoExecute(Agent agent)
@@ -46,6 +64,10 @@ namespace AI
             foreach (var material in _config.Materials)
             {
                 agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>(material.id), material.amount);
+                if (material.id == "PROP_MATERIAL_HANDBUCKET_WATER")
+                {
+                    agent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1);
+                }
             }
 
             agent.Bag.AddItem(_config, 1);
@@ -65,6 +87,12 @@ namespace AI
             ActionName = "Cook";
 
             ActionSpeed = 10f;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            _config = null;
         }
     }
 

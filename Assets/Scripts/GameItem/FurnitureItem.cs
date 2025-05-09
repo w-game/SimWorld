@@ -116,6 +116,10 @@ namespace GameItem
                 ActionPool.Get<DrawWaterAction>(this),
             };
         }
+
+        public virtual void DrawWater(PropConfig propConfig)
+        {
+        }
     }
 
     public class StoveItem : FurnitureItem
@@ -134,33 +138,10 @@ namespace GameItem
         {
             if (agent is Agent a)
             {
-                var configs = ConfigReader.GetAllConfigs<PropConfig>();
-                var foodConfigs = configs.FindAll(c => c.type == PropType.Food);
-
-                foreach (var c in foodConfigs)
+                return new List<IAction>()
                 {
-                    if (c.Materials.Length == 0)
-                        continue;
-
-                    var canCook = true;
-                    foreach (var material in c.Materials)
-                    {
-                        var amount = a.Bag.CheckItemAmount(material.id);
-                        if (amount < material.amount)
-                        {
-                            canCook = false;
-                            break;
-                        }
-                    }
-
-                    if (canCook)
-                    {
-                        return new List<IAction>()
-                        {
-                            ActionPool.Get<CookAction>(this, c)
-                        };
-                    }
-                }
+                    ActionPool.Get<CookAction>(this)
+                };
             }
 
             return new List<IAction>();
@@ -330,18 +311,36 @@ namespace GameItem
         }
     }
 
-    public class BucketItem : FurnitureItem
+    public class BucketItem : WellItem
     {
+        public int WaterQuantity { get; private set; } = 0;
+        public int MaxWaterQuantity { get; private set; } = 5;
         public BucketItem(BuildingConfig config, Vector3 pos) : base(config, pos)
         {
         }
 
-        public override List<IAction> ActionsOnClick(Agent agent)
+        public override List<IAction> ItemActions(IGameItem agent)
         {
+            if (agent.Owner != Owner) return new List<IAction>();
+            if (WaterQuantity >= MaxWaterQuantity) return new List<IAction>();
+            var city = MapManager.I.GetCityByPos(Pos);
+            if (city == null)
+                return new List<IAction>();
+
             return new List<IAction>()
             {
-                // system
+                ActionPool.Get<DrawWaterAction>(city.WellItem, this),
             };
+        }
+
+        public void AddWater(int v)
+        {
+            WaterQuantity = Math.Min(WaterQuantity + v, MaxWaterQuantity);
+        }
+
+        public override void DrawWater(PropConfig propConfig)
+        {
+            WaterQuantity = Math.Max(WaterQuantity - 1, 0);
         }
     }
 

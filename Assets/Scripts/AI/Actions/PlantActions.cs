@@ -100,35 +100,103 @@ namespace AI
     public class DrawWaterAction : SingleActionBase
     {
         private WellItem _wellItem;
+        private BucketItem _bucketItem;
 
         public override void OnGet(params object[] args)
         {
-            _wellItem = args[0] as WellItem;
+            if (args?.Length > 0 && args[0] is WellItem wellItem)
+                _wellItem = wellItem;
+
+            if (args?.Length > 1 && args[1] is BucketItem bucketItem)
+            {
+                _bucketItem = bucketItem;
+                NextAction = ActionPool.Get<PutWaterIntoBucketAction>(_bucketItem);
+            }
+
             ActionName = "Draw water";
             ActionSpeed = 1f;
         }
 
         public override void OnRegister(Agent agent)
         {
-            if (agent.Bag.CheckItem("PROP_TOOL_HANDBUCKET").Count == 0)
+            if (_wellItem == null)
+            {
+                var city = MapManager.I.GetCityByPos(agent.Pos);
+                _wellItem = city?.WellItem;
+
+                if (_wellItem == null)
+                {
+                    ActionFailed();
+                    return;
+                }
+            }
+
+            if (agent.Bag.CheckItemAmount("PROP_TOOL_HANDBUCKET") <= 0)
             {
                 var bucket = ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET");
-                MessageBox.I.ShowMessage("No Bucket!", bucket.icon, MessageType.Error);
+                if (GameManager.I.CheckCurrentAgent(agent))
+                {
+                    MessageBox.I.ShowMessage("No Bucket!", bucket.icon, MessageType.Error);
+                }
                 ActionFailed();
+                return;
             }
-            else
-            {
-                CheckMoveToArroundPos(agent, _wellItem, () => { Target = _wellItem.Pos; });
-            }
+
+            CheckMoveToArroundPos(agent, _wellItem, () => { Target = _wellItem.Pos; });
         }
 
         protected override void DoExecute(Agent agent)
         {
-            if (agent.Bag.CheckItem("PROP_TOOL_HANDBUCKET").Count > 0)
+            var config = ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET");
+
+            if (agent.Bag.RemoveItem(config, 1))
             {
-                agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1);
+                _wellItem.DrawWater(config);
                 agent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
             }
+            else
+            {
+                ActionFailed();
+            }
+        }
+
+        public override float Evaluate(Agent agent, HouseType houseType)
+        {
+            if (_bucketItem == null) return 0f;
+            return _bucketItem.WaterQuantity == 0
+                ? 150f
+                : 150f * (_bucketItem.MaxWaterQuantity - _bucketItem.WaterQuantity) / _bucketItem.MaxWaterQuantity;
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+            _wellItem = null;
+            _bucketItem = null;
+        }
+    }
+
+    public class PutWaterIntoBucketAction : SingleActionBase
+    {
+        private BucketItem _bucketItem;
+
+        public override void OnGet(params object[] args)
+        {
+            _bucketItem = args[0] as BucketItem;
+            ActionName = "Put water into bucket";
+            ActionSpeed = 1f;
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            CheckMoveToArroundPos(agent, _bucketItem, () => { Target = _bucketItem.Pos; });
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            agent.Bag.RemoveItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_HANDBUCKET_WATER"), 1);
+            agent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1);
+            _bucketItem.AddWater(1);
         }
     }
 

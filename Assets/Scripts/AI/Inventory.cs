@@ -126,7 +126,7 @@ public class Inventory
         return remaining == 0;
     }
 
-    public void RemoveItem(PropConfig config, int quantity = 1)
+    public bool RemoveItem(PropConfig config, int quantity = 1)
     {
         var targets = Items.Where(i => i.Config.id == config.id).ToList();
         foreach (var propItem in targets)
@@ -140,9 +140,10 @@ public class Inventory
 
             OnInventoryChanged?.Invoke(propItem, -delta);
 
-            if (quantity == 0)
-                return;
+            if (quantity <= 0)
+                return true;
         }
+        return false;
     }
 
     public List<PropItem> CheckItem(string id)

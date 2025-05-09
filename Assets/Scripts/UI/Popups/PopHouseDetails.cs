@@ -19,20 +19,31 @@ namespace UI.Views
         {
             if (Model.House != null)
             {
-                var property = Property.Properties[Model.House];
-                propertyName.text = Model.House.HouseType.ToString();
-                propertyDetails.text = $"Employee: {property.Employees.Count}";
-                foreach (var job in property.JobRecruitCount)
+                if (Model.House.HouseType == HouseType.House)
                 {
-                    var recruitmentItem = Instantiate(recruitmentItemPrefab, propertyDetails.transform.parent);
-                    recruitmentItem.GetComponent<JobRecruitElement>().Init(job.Key, (jobConfig) =>
+                    propertyName.text = Model.House.HouseType.ToString();
+                    buyButton.onClick.AddListener(() =>
                     {
-                        property.AddApplicant(jobConfig, GameManager.I.CurrentAgent);
+                        Model.House.SetOwner(GameManager.I.CurrentAgent.Owner);
                     });
+                }
+                else
+                {
+                    var property = Property.Properties[Model.House];
+                    propertyName.text = Model.House.HouseType.ToString();
+                    propertyDetails.text = $"Employee: {property.Employees.Count}";
+                    foreach (var job in property.JobRecruitCount)
+                    {
+                        var recruitmentItem = Instantiate(recruitmentItemPrefab, propertyDetails.transform.parent);
+                        recruitmentItem.GetComponent<JobRecruitElement>().Init(job.Key, (jobConfig) =>
+                        {
+                            property.AddApplicant(jobConfig, GameManager.I.CurrentAgent);
+                        });
+                    }
+                    buyButton.onClick.AddListener(Model.BuyProperty);
                 }
             }
 
-            buyButton.onClick.AddListener(Model.BuyProperty);
         }
     }
 }

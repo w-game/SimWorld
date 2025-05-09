@@ -46,7 +46,7 @@ namespace GameItem
         public float MoveSpeed { get; private set; } = 3f;
         public int SightRange { get; private set; } = 9;
         private List<Vector2Int> _sights = new List<Vector2Int>();
-        public int MaxScanCount { get; private set; } = 5;
+        public int MaxScanCount { get; private set; } = 10;
 
         public FamilyMember Citizen { get; private set; }
         public AgentState State { get; private set; }
@@ -90,6 +90,8 @@ namespace GameItem
                     _sights.Add(new Vector2Int((int)pos.x, (int)pos.y));
                 }
             }
+
+            Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_TOOL_HANDBUCKET"), 1);
         }
 
         public override void ShowUI()
@@ -175,21 +177,35 @@ namespace GameItem
 
         private Vector3? _nextPos;
         private Vector2Int? _targetCellPos;
-        public void CalcMovePaths(Vector3 targetWorldPos)
+        public void CalcMovePaths(Vector3 targetWorldPos, int maxSteps = 5000)
         {
-            if (!MapManager.I.IsWalkable(targetWorldPos)) return;
+            if (!MapManager.I.IsWalkable(Pos) || !MapManager.I.IsWalkable(targetWorldPos)) return;
 
             var startCell = MapManager.I.WorldPosToCellPos(Pos);
             var targetCell = MapManager.I.WorldPosToCellPos(targetWorldPos);
 
-            _paths = AStar.FindPath(startCell, targetCell, p => MapManager.I.IsWalkable(new Vector3(p.x, p.y)));
+            int attempt = 0;
+            const int maxAttempts = 5;
 
-            if (_paths != null && _paths.Count > 1)
+            while (attempt < maxAttempts)
             {
-                var cell = _paths[1];
-                _nextPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
-                _targetCellPos = targetCell;
+                _paths = AStar.FindPath(startCell, targetCell, p => MapManager.I.IsWalkable(new Vector3(p.x, p.y)), maxSteps);
+
+                if (_paths != null && _paths.Count > 1)
+                {
+                    var cell = _paths[1];
+                    _nextPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
+                    _targetCellPos = targetCell;
+                    return;
+                }
+
+                maxSteps *= 2;
+                attempt++;
             }
+
+            _paths = null;
+            _nextPos = null;
+            _targetCellPos = null;
         }
 
         public void MoveToTarget(Vector3 pos)
@@ -204,13 +220,28 @@ namespace GameItem
             }
             if (_nextPos == null || _targetCellPos == null) return;
 
-            if (_paths[0] != MapManager.I.WorldPosToCellPos(Pos) || _targetCellPos.Value != MapManager.I.WorldPosToCellPos(pos))
+            if (!MapManager.I.IsWalkable(_nextPos.Value) || _targetCellPos.Value != MapManager.I.WorldPosToCellPos(pos))
             {
                 CalcMovePaths(pos);
                 if (_paths == null) return;
             }
 
             Pos = Vector3.MoveTowards(Pos, _nextPos.Value, MoveSpeed * Time.deltaTime);
+
+            if (Vector3.SqrMagnitude(Pos - _nextPos.Value) < 0.01f)
+            {
+                _paths.RemoveAt(0);
+                if (_paths.Count > 1)
+                {
+                    var cell = _paths[1];
+                    _nextPos = new Vector3(cell.x + 0.5f, cell.y + 0.5f);
+                }
+                else
+                {
+                    _nextPos = null;
+                    _targetCellPos = null;
+                }
+            }
         }
 
         private T BFSItem<T>() where T : IGameItem

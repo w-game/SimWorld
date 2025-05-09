@@ -247,7 +247,7 @@
             "type": "Tool",
             "icon": "Textures/HandBucket",
             "prefab": "Prefabs/GameItems/PropItem",
-            "maxStackSize": 1,
+            "maxStackSize": 5,
             "additionals": {
                 "price": 15
             }

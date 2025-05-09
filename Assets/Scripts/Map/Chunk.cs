@@ -185,8 +185,30 @@ namespace Map
             Debug.Log($"CheckCreateCity {Pos} Layer {Layer} ChunkType {ChunkType}");
             if (ChunkType == BlockType.Plain)
             {
+                // 检测周围是否有城市
+                var neighbors = new List<Vector2Int>()
+                {
+                    new Vector2Int(0, 1),
+                    new Vector2Int(1, 0),
+                    new Vector2Int(0, -1),
+                    new Vector2Int(-1, 0),
+                    new Vector2Int(1, 1),
+                    new Vector2Int(1, -1),
+                    new Vector2Int(-1, 1),
+                    new Vector2Int(-1, -1)
+                };
+                var hasCity = false;
+                foreach (var neighbor in neighbors)
+                {
+                    var chunk = Map.GetChunk(Pos + neighbor, CityLayer, false);
+                    if (chunk != null && chunk.City != null)
+                    {
+                        hasCity = true;
+                        break;
+                    }
+                }
 
-                if (_chunkRand.Next(0, 100) < 20)
+                if (_chunkRand.Next(0, 100) < 20 && !hasCity)
                 {
                     City = new City(CenterPos, Size, this, _chunkRand);
                     Debug.Log($"Create City at {CenterPos} in Chunk {Pos} Layer {Layer}");

@@ -41,11 +41,11 @@ namespace AI
 
         public static List<Vector2Int> FindPath(Vector2Int start, Vector2Int goal, System.Func<Vector2Int, bool> isWalkable, int maxSteps = 20000, int maxRange = 30)
         {
-            if (Mathf.Abs(goal.x - start.x) > maxRange || Mathf.Abs(goal.y - start.y) > maxRange)
-            {
-                Debug.LogWarning("[AStar] Goal too far from start.");
-                return null;
-            }
+            // if (Mathf.Abs(goal.x - start.x) > maxRange || Mathf.Abs(goal.y - start.y) > maxRange)
+            // {
+            //     Debug.LogWarning("[AStar] Goal too far from start.");
+            //     return null;
+            // }
 
             var openSet = new List<Node>();
             var closedSet = new HashSet<Vector2Int>();

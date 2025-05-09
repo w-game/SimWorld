@@ -116,6 +116,7 @@ namespace AI
         public void ActionFailed()
         {
             _success = false;
+            NextAction = null;
             Done = true;
         }
 

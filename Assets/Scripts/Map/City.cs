@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using GameItem;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
@@ -26,6 +27,8 @@ namespace Map
 
         public CityPrice CityPrice { get; private set; }
         public int Population { get; private set; } = 0;
+        public WellItem WellItem { get; private set; }
+
         public event UnityAction<int> OnPopulationChanged;
 
         public City(Vector2Int pos, int size, Chunk originChunk, System.Random chunkRand)
@@ -47,11 +50,48 @@ namespace Map
 
         private void CreateCity()
         {
+            bool[,] cityMap = new bool[Size, Size];
             // 创建跨Chunk的道路
             CreateRoad();
 
+            foreach (var road in Roads)
+            {
+                foreach (var worldPos in road)
+                {
+                    Vector2Int local = worldPos - OriginChunk.WorldPos;
+                    if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
+                        cityMap[local.x, local.y] = true;
+                }
+            }
+
+            // 在道路上放置水井
+            PutWell(cityMap);
+
             // 在所有受影响的Chunk中放置建筑
-            PutRoom();
+            PutRoom(cityMap);
+        }
+
+        public void PutWell(bool[,] cityMap)
+        {
+            // 在随机道路上方放置水井
+
+            Vector2Int wellPos;
+            Vector2Int local;
+            do
+            {
+                var road = Roads[ChunkRand.Next(Roads.Count)];
+                var roadPoint = road[ChunkRand.Next(road.Count)];
+                wellPos = roadPoint + new Vector2Int(0, 1);
+                local = wellPos - OriginChunk.WorldPos;
+            } while (cityMap[local.x, local.y] || cityMap[local.x + 1, local.y]);
+
+            WellItem = GameItemManager.CreateGameItem<WellItem>(
+                ConfigReader.GetConfig<BuildingConfig>("BUILDING_WELL"),
+                new Vector3(wellPos.x, wellPos.y, 0),
+                GameItemType.Static);
+
+            cityMap[local.x, local.y] = true;
+            cityMap[local.x + 1, local.y] = true;
         }
 
         public void ChangePopulation(int amount)
@@ -166,21 +206,8 @@ namespace Map
             Debug.Log($"City {GlobalPos} has {Roads.Count} roads");
         }
 
-        private void PutRoom()
+        private void PutRoom(bool[,] cityMap)
         {
-            bool[,] blockOccupancyMap = new bool[Size, Size];
-            bool[,] roadMap = new bool[Size, Size];
-
-            foreach (var road in Roads)
-            {
-                foreach (var worldPos in road)
-                {
-                    Vector2Int local = worldPos - OriginChunk.WorldPos;
-                    if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
-                        roadMap[local.x, local.y] = true;
-                }
-            }
-
             foreach (var road in Roads)
             {
                 var roadPoints = new List<Vector2Int>(road);
@@ -195,7 +222,7 @@ namespace Map
 
                     for (int dir = 0; dir < 4; dir++)
                     {
-                        var house = PlaceBuilding(roadPoint, blockOccupancyMap, roadMap);
+                        var house = PlaceBuilding(roadPoint, cityMap);
                         if (house != null)
                         {
                             Houses.Add(house);
@@ -204,7 +231,7 @@ namespace Map
                             {
                                 var local = b - OriginChunk.WorldPos;
                                 if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
-                                    blockOccupancyMap[local.x, local.y] = true;
+                                    cityMap[local.x, local.y] = true;
                             }
                             housesPlaced++;
                             if (housesPlaced >= maxHousesPerRoad)
@@ -227,7 +254,7 @@ namespace Map
             }
         }
 
-        private IHouse PlaceBuilding(Vector2Int roadPoint, bool[,] blockOccupancyMap, bool[,] roadMap)
+        private IHouse PlaceBuilding(Vector2Int roadPoint, bool[,] cityMap)
         {
             // Randomly pick a room config
             var roomConfig = _roomConfigs[ChunkRand.Next(_roomConfigs.Count)];
@@ -256,7 +283,7 @@ namespace Map
                         int y = local.y + iy;
                         if (x >= 0 && x < Size && y >= 0 && y < Size)
                         {
-                            if (blockOccupancyMap[x, y] || roadMap[local.x, local.y])
+                            if (cityMap[x, y] && !Roads.Any(r => r.Contains(new Vector2Int(x + OriginChunk.WorldPos.x, y + OriginChunk.WorldPos.y))))
                                 return null;
                         }
                     }

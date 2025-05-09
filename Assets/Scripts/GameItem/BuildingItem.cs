@@ -1,11 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using AI;
-using Citizens;
 using Map;
-using NUnit.Framework;
 using UI.Models;
 using UnityEngine;
 using UnityEngine.Tilemaps;

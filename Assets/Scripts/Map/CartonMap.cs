@@ -94,6 +94,28 @@ namespace Map
             return null;
         }
 
+        public Chunk GetChunk(Vector2Int pos, int layer, bool create)
+        {
+            if (layer < 0 || layer >= LAYER_NUM)
+            {
+                return null;
+            }
+
+            if (chunks.ContainsKey(layer))
+            {
+                if (chunks[layer].ContainsKey(pos))
+                {
+                    return chunks[layer][pos];
+                }
+                else if (create)
+                {
+                    return CreateChunk(pos, layer);
+                }
+            }
+
+            return null;
+        }
+
         public Chunk CreateChunk(Vector2Int pos, int layer)
         {
             Chunk chunk = new Chunk(pos, layer, this);
