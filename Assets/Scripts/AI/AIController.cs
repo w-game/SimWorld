@@ -164,6 +164,11 @@ namespace AI
                         RegisterAction(ActionPool.Get<EatAction>(foodItem), true);
                         return true;
                     }
+                    else if (_agent.Bag.CheckItemAmount(PropType.Food) > 0)
+                    {
+                        RegisterAction(ActionPool.Get<EatAction>(), true);
+                        return true;
+                    }
                     break;
                 case "Toilet":
                     var toiletAction = ActionPool.Get<ToiletAction>(_agent.State.Toilet);

@@ -71,6 +71,8 @@ namespace GameItem
 
         public Dictionary<Type, SkillBase> Skills { get; private set; } = new Dictionary<Type, SkillBase>();
 
+        public IGameItem ItemInHand { get; private set; }
+
         public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
         {
             Brain = brain;
@@ -316,8 +318,7 @@ namespace GameItem
 
         public void TakeItemInHand(IGameItem item)
         {
-            // item.transform.SetParent(handItem);
-            // item.transform.localPosition = Vector3.zero;
+            ItemInHand = item;
         }
 
         internal void RegisterSchedule(Schedule newSchedule, string scheduleName)
@@ -529,6 +530,23 @@ namespace GameItem
                 var newSkill = Activator.CreateInstance<T>();
                 Skills[typeof(T)] = newSkill;
                 return newSkill;
+            }
+        }
+
+        public void Eat(FoodItem foodItem)
+        {
+            if (foodItem == null)
+            {
+                Debug.LogError("Food item is null");
+                return;
+            }
+
+            foodItem.FoodTimes--;
+            State.Hunger.Increase(foodItem.FoodValue / foodItem.FoodTimes);
+
+            if (foodItem.FoodTimes <= 0)
+            {
+                foodItem.AddCount(-1);
             }
         }
     }

@@ -9,6 +9,7 @@ namespace GameItem
         public CircleCollider2D CircleCollider2D => GetComponent<CircleCollider2D>();
         public void OnMouseDown()
         {
+            if (Item.ItemType == GameItemType.Dynamic) return;
             if ((GameItem.Pos - GameManager.I.CurrentAgent.Pos).sqrMagnitude < CircleCollider2D.radius * CircleCollider2D.radius + 1f)
             {
                 Item.BePickedUp(GameManager.I.CurrentAgent);

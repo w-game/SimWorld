@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AI;
 using GameItem;
 using UI.Models;
 using UnityEngine;
@@ -25,7 +26,8 @@ namespace UI.Elements
 
             CreateElement("Take in hand", () =>
             {
-                // Handle use action
+                var action = ActionPool.Get<TakeItemFromInventory>(propItem);
+                GameManager.I.CurrentAgent.Brain.RegisterAction(action, true);
             });
 
             CreateElement("Drop", () =>

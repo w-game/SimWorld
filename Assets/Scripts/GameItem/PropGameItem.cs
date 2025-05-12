@@ -28,7 +28,7 @@ namespace GameItem
             UI.SetName(Config.name);
         }
 
-        public void AddCount(int count)
+        public virtual void AddCount(int count)
         {
             PropItem.AddQuantity(count);
             if (PropItem.Quantity <= 0)
@@ -90,20 +90,10 @@ namespace GameItem
     public class FoodItem : PropGameItem
     {
         public float FoodValue { get; set; } = 20;
-        public int MaxFoodTimes { get; set; } = 5;
         public int FoodTimes { get; set; } = 5;
 
         public FoodItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
         {
-        }
-
-        internal void DecreaseFoodTimes()
-        {
-            FoodTimes--;
-            if (FoodTimes <= 0)
-            {
-                Destroy();
-            }
         }
 
         public override List<IAction> ItemActions(IGameItem agent)
@@ -112,6 +102,16 @@ namespace GameItem
             if (agent is Agent a && Owner == a.Citizen.Family)
                 actions.Add(ActionPool.Get<EatAction>(this, GameManager.I.CurrentAgent.State.Hunger));
             return actions;
+        }
+
+        public override void AddCount(int count)
+        {
+            base.AddCount(count);
+            if (PropItem.Quantity > 0)
+            {
+                FoodValue = 20;
+                FoodTimes = 5;
+            }
         }
     }
 

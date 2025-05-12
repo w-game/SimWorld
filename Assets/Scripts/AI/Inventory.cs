@@ -191,4 +191,10 @@ public class Inventory
         }
         return item;
     }
+
+    public bool GetItemsByType(PropType type, out List<PropItem> items)
+    {
+        items = Items.Where(i => i.Type == type).ToList();
+        return items.Count > 0;
+    }
 }

@@ -382,7 +382,45 @@ namespace AI
 
         public override void OnGet(params object[] args)
         {
-            _item = args[0] as PropGameItem;
+            
+        }
+    }
+
+    public class TakeItemFromInventory : SingleActionBase
+    {
+        public override string ActionName => "Take Item From Inventory";
+        private Inventory _inventory;
+        private PropConfig _config;
+        private int _amount;
+
+        public override void OnRegister(Agent agent)
+        {
+            // 可在此添加需要的前置动作（如检查是否已移动到目标）
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            _inventory.RemoveItem(_config, _amount);
+            if (_config.type == PropType.Food)
+            {
+                var foodItem = GameItemManager.CreateGameItem<FoodItem>(_config, agent.Pos, GameItemType.Dynamic, _amount);
+                foodItem.Owner = agent.Owner;
+                agent.TakeItemInHand(foodItem);
+                return;
+            }
+            else
+            {
+                var propItem = GameItemManager.CreateGameItem<PropGameItem>(_config, agent.Pos, GameItemType.Dynamic, _amount);
+                propItem.Owner = agent.Owner;
+                agent.TakeItemInHand(propItem);
+            }
+        }
+
+        public override void OnGet(params object[] args)
+        {
+            _inventory = args[0] as Inventory;
+            _config = args[1] as PropConfig;
+            _amount = (int)args[2];
         }
     }
 
@@ -402,27 +440,38 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
-            TableItem tableItem = agent.FindNearestTableItem();
-
-            var takeItem = ActionPool.Get<TakeItemInHand>(_foodItem);
-            takeItem.OnRegister(agent);
-            PrecedingActions.Add(takeItem);
-
-            if (tableItem != null)
+            if (_foodItem == null)
             {
-                var putItemToTarget = ActionPool.Get<PutItemToTarget>(_foodItem, tableItem);
-                PrecedingActions.Add(putItemToTarget);
+                if (agent.Bag.CheckItemAmount(PropType.Food) > 0)
+                {
+                    if (agent.Bag.GetItemsByType(PropType.Food, out var foodItems))
+                    {
+                        var foodItem = foodItems[UnityEngine.Random.Range(0, foodItems.Count)];
+                        AddPrecedingAction<TakeItemFromInventory>(agent, (a, s) =>
+                        {
+                            _foodItem = agent.ItemInHand as FoodItem;
+                            TotalTimes = _foodItem.FoodTimes;
+                        }, agent.Bag, foodItem.Config, foodItem.Quantity);
+                    }
+                }
             }
+            // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
+            // TableItem tableItem = agent.FindNearestTableItem();
+
+            // var takeItem = ActionPool.Get<TakeItemInHand>(_foodItem);
+            // takeItem.OnRegister(agent);
+            // PrecedingActions.Add(takeItem);
+
+            // if (tableItem != null)
+            // {
+            //     var putItemToTarget = ActionPool.Get<PutItemToTarget>(_foodItem, tableItem);
+            //     PrecedingActions.Add(putItemToTarget);
+            // }
         }
 
         protected override void DoExecute(Agent agent)
         {
-            // 每个阈值增加的饱食度：使用 FoodValue * ProgressSpeed / 100 的计算公式
-            float increment = _foodItem.FoodValue / _foodItem.MaxFoodTimes;
-            agent.State.Hunger.Increase(increment);
-            _foodItem.DecreaseFoodTimes();
-            Debug.Log($"饱食度增加了 {increment}，当前饱食度: {agent.State.Hunger}");
+            agent.Eat(_foodItem);
         }
 
         public override float Evaluate(Agent agent, HouseType houseType)
@@ -432,11 +481,13 @@ namespace AI
 
         public override void OnGet(params object[] args)
         {
-            _foodItem = args[0] as FoodItem;
+            if (args.Length > 0)
+            {
+                _foodItem = args[0] as FoodItem;
+                TotalTimes = _foodItem.FoodTimes;
+            }
             ActionName = "Eat";
-
-            ProgressSpeed = _foodItem.MaxFoodTimes;
-            TotalTimes = 5;
+            ProgressSpeed = 10f;
         }
     }
 

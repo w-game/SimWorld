@@ -25,6 +25,7 @@ namespace UI.Views
                     buyButton.onClick.AddListener(() =>
                     {
                         Model.House.SetOwner(GameManager.I.CurrentAgent.Owner);
+                        GameManager.I.CurrentAgent.Citizen.Family.AddHouse(Model.House);
                     });
                 }
                 else

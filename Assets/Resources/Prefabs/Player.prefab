@@ -315,6 +315,7 @@ MonoBehaviour:
   itemNameText: {fileID: 0}
   rb: {fileID: 927521976815728567}
   animator: {fileID: 2911523480166893942}
+  hand: {fileID: 8714429792434075032}
 --- !u!95 &2911523480166893942
 Animator:
   serializedVersion: 7

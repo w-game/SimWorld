@@ -5,6 +5,7 @@ public class PlayerController : GameItemUI
 {
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private Animator animator;
+    [SerializeField] private Transform hand;
 
     public Rigidbody2D Rb => rb;
     private Agent _agent;
@@ -57,5 +58,11 @@ public class PlayerController : GameItemUI
         // animator.SetFloat("Speed", dir.magnitude);
 
         _lastPos = curPos;
+
+        if (_agent.ItemInHand != null)
+        {
+            var item = _agent.ItemInHand;
+            item.Pos = hand.position;
+        }
     }
 }

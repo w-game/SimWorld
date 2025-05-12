@@ -215,7 +215,7 @@ namespace Citizens
         {
             var player = new FamilyMember(true, 18);
             Family family = new Family();
-            family.AddHouse(new House(new List<Vector2Int>(), HouseType.House));
+            // family.AddHouse(new House(new List<Vector2Int>(), HouseType.House));
             family.AddMember(player);
             return player;
         }
