@@ -37,7 +37,16 @@ namespace UI.Elements
                 var countSelectData = new CountSelectData("Drop", propItem.Quantity);
                 countSelectData.ConfirmEvent += (count) =>
                 {
-                    var createdPropItem = GameItemManager.CreateGameItem<PropGameItem>(propItem.Config, GameManager.I.CurrentAgent.Pos, GameItemType.Static, count);
+                    PropGameItem createdPropItem = null;
+                    var propConfig = propItem.Config as PropConfig;
+                    if (propConfig.type == PropType.Food)
+                    {
+                        createdPropItem = GameItemManager.CreateGameItem<FoodItem>(propConfig, GameManager.I.CurrentAgent.Pos, GameItemType.Static, count);
+                    }
+                    else
+                    {
+                        createdPropItem = GameItemManager.CreateGameItem<PropGameItem>(propConfig, GameManager.I.CurrentAgent.Pos, GameItemType.Static, count);
+                    }
                     createdPropItem.Owner = GameManager.I.CurrentAgent.Owner;
                     GameManager.I.CurrentAgent.Bag.RemoveItem(propItem.Config as PropConfig, count);
                 };

@@ -340,10 +340,11 @@ namespace AI
     public class PutItemToTarget : SingleActionBase
     {
         public override string ActionName => "将物品放置到目标点";
+        private IGameItem _targetItem;
 
         public override void OnGet(params object[] args)
         {
-            throw new NotImplementedException();
+            _targetItem = args[0] as IGameItem;
         }
 
         public override void OnRegister(Agent agent)
@@ -353,9 +354,7 @@ namespace AI
 
         protected override void DoExecute(Agent agent)
         {
-            Debug.Log("执行将物品放置到目标点动作");
-            // 模拟放置物品的逻辑
-            Done = true;
+            agent.PutItemToTarget(_targetItem);
         }
     }
 
@@ -369,20 +368,18 @@ namespace AI
         {
             if (Vector3.Distance(agent.Pos, _item.Pos) > 0.5f)
             {
-                PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _item.Pos));
+                AddPrecedingAction<CheckMoveToTarget>(agent, agent, _item.Pos);
             }
         }
 
         protected override void DoExecute(Agent agent)
         {
-            Debug.Log("执行捡取物品动作");
             agent.TakeItemInHand(_item);
-            ActionSpeed = 0f;
         }
 
         public override void OnGet(params object[] args)
         {
-            
+            _item = args[0] as PropGameItem;
         }
     }
 
@@ -455,18 +452,37 @@ namespace AI
                     }
                 }
             }
+            else
+            {
+                AddPrecedingAction<TakeItemInHand>(agent, _foodItem);
+            }
+
+            var tableItem = agent.GetGameItem<TableItem>();
+            if (tableItem != null)
+            {
+                var aroundPos = tableItem.ArroundPosList();
+                foreach (var pos in aroundPos)
+                {
+                    if (GameManager.I.GameItemManager.TryGetItemAtPos<ChairItem>(pos, out var chairItem))
+                    {
+                        AddPrecedingAction<SitAction>(agent, chairItem);
+                        AddPrecedingAction<PutItemToTarget>(agent, tableItem);
+                        break;
+                    }
+                }
+            }
             // 检测附近最近的桌子（TODO: 替换为实际逻辑，例如选择空闲桌子或优先选择有其他NPC旁边的桌子）
             // TableItem tableItem = agent.FindNearestTableItem();
 
-            // var takeItem = ActionPool.Get<TakeItemInHand>(_foodItem);
-            // takeItem.OnRegister(agent);
-            // PrecedingActions.Add(takeItem);
+                // var takeItem = ActionPool.Get<TakeItemInHand>(_foodItem);
+                // takeItem.OnRegister(agent);
+                // PrecedingActions.Add(takeItem);
 
-            // if (tableItem != null)
-            // {
-            //     var putItemToTarget = ActionPool.Get<PutItemToTarget>(_foodItem, tableItem);
-            //     PrecedingActions.Add(putItemToTarget);
-            // }
+                // if (tableItem != null)
+                // {
+                //     var putItemToTarget = ActionPool.Get<PutItemToTarget>(_foodItem, tableItem);
+                //     PrecedingActions.Add(putItemToTarget);
+                // }
         }
 
         protected override void DoExecute(Agent agent)
@@ -487,7 +503,7 @@ namespace AI
                 TotalTimes = _foodItem.FoodTimes;
             }
             ActionName = "Eat";
-            ProgressSpeed = 10f;
+            ProgressSpeed = 1f;
         }
     }
 

@@ -52,6 +52,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_MATERIAL_FLOUR"), 5);
+            CurrentAgent.Bag.AddItem(ConfigReader.GetConfig<PropConfig>("PROP_FOOD_MANTOU"), 1);
         }
     }
 

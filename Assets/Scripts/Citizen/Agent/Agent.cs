@@ -246,8 +246,9 @@ namespace GameItem
             }
         }
 
-        private T BFSItem<T>() where T : IGameItem
+        private List<IGameItem> BFSItem()
         {
+            List<IGameItem> foundItems = new List<IGameItem>();
             var visitedPositions = new HashSet<Vector2>();
             var queue = new Queue<Vector2>();
             queue.Enqueue(Pos);
@@ -258,10 +259,8 @@ namespace GameItem
                 Vector2 currentPos = queue.Dequeue();
                 // 检查当前位置是否有目标物品
                 var items = GameManager.I.GameItemManager.GetItemsAtPos(currentPos);
-                foreach (var item in items)
-                {
-                    if (item is T tItem) return tItem;
-                }
+
+                foundItems.AddRange(items);
 
                 // 向周围位置扩散（限定最大距离避免无穷扩散）
                 foreach (var dir in new Vector2[] { Vector2.up, Vector2.down, Vector2.left, Vector2.right })
@@ -275,29 +274,41 @@ namespace GameItem
                     }
                 }
             }
-            return default;
+            return foundItems;
         }
 
-        private Dictionary<Type, IGameItem> _gameItems = new Dictionary<Type, IGameItem>();
+        private Dictionary<Type, List<IGameItem>> _gameItems = new Dictionary<Type, List<IGameItem>>();
         private Vector3 _lastScanPos;
 
         public T GetGameItem<T>() where T : class, IGameItem
         {
-            if (_gameItems.TryGetValue(typeof(T), out var item) && (item.Pos - Pos).sqrMagnitude < SightRange * SightRange)
+            if ((Pos - _lastScanPos).sqrMagnitude > SightRange * SightRange)
             {
-                // 如果物品在视野范围内，直接返回
-                if (item is T tItem)
-                    return tItem;
-            }
-            else if ((Pos - _lastScanPos).sqrMagnitude > SightRange * SightRange)
-            {
-                var foundItem = BFSItem<T>();
-                if (foundItem != null)
+                var foundItems = BFSItem();
+                _gameItems.Clear();
+
+                foreach (var foundItem in foundItems)
                 {
-                    _gameItems[typeof(T)] = foundItem;
-                    return foundItem as T;
+                    if (_gameItems.ContainsKey(foundItem.GetType()))
+                    {
+                        _gameItems[foundItem.GetType()].Add(foundItem);
+                    }
+                    else
+                    {
+                        _gameItems.Add(foundItem.GetType(), new List<IGameItem> { foundItem });
+                    }
                 }
                 _lastScanPos = Pos;
+            }
+
+            if (_gameItems.TryGetValue(typeof(T), out var items) && items.Count > 0)
+            {
+                // 如果物品在视野范围内，直接返回
+                foreach (var item in items)
+                {
+                    if (item is T tItem)
+                        return tItem;
+                }
             }
 
             return null;
@@ -319,6 +330,14 @@ namespace GameItem
         public void TakeItemInHand(IGameItem item)
         {
             ItemInHand = item;
+        }
+
+        public void PutItemToTarget(IGameItem item)
+        {
+            var handItem = ItemInHand;
+            ItemInHand = null;
+
+            handItem.Pos = item.Pos + new Vector3(0.5f, 0.4f);
         }
 
         internal void RegisterSchedule(Schedule newSchedule, string scheduleName)

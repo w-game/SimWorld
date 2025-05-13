@@ -149,14 +149,16 @@ public class GameItemManager
         return new List<IGameItem>();
     }
 
-    public T TryGetItemAtPos<T>(Vector3 pos) where T : class, IGameItem
+    public bool TryGetItemAtPos<T>(Vector3 pos, out T item) where T : class, IGameItem
     {
         var mapPos = ItemPosToMapPosConverter.Invoke(pos);
         if (_staticGameItems.ContainsKey(mapPos))
         {
-            return _staticGameItems[mapPos].FirstOrDefault(x => x is T) as T;
+            item = _staticGameItems[mapPos].FirstOrDefault(x => x is T) as T;
+            return item != null;
         }
-        return null;
+        item = null;
+        return false;
     }
 
     private static IEnumerator GameItemUpdateCoroutine((List<IGameItem>, List<IGameItem>) value)

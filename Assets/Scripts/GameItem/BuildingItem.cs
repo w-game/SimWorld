@@ -132,7 +132,7 @@ namespace GameItem
 
     public class FarmItem : BuildingItem, ISelectItem
     {
-        public PlantItem PlantItem => GameManager.I.GameItemManager.TryGetItemAtPos<PlantItem>(Pos);
+        public PlantItem PlantItem => GameManager.I.GameItemManager.TryGetItemAtPos<PlantItem>(Pos, out var plantItem) ? plantItem : null;
 
         public PropType PropType => PropType.Seed;
 

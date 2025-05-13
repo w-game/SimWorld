@@ -136,7 +136,7 @@ namespace GameItem
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
-            if (agent is Agent a)
+            if (agent is Agent a && a.Owner == Owner)
             {
                 return new List<IAction>()
                 {
