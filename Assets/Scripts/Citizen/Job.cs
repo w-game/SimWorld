@@ -127,20 +127,20 @@ namespace Citizens
 
     public class Owner : Job
     {
-        public List<Property> properties = new List<Property>();
+        public List<Property> Properties { get; private set; } = new List<Property>();
         public Owner(FamilyMember member) : base(member)
         {
         }
 
         public void AddProperty(Property property)
         {
-            properties.Add(property);
+            Properties.Add(property);
             ChangeProperty();
         }
 
         public void RemoveProperty(Property property)
         {
-            properties.Remove(property);
+            Properties.Remove(property);
             if (Property == property)
             {
                 ChangeProperty();
@@ -149,23 +149,23 @@ namespace Citizens
 
         private void ChangeProperty()
         {
-            var property = properties.Find(p => p.Rentant == null && p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
+            var property = Properties.Find(p => p.Rentant == null && p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
             if (property != null)
             {
                 Property = property;
             }
             else
             {
-                property = properties.Find(p => p.JobUnits.Count > 0);
+                property = Properties.Find(p => p.JobUnits.Count > 0);
                 if (property != null)
                 {
                     Property = property;
                 }
             }
 
-            if (Property == null && properties.Count > 0)
+            if (Property == null && Properties.Count > 0)
             {
-                Property = properties[0];
+                Property = Properties[0];
             }
         }
 

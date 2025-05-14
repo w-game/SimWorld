@@ -497,11 +497,11 @@ namespace GameItem
         }
 
         private DialogElement _dialogElement;
-        public void ShowConvarsation(string conversation, UnityAction callback)
+        public void ShowConversation(DialogData dialogData)
         {
             // 显示对话框
             var chatUI = GameManager.I.GameItemManager.ItemUIPool.Get<DialogElement>("Prefabs/UI/Elements/DialogElement", Pos + Vector3.up, UI.transform);
-            chatUI.ShowTextByCharacter(conversation, callback);
+            chatUI.ShowTextByCharacter(dialogData);
             _dialogElement = chatUI;
         }
 
@@ -513,19 +513,27 @@ namespace GameItem
 
         public override List<IAction> ActionsOnClick(Agent agent)
         {
-            if (Citizen.Job is Owner owner && owner.Property is ShopProperty)
-            {
-                return new List<IAction>()
-                {
-                    ActionPool.Get<CheckInteractionAction>(this, typeof(ChatAction), "Chat"),
-                    ActionPool.Get<CheckInteractionAction>(this, typeof(TradeAction), "Trade")
-                };
-            }
-
-            return new List<IAction>()
+            var actions = new List<IAction>()
             {
                 ActionPool.Get<CheckInteractionAction>(this, typeof(ChatAction), "Chat")
             };
+
+            if (Citizen.Job is Owner owner)
+            {
+                if (owner.Property is ShopProperty shop)
+                {
+                    actions.Add(ActionPool.Get<CheckInteractionAction>(this, typeof(TradeAction), "Trade"));
+                }
+
+                var farms = owner.Properties.OfType<FarmProperty>().ToList();
+
+                if (farms.Count > 0)
+                {
+                    actions.Add(ActionPool.Get<CheckInteractionAction>(this, typeof(RentPropertyAction), "询问土地租赁"));
+                }
+            }
+
+            return actions;
         }
 
         public bool CheckSkillLevel<T>(int targetLevel) where T : SkillBase

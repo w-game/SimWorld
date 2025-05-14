@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -11,6 +12,9 @@ namespace UI.Elements
     {
         [SerializeField] private TextMeshProUGUI text;
         [SerializeField] private CanvasGroup canvasGroup;
+        [SerializeField] private Transform optionParent;
+
+        private List<DialogOptionElement> _dialogOptionElements = new List<DialogOptionElement>();
 
         public void OnGet()
         {
@@ -23,16 +27,42 @@ namespace UI.Elements
             text.text = string.Empty;
         }
 
-        public void ShowTextByCharacter(string content, UnityAction callback, float charInterval = 0.05f)
+        public void ShowTextByCharacter(DialogData dialogData, float charInterval = 0.05f)
         {
             StopAllCoroutines();
-            text.text = content;
+            text.text = dialogData.Content;
             text.ForceMeshUpdate();
             text.maxVisibleCharacters = 0;
-            StartCoroutine(TypeText(charInterval, callback));
+            StartCoroutine(TypeText(charInterval, () =>
+            {
+                dialogData.Callback?.Invoke();
+                StartCoroutine(ShowOptions(dialogData));
+            }));
         }
 
-        private IEnumerator TypeText(float charInterval, UnityAction callback)
+        private IEnumerator ShowOptions(DialogData dialogData)
+        {
+            foreach (var optionElement in _dialogOptionElements)
+            {
+                UIManager.I.ReleaseElement(optionElement, "Prefabs/UI/Elements/DialogOptionElement");
+            }
+            _dialogOptionElements.Clear();
+
+            foreach (var option in dialogData.Options)
+            {
+                var optionElement = UIManager.I.GetElement<DialogOptionElement>("Prefabs/UI/Elements/DialogOptionElement", Vector3.zero, optionParent);
+                optionElement.ShowText(_dialogOptionElements.Count + 1, option.Text);
+                optionElement.OnClick.AddListener(() =>
+                {
+                    option.OnClick?.Invoke();
+                    Hide();
+                });
+                _dialogOptionElements.Add(optionElement);
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+
+        private IEnumerator TypeText(float charInterval, Action callback)
         {
             int totalChars = text.textInfo.characterCount;
             for (int i = 1; i <= totalChars; i++)
@@ -41,7 +71,6 @@ namespace UI.Elements
                 yield return new WaitForSeconds(charInterval);
             }
 
-            yield return new WaitForSeconds(0.5f);
             callback?.Invoke();
         }
 

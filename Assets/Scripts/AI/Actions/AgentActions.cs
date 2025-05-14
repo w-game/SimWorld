@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Citizens;
 using GameItem;
 using UI.Models;
@@ -30,11 +31,16 @@ namespace AI
                 }
                 else
                 {
-                    _targetAgent.ShowConvarsation("Sorry, I'm busy right now.", () =>
+                    var dialogData = new DialogData
                     {
-                        _targetAgent.HideDialog();
-                        Done = true;
-                    });
+                        Content = "Sorry, I can't do that right now.",
+                        Callback = () =>
+                        {
+                            _targetAgent.HideDialog();
+                            Done = true;
+                        }
+                    };
+                    _targetAgent.ShowConversation(dialogData);
                 }
             });
         }
@@ -105,21 +111,26 @@ namespace AI
             _state = ChatState.Speaking;
             // Show conversation line
             listener.HideDialog();
-            speaker.ShowConvarsation($"{_state}'s turn to speak.", () =>
+            var dialogData = new DialogData
             {
-                _turnCount++;
-                if (_turnCount >= _maxTurns)
+                Content = $"{_state} says something.",
+                Callback = () =>
                 {
-                    EndChat();
-                }
-                else
-                {
-                    // Switch state for next turn
-                    _state = (curState == ChatState.AgentOneTurn) ? ChatState.AgentTwoTurn : ChatState.AgentOneTurn;
-                    _timer = 0f;
-                    _delay = UnityEngine.Random.Range(1f, 3f);
-                }
-            });
+                    _turnCount++;
+                    if (_turnCount >= _maxTurns)
+                    {
+                        EndChat();
+                    }
+                    else
+                    {
+                        // Switch state for next turn
+                        _state = (curState == ChatState.AgentOneTurn) ? ChatState.AgentTwoTurn : ChatState.AgentOneTurn;
+                        _timer = 0f;
+                        _delay = UnityEngine.Random.Range(1f, 3f);
+                    }
+                },
+            };
+            speaker.ShowConversation(dialogData);
         }
 
         private void EndChat()
@@ -186,12 +197,195 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            
+
         }
 
         protected override void DoExecute(Agent agent)
         {
 
+        }
+    }
+    
+    public class RentPropertyAction : ConditionActionBase
+    {
+        private Agent _agentOne;
+        private Agent _agentTwo;
+
+        private bool _end = false;
+
+        private int _step = 0;
+
+        private DialogOption _endOption;
+
+        private List<Property> _propertiesForRent = new List<Property>();
+
+        private Property _selectedProperty;
+
+        public override void OnGet(params object[] args)
+        {
+            ActionName = "RentProperty";
+            _agentOne = args[0] as Agent;
+            _agentTwo = args[1] as Agent;
+
+            _agentOne.HideDialog();
+            _agentTwo.HideDialog();
+
+            // var model = IModel.GetModel<PopRentPropertyModel>();
+            // model.ShowUI(this);
+            _end = false;
+
+            Condition = () => _end;
+
+            _endOption = new DialogOption
+            {
+                Text = "我考虑考虑",
+                OnClick = () =>
+                {
+                    EndRent();
+                }
+            };
+        }
+
+        private void EndRent()
+        {
+            _end = true;
+            _agentOne.HideDialog();
+            _agentTwo.HideDialog();
+        }
+
+        private void Rent()
+        {
+            _end = true;
+            _agentOne.HideDialog();
+            _agentTwo.HideDialog();
+            _selectedProperty.LeaseTo(_agentOne.Citizen.Family);
+        }
+
+        public override void OnRegister(Agent agent)
+        {
+            var role = _agentTwo.Citizen.Job as Owner;
+            if (role != null)
+            {
+                var properties = role.Properties.OfType<FarmProperty>();
+                _propertiesForRent = properties.Where(x => x.ForRent).Cast<Property>().ToList();
+            }
+        }
+
+        protected override void DoExecute(Agent agent)
+        {
+            switch (_step)
+            {
+                case 0:
+                    DialogData dialogData = null;
+                    if (_selectedProperty == null)
+                    {
+                        List<string> sizes = _propertiesForRent.Select(x => (x.House.Size.x * x.House.Size.y).ToString()).ToList();
+                        dialogData = new DialogData
+                        {
+                            Content = $"我这有{_propertiesForRent.Count}块地，你问的是哪一块？\n" +
+                                        "分别有" +
+                                        string.Join(",", sizes) + "平方米大小的",
+                        };
+
+                        for (int i = 0; i < sizes.Count; i++)
+                        {
+                            var size = sizes[i];
+                            var idx = i;
+                            dialogData.Options.Add(new DialogOption
+                            {
+                                Text = $"{i + 1}号地（{size}平方米）",
+                                OnClick = () =>
+                                {
+                                    _selectedProperty = _propertiesForRent[idx];
+                                    _step = 0;
+                                }
+                            });
+                        }
+                    }
+                    else
+                    {
+                        dialogData = new DialogData
+                        {
+                            Content = "这块地\n" +
+                                    "一周只要<color=#ff0000>10文钱每平方米</color>，\n" +
+                                    "怎么样？",
+                            Options = new List<DialogOption>
+                            {
+                                new DialogOption{
+                                    Text = "成交！",
+                                    OnClick = () =>
+                                    {
+                                        _step = 1;
+                                    }
+                                },
+                                new DialogOption{
+                                    Text = "能便宜点吗？",
+                                    OnClick = () => {
+                                        _step = 2;
+                                    }
+                                },
+                                new DialogOption{
+                                    Text = "我想看看位置。",
+                                    OnClick = () =>
+                                    {
+                                        _step = 3;
+                                    }
+                                },
+                                _endOption
+                            }
+                        };
+                    }
+                    _agentTwo.ShowConversation(dialogData);
+                    _step = -1;
+                    break;
+                case 1:
+                    var dialogData1 = new DialogData
+                    {
+                        Content = "那先付这周的租金吧\n",
+                        Options = new List<DialogOption>
+                        {
+                            new DialogOption{
+                                Text = "给钱（10文钱）",
+                                OnClick = () =>
+                                {
+                                    Rent();
+                                }
+                            },
+                            _endOption
+                        }
+                    };
+                    _agentTwo.ShowConversation(dialogData1);
+                    _step = -1;
+                    break;
+                case 2:
+                    var dialogData2 = new DialogData
+                    {
+                        Content = "我可以给你<color=#ff0000>8文钱</color>，\n" +
+                                  "但是你要帮我做点事情。",
+                        Options = new List<DialogOption>
+                        {
+                            new DialogOption{
+                                Text = "好的，我愿意。",
+                                OnClick = () =>
+                                {
+                                    Rent();
+                                }
+                            },
+                            _endOption
+                        }
+                    };
+                    _agentTwo.ShowConversation(dialogData2);
+                    _step = -1;
+                    break;
+                case 3:
+                    var dialogData3 = new DialogData
+                    {
+                        Content = "我带你过去吧，跟着我。"
+                    };
+                    _agentTwo.ShowConversation(dialogData3);
+                    _step = -1;
+                    break;
+            }
         }
     }
 }

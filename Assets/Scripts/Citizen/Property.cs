@@ -18,6 +18,8 @@ namespace Citizens
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
         public event Action<Type, JobUnit> OnJobUnitAdded;
 
+        public bool ForRent { get; set; } = true;
+
         public Property(IHouse house)
         {
             House = house;

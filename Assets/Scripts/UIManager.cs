@@ -14,7 +14,7 @@ public class UIManager : MonoSingleton<UIManager>
     public CinemachineCamera cinemachineCamera;
 
     public static event UnityAction<Vector3> OnMouseBtnClicked;
-    public ObjectPool UIPool { get; } = new ObjectPool(30);
+    private ObjectPool UIPool { get; } = new ObjectPool(30);
 
     internal Vector3 MousePosToWorldPos()
     {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using GameItem;
 using Map;
@@ -183,7 +184,7 @@ namespace Citizens
                     break;
             }
 
-            var adults = family.Members.FindAll(_ => _.Age >= 18);
+            var adults = family.Members.Where(m => m.Age >= 18).ToList();
             if (adults.Count == 0)
             {
                 return; // No adults to assign jobs
@@ -194,7 +195,7 @@ namespace Citizens
             if (ownerAmount == 1)
             {
                 var randomAdult = adults[Random.Range(0, adults.Count)];
-                var owner = new Owner(randomAdult);
+                var owner = randomAdult.Job is Owner o ? o : new Owner(randomAdult);
                 owner.AddProperty(property);
                 randomAdult.SetJob(owner);
             }
@@ -202,7 +203,7 @@ namespace Citizens
             {
                 foreach (var adult in adults)
                 {
-                    var owner = new Owner(adult);
+                    var owner = adult.Job is Owner o ? o : new Owner(adult);
                     owner.AddProperty(property);
                     adult.SetJob(owner);
                 }

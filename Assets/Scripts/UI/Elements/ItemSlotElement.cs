@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace UI.Elements
 {
-    public class ItemSlotElement : MonoBehaviour, IPoolable, IPointerEnterHandler, IPointerExitHandler
+    public class ItemSlotElement : MonoBehaviour, IUIPoolable, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] private Image itemIcon;
         [SerializeField] private Button itemButton;

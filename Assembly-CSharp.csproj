@@ -89,6 +89,7 @@
     <Compile Include="Assets/Scripts/UIManager.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopTradeModel.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopBuildingCraftModel.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/DialogOptionElement.cs" />
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/JobUnitElement.cs" />
     <Compile Include="Assets/TIles/DirtTile.cs" />
@@ -117,6 +118,7 @@
     <Compile Include="Assets/Scripts/AI/Actions/NormalActions.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItemUI.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCountSelectorModel.cs" />
+    <Compile Include="Assets/Scripts/Citizen/Agent/Dialog.cs" />
     <Compile Include="Assets/TIles/OceanTile.cs" />
     <Compile Include="Assets/Scripts/UI/ElementBase.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopHouseDetailsModel.cs" />

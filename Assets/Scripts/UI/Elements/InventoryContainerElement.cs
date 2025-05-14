@@ -63,7 +63,7 @@ namespace UI.Elements
             if (slotElement == null || SlotInfoPanel == null)
                 return;
 
-            UIManager.I.UIPool.Release(SlotInfoPanel, "Prefabs/UI/Elements/SlotInfoPanel");
+            UIManager.I.ReleaseElement(SlotInfoPanel, "Prefabs/UI/Elements/SlotInfoPanel");
             SlotInfoPanel = null;
         }
 
@@ -72,7 +72,7 @@ namespace UI.Elements
             ClearSlots();
             for (int i = 0; i < Inventory.MaxSize; i++)
             {
-                var slot = UIManager.I.UIPool.Get<ItemSlotElement>("Prefabs/UI/Elements/ItemSlotElement", transform.position, _slotsParent);
+                var slot = UIManager.I.GetElement<ItemSlotElement>("Prefabs/UI/Elements/ItemSlotElement", transform.position, _slotsParent);
                 _inventorySlots.Add(slot);
                 slot.Init(null, OnSlotClicked);
                 slot.OnPointerEnterEvent += OnSlotPointerEnter;
@@ -108,7 +108,7 @@ namespace UI.Elements
             foreach (var slot in _inventorySlots)
             {
                 slot.Clear();
-                UIManager.I.UIPool.Release(slot, "Prefabs/UI/Elements/ItemSlotElement");
+                UIManager.I.ReleaseElement(slot, "Prefabs/UI/Elements/ItemSlotElement");
             }
             _inventorySlots.Clear();
         }
