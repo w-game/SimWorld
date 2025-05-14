@@ -1,3 +1,4 @@
+using System;
 using Citizens;
 using Map;
 using UI.Views;
@@ -16,7 +17,7 @@ namespace UI.Models
         {
         }
 
-        internal void BuyProperty()
+        public void BuyProperty()
         {
             if (House != null)
             {
@@ -24,6 +25,18 @@ namespace UI.Models
                 if (property != null)
                 {
                     property.BeBought(GameManager.I.CurrentAgent);
+                }
+            }
+        }
+
+        public void RentProperty()
+        {
+            if (House != null)
+            {
+                var property = Property.Properties[House];
+                if (property != null)
+                {
+                    property.LeaseTo(GameManager.I.CurrentAgent.Citizen.Family);
                 }
             }
         }

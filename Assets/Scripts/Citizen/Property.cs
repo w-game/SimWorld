@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AI;
 using GameItem;
 using Map;
@@ -12,21 +11,19 @@ namespace Citizens
     {
         public static Dictionary<IHouse, Property> Properties { get; } = new Dictionary<IHouse, Property>();
         public IHouse House { get; private set; }
-        public Family Owner { get; private set; }
+        public Family Rentant { get; private set; }
         public List<Employee> Employees { get; } = new List<Employee>();
         public Dictionary<Type, List<JobUnit>> JobUnits { get; } = new Dictionary<Type, List<JobUnit>>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 8 * 60 * 60 };
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
         public event Action<Type, JobUnit> OnJobUnitAdded;
 
-        public Property(IHouse house, Family owner)
+        public Property(IHouse house)
         {
             House = house;
-            Owner = owner;
-
             Properties.Add(house, this);
 
-            BeBought(owner.Members[0].Agent);
+            BeBought(House.Owner.Members[0].Agent);
 
             Debug.Log($"Property: {House.HouseType} has been created.");
         }
@@ -52,17 +49,14 @@ namespace Citizens
 
         public void BeBought(Agent agent)
         {
-            if (Owner != null)
+            foreach (var member in House.Owner.Members)
             {
-                foreach (var member in Owner.Members)
+                if (member.IsAdult && member.Job is Owner owner)
                 {
-                    if (member.IsAdult && member.Job is Owner owner)
+                    owner.RemoveProperty(this);
+                    if (owner.Property == null)
                     {
-                        owner.RemoveProperty(this);
-                        if (owner.Property == null)
-                        {
-                            member.SetJob(null);
-                        }
+                        member.SetJob(null);
                     }
                 }
             }
@@ -80,11 +74,25 @@ namespace Citizens
                 }
             }
         }
+
+        public void LeaseTo(Family family)
+        {
+            Rentant = family;
+            foreach (var member in family.Members)
+            {
+                if (member.IsAdult)
+                {
+                    var job = new Rentant(member, this);
+                    member.SetJob(job);
+                }
+            }
+        }
     }
+
 
     public class FarmProperty : Property
     {
-        public FarmProperty(IHouse house, Family owner) : base(house, owner)
+        public FarmProperty(IHouse house) : base(house)
         {
             CheckFarmHoed();
         }
@@ -94,28 +102,9 @@ namespace Citizens
             foreach (var pos in House.Blocks)
             {
                 var block = new Vector3(pos.x, pos.y);
-                MapManager.I.TryGetBuildingItem(block, out var buildingItem);
-                if (buildingItem == null)
+                if (MapManager.I.TryGetBuildingItem(block, out var buildingItem) && buildingItem is FarmItem farmItem)
                 {
-                    var jobUnit = new JobUnit(ActionPool.Get<HoeAction>(block, House), jobUnit =>
-                    {
-                        if (MapManager.I.TryGetBuildingItem(block, out var item))
-                        {
-                            if (item is FarmItem farmItem)
-                            {
-                                CheckPlantToFarm(farmItem);
-                            }
-                        }
-
-                    });
-                    AddJobUnit<Farmer>(jobUnit);
-                }
-                else
-                {
-                    if (buildingItem is FarmItem farmItem)
-                    {
-                        CheckPlantToFarm(farmItem);
-                    }
+                    CheckPlantToFarm(farmItem);
                 }
             }
 
@@ -157,7 +146,7 @@ namespace Citizens
     public class RestaurantProperty : Property
     {
         private List<StoveItem> _stoveItems = new List<StoveItem>();
-        public RestaurantProperty(IHouse house, Family owner) : base(house, owner)
+        public RestaurantProperty(IHouse house) : base(house)
         {
             foreach (var furniture in House.FurnitureItems)
             {
@@ -232,14 +221,14 @@ namespace Citizens
 
     public class TeahouseProperty : RestaurantProperty
     {
-        public TeahouseProperty(IHouse house, Family owner) : base(house, owner)
+        public TeahouseProperty(IHouse house) : base(house)
         {
         }
     }
 
     public class TavernProperty : RestaurantProperty
     {
-        public TavernProperty(IHouse house, Family owner) : base(house, owner)
+        public TavernProperty(IHouse house) : base(house)
         {
         }
     }
@@ -251,8 +240,7 @@ namespace Citizens
         private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
 
         private List<ShopShelfItem> ShopShelfItemsInRestocking = new List<ShopShelfItem>();
-
-        public ShopProperty(IHouse house, Family owner) : base(house, owner)
+        public ShopProperty(IHouse house) : base(house)
         {
             var configs = ConfigReader.GetAllConfigs<PropConfig>(c => c.type == PropType.Seed || c.type == PropType.Crop || c.type == PropType.Ingredient);
 
@@ -261,7 +249,7 @@ namespace Citizens
                 if (furniture.Value is ShopShelfItem shopShelfItem)
                 {
                     shopShelfItem.OnSoldEvent += CheckRestock;
-                    shopShelfItem.Owner = owner;
+                    shopShelfItem.Owner = house.Owner;
                     _shopShelfItems.Add(shopShelfItem);
                 }
                 else if (furniture.Value is ContainerItem containerItem)

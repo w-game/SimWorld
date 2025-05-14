@@ -14,6 +14,7 @@ namespace UI.Views
         [SerializeField] private TextMeshProUGUI propertyDetails;
         [SerializeField] private GameObject recruitmentItemPrefab;
         [SerializeField] private Button buyButton;
+        [SerializeField] private Button rentButton;
 
         public override void OnShow()
         {
@@ -42,6 +43,7 @@ namespace UI.Views
                         });
                     }
                     buyButton.onClick.AddListener(Model.BuyProperty);
+                    rentButton.onClick.AddListener(Model.RentProperty);
                 }
             }
 

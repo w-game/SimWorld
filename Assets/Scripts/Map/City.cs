@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameItem;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -10,6 +9,12 @@ namespace Map
 
     public class City
     {
+        public enum BlockType
+        {
+            None,
+            Road,
+            House
+        }
         public Vector2Int GlobalPos { get; private set; } // 城市在世界中的绝对位置
         public int Size { get; private set; } // 城市大小，影响城市半径
         public Chunk OriginChunk { get; private set; } // 城市起源的Chunk
@@ -50,7 +55,7 @@ namespace Map
 
         private void CreateCity()
         {
-            bool[,] cityMap = new bool[Size, Size];
+            BlockType[,] cityMap = new BlockType[Size, Size];
             // 创建跨Chunk的道路
             CreateRoad();
 
@@ -60,7 +65,7 @@ namespace Map
                 {
                     Vector2Int local = worldPos - OriginChunk.WorldPos;
                     if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
-                        cityMap[local.x, local.y] = true;
+                        cityMap[local.x, local.y] = BlockType.Road;
                 }
             }
 
@@ -71,7 +76,7 @@ namespace Map
             PutRoom(cityMap);
         }
 
-        public void PutWell(bool[,] cityMap)
+        public void PutWell(BlockType[,] cityMap)
         {
             // 在随机道路上方放置水井
 
@@ -83,15 +88,15 @@ namespace Map
                 var roadPoint = road[ChunkRand.Next(road.Count)];
                 wellPos = roadPoint + new Vector2Int(0, 1);
                 local = wellPos - OriginChunk.WorldPos;
-            } while (cityMap[local.x, local.y] || cityMap[local.x + 1, local.y]);
+            } while (cityMap[local.x, local.y] != BlockType.None || cityMap[local.x + 1, local.y] != BlockType.None);
 
             WellItem = GameItemManager.CreateGameItem<WellItem>(
                 ConfigReader.GetConfig<BuildingConfig>("BUILDING_WELL"),
                 new Vector3(wellPos.x, wellPos.y, 0),
                 GameItemType.Static);
 
-            cityMap[local.x, local.y] = true;
-            cityMap[local.x + 1, local.y] = true;
+            cityMap[local.x, local.y] = BlockType.House;
+            cityMap[local.x + 1, local.y] = BlockType.House;
         }
 
         public void ChangePopulation(int amount)
@@ -206,7 +211,7 @@ namespace Map
             Debug.Log($"City {GlobalPos} has {Roads.Count} roads");
         }
 
-        private void PutRoom(bool[,] cityMap)
+        private void PutRoom(BlockType[,] cityMap)
         {
             foreach (var road in Roads)
             {
@@ -231,7 +236,7 @@ namespace Map
                             {
                                 var local = b - OriginChunk.WorldPos;
                                 if (local.x >= 0 && local.x < Size && local.y >= 0 && local.y < Size)
-                                    cityMap[local.x, local.y] = true;
+                                    cityMap[local.x, local.y] = BlockType.House;
                             }
                             housesPlaced++;
                             if (housesPlaced >= maxHousesPerRoad)
@@ -254,7 +259,7 @@ namespace Map
             }
         }
 
-        private IHouse PlaceBuilding(Vector2Int roadPoint, bool[,] cityMap)
+        private IHouse PlaceBuilding(Vector2Int roadPoint, BlockType[,] cityMap)
         {
             // Randomly pick a room config
             var roomConfig = _roomConfigs[ChunkRand.Next(_roomConfigs.Count)];
@@ -281,10 +286,19 @@ namespace Map
                     {
                         int x = local.x + ix;
                         int y = local.y + iy;
+                            
                         if (x >= 0 && x < Size && y >= 0 && y < Size)
                         {
-                            if (cityMap[x, y] && !Roads.Any(r => r.Contains(new Vector2Int(x + OriginChunk.WorldPos.x, y + OriginChunk.WorldPos.y))))
-                                return null;
+                            if (ix == 0 && iy == 0)
+                            {
+                                if (cityMap[x, y] != BlockType.None)
+                                    return null;
+                            }
+                            else
+                            {
+                                if (cityMap[x, y] == BlockType.House)
+                                    return null;
+                            }
                         }
                     }
                 }

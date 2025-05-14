@@ -237,6 +237,19 @@ namespace AI
                     }
                 }
             }
+            else if (_agent.Citizen.Job is Rentant rentant)
+            {
+                if ((_agent == GameManager.I.CurrentAgent && _agent.Citizen.Job.AutoAssign) || (_agent != GameManager.I.CurrentAgent))
+                {
+                    if (rentant.CurJob == null)
+                    {
+                        rentant.Next();
+                        if (rentant.CurJob == null)
+                            return;
+                        RegisterAction(rentant.CurJob.Action, true);
+                    }
+                }
+            }
             else if (!result)
             {
                 if (_scanTimer < _scanInterval)

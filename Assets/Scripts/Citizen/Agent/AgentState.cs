@@ -27,7 +27,7 @@ namespace Citizens
             Health = new State("Health", 100, 0, Agent);
             Hunger = new State("Hunger", 100, 0.00463f, Agent);
             Toilet = new ToiletState("Toilet", 100, 0.00526f, Agent);
-            Social = new SocialState("Social", 100, 0.00347f, Agent);
+            Social = new SocialState("Social", 100, 0.00047f, Agent);
             Mood = new State("Mood", 100, 0.00231f, Agent);
             Sleep = new SleepState("Sleep", 100, 0.00174f, Agent);
             Hygiene = new HygieneState("Hygiene", 100, 0.00116f, Agent);

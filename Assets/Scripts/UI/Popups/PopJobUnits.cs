@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Citizens;
 using UI.Elements;
 using UI.Models;
@@ -25,10 +24,10 @@ namespace UI.Views
                 }
             }
 
-            autoAssignSlider.gameObject.SetActive(Model.Job.AutoAssign);
+            autoAssignSlider.gameObject.SetActive(Model.SelfJob.AutoAssign);
             autoAssignButton.onClick.AddListener(OnAutoAssignButtonClicked);
 
-            Model.Job.Property.OnJobUnitAdded += CreateElement;
+            Model.SelfJob.Property.OnJobUnitAdded += CreateElement;
         }
 
         private void CreateElement(Type type, JobUnit jobUnit)
@@ -39,7 +38,7 @@ namespace UI.Views
             {
                 Destroy(jobUnitElement.gameObject);
             };
-            jobUnitElement.SetBtnInteractable(!Model.Job.AutoAssign);
+            jobUnitElement.SetBtnInteractable(!Model.SelfJob.AutoAssign);
         }
 
         private void OnDoBtnClicked((Type, JobUnit) jobUnitData, JobUnitElement jobUnitElement)
@@ -52,14 +51,14 @@ namespace UI.Views
 
         private void OnAutoAssignButtonClicked()
         {
-            Model.Job.AutoAssign = !Model.Job.AutoAssign;
-            autoAssignSlider.gameObject.SetActive(Model.Job.AutoAssign);
+            Model.SelfJob.AutoAssign = !Model.SelfJob.AutoAssign;
+            autoAssignSlider.gameObject.SetActive(Model.SelfJob.AutoAssign);
             foreach (Transform child in jobUnitContainer)
             {
                 var jobUnitElement = child.GetComponent<JobUnitElement>();
                 if (jobUnitElement != null)
                 {
-                    jobUnitElement.SetBtnInteractable(!Model.Job.AutoAssign);
+                    jobUnitElement.SetBtnInteractable(!Model.SelfJob.AutoAssign);
                 }
             }
         }
@@ -68,7 +67,7 @@ namespace UI.Views
         {
             base.OnHide();
             autoAssignButton.onClick.RemoveListener(OnAutoAssignButtonClicked);
-            Model.Job.Property.OnJobUnitAdded -= CreateElement;
+            Model.SelfJob.Property.OnJobUnitAdded -= CreateElement;
         }
     }
 }

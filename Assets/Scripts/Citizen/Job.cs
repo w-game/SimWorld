@@ -149,7 +149,7 @@ namespace Citizens
 
         private void ChangeProperty()
         {
-            var property = properties.Find(p => p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
+            var property = properties.Find(p => p.Rentant == null && p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
             if (property != null)
             {
                 Property = property;
@@ -177,6 +177,36 @@ namespace Citizens
                 if (Property == null) return null;
             }
 
+            if (Property.Rentant != null)
+            {
+                Property = null;
+                return null;
+            }
+
+            Property.JobUnits.TryGetValue(GetType(), out var jobUnits);
+
+            foreach (var kv in Property.JobUnits)
+            {
+                if (kv.Value.Count > 0)
+                {
+                    var unit = kv.Value[0];
+                    kv.Value.RemoveAt(0);
+                    return unit;
+                }
+            }
+            return null;
+        }
+    }
+
+    public class Rentant : Job
+    {
+        public Rentant(FamilyMember member, Property property) : base(member)
+        {
+            Property = property;
+        }
+
+        public override JobUnit CheckJobUnit()
+        {
             foreach (var kv in Property.JobUnits)
             {
                 if (kv.Value.Count > 0)

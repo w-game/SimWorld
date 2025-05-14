@@ -120,8 +120,6 @@ namespace Citizens
         {
             if (Families.ContainsKey(city)) return;
 
-            return;
-
             List<IHouse> cityProperties = new List<IHouse>();
             List<Family> families = new List<Family>();
 
@@ -147,6 +145,7 @@ namespace Citizens
                     CreateChildren(familyType, family, house, city, father, mother, grandfather, grandmother);
 
                     families.Add(family);
+                    city.ChangePopulation(family.Members.Count);
                 }
                 else if (house.HouseType == HouseType.Farm || house.HouseType == HouseType.Shop || house.HouseType == HouseType.Teahouse)
                 {
@@ -168,16 +167,17 @@ namespace Citizens
         private void AssignMembersJobs(Family family, IHouse house)
         {
             Property property = null;
+            house.SetOwner(family);
             switch (house.HouseType)
             {
                 case HouseType.Farm:
-                    property = new FarmProperty(house, family);
+                    property = new FarmProperty(house);
                     break;
                 case HouseType.Shop:
-                    property = new ShopProperty(house, family);
+                    property = new ShopProperty(house);
                     break;
                 case HouseType.Teahouse:
-                    property = new TeahouseProperty(house, family);
+                    property = new TeahouseProperty(house);
                     break;
                 default:
                     break;
@@ -207,8 +207,6 @@ namespace Citizens
                     adult.SetJob(owner);
                 }
             }
-
-            house.SetOwner(family);
         }
 
         public FamilyMember CreatePlayer()

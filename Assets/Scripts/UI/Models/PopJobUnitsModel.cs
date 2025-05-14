@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Citizens;
 using UI.Views;
-using Unity.VisualScripting;
 
 namespace UI.Models
 {
@@ -12,15 +10,15 @@ namespace UI.Models
         public override string Path => "PopJobUnits";
         public override ViewType ViewType => ViewType.Popup;
 
-        public Job Job => Data[0] as Job;
+        public Job SelfJob => Data[0] as Job;
         public Dictionary<Type, List<JobUnit>> JobUnits
         {
             get
             {
                 Dictionary<Type, List<JobUnit>> jobUnits = new Dictionary<Type, List<JobUnit>>();
-                foreach (var jobUnit in Job.Property.JobUnits)
+                foreach (var jobUnit in SelfJob.Property.JobUnits)
                 {
-                    if (jobUnit.Key == typeof(Job))
+                    if (jobUnit.Key == SelfJob.GetType())
                     {
                         if (jobUnit.Value.Count > 0)
                         {
@@ -29,9 +27,9 @@ namespace UI.Models
                     }
                 }
 
-                if (jobUnits.Count == 0 && Job is Owner)
+                if (jobUnits.Count == 0 &&( SelfJob is Owner || SelfJob is Rentant))
                 {
-                    return Job.Property.JobUnits;
+                    return SelfJob.Property.JobUnits;
                 }
                 return jobUnits;
             }
@@ -39,7 +37,7 @@ namespace UI.Models
 
         public bool DoJobUnit(Type type, JobUnit jobUnit)
         {
-            return Job.DoJobUnit(type, jobUnit);
+            return SelfJob.DoJobUnit(type, jobUnit);
         }
     }
 }
