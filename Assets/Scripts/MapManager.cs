@@ -111,36 +111,15 @@ public class MapManager : MonoSingleton<MapManager>
                 GenerateChunk(pos);
             }
         }
-    }
 
-    void Update()
-    {
-        // Compute current player chunk
-        Vector2Int currentChunkPos = new Vector2Int(
-            Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
-            Mathf.FloorToInt(_player.Pos.y / CartonMap.NORMAL_CHUNK_SIZE)
-        );
-
-        // Only start a new update if the player moved to a different chunk
-        if (currentChunkPos != _lastPlayerChunkPos)
-        {
-            _lastPlayerChunkPos = currentChunkPos;
-
-            // Stop any ongoing chunk update coroutine
-            if (_updateChunksCoroutine != null)
-                StopCoroutine(_updateChunksCoroutine);
-
-            // Start a new chunk update
-            _updateChunksCoroutine = StartCoroutine(UpdateChunkCoroutine());
-        }
+        _updateChunksCoroutine = StartCoroutine(UpdateChunkCoroutine());
     }
 
     private void GenerateChunk(Vector2Int pos)
     {
-        var chunk = CartonMap.GetChunk(pos, 0);
+        var chunk = CartonMap.GetChunk(pos, 0, true);
         if (chunk != null)
         {
-            chunk.CalcBlocks();
             chunk.CheckCityItems();
             chunk.CalcMapItems();
 
@@ -154,40 +133,51 @@ public class MapManager : MonoSingleton<MapManager>
 
     private IEnumerator UpdateChunkCoroutine()
     {
-        var playerChunkPos = new Vector2Int(
-            Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
-            Mathf.FloorToInt(_player.Pos.y / CartonMap.NORMAL_CHUNK_SIZE)
-        );
-
-        for (int x = 0; x < SIGHT_RANGE; x++)
+        while (true)
         {
-            for (int y = 0; y < SIGHT_RANGE; y++)
-            {
-                var pos = playerChunkPos + new Vector2Int(x - SIGHT_RANGE / 2, y - SIGHT_RANGE / 2);
-                if (_chunkActive.ContainsKey(pos))
-                {
-                    continue;
-                }
+            var playerChunkPos = new Vector2Int(
+                Mathf.FloorToInt(_player.Pos.x / CartonMap.NORMAL_CHUNK_SIZE),
+                Mathf.FloorToInt(_player.Pos.y / CartonMap.NORMAL_CHUNK_SIZE)
+            );
 
-                GenerateChunk(pos);
+            if (playerChunkPos == _lastPlayerChunkPos)
+            {
                 yield return null;
+                continue;
             }
-        }
 
-        // Clean up distant chunks
-        List<Vector2Int> toRemove = new List<Vector2Int>();
-        foreach (var kvp in _chunkActive)
-        {
-            if (kvp.Value != null &&
-                Vector2Int.Distance(kvp.Value.Pos, playerChunkPos) > SIGHT_RANGE + 2)
+            _lastPlayerChunkPos = playerChunkPos;
+
+            for (int x = 0; x < SIGHT_RANGE; x++)
             {
-                toRemove.Add(kvp.Key);
+                for (int y = 0; y < SIGHT_RANGE; y++)
+                {
+                    var pos = playerChunkPos + new Vector2Int(x - SIGHT_RANGE / 2, y - SIGHT_RANGE / 2);
+                    if (_chunkActive.ContainsKey(pos))
+                    {
+                        continue;
+                    }
+
+                    GenerateChunk(pos);
+                    yield return null;
+                }
             }
-        }
-        foreach (var key in toRemove)
-        {
-            UnVisualChunk(_chunkActive[key]);
-            _chunkActive.Remove(key);
+
+            // Clean up distant chunks
+            List<Vector2Int> toRemove = new List<Vector2Int>();
+            foreach (var kvp in _chunkActive)
+            {
+                if (kvp.Value != null &&
+                    Vector2Int.Distance(kvp.Value.Pos, playerChunkPos) > SIGHT_RANGE + 2)
+                {
+                    toRemove.Add(kvp.Key);
+                }
+            }
+            foreach (var key in toRemove)
+            {
+                UnVisualChunk(_chunkActive[key]);
+                _chunkActive.Remove(key);
+            }
         }
     }
 

@@ -28,7 +28,6 @@ namespace Map
             Layer = layer;
             Map = map;
             Size = (int)Mathf.Pow(2, layer) * CartonMap.NORMAL_CHUNK_SIZE;
-            Blocks = new BlockType[Size, Size];
 
             _chunkRand = new System.Random(Map.seed + layer * 1000 + pos.x * 100 + pos.y);
 
@@ -82,6 +81,8 @@ namespace Map
 
         public void CalcBlocks()
         {
+            Blocks = new BlockType[Size, Size];
+
             for (int i = 0; i < Size; i++)
             {
                 for (int j = 0; j < Size; j++)
@@ -186,29 +187,29 @@ namespace Map
             if (ChunkType == BlockType.Plain)
             {
                 // 检测周围是否有城市
-                var neighbors = new List<Vector2Int>()
-                {
-                    new Vector2Int(0, 1),
-                    new Vector2Int(1, 0),
-                    new Vector2Int(0, -1),
-                    new Vector2Int(-1, 0),
-                    new Vector2Int(1, 1),
-                    new Vector2Int(1, -1),
-                    new Vector2Int(-1, 1),
-                    new Vector2Int(-1, -1)
-                };
-                var hasCity = false;
-                foreach (var neighbor in neighbors)
-                {
-                    var chunk = Map.GetChunk(Pos + neighbor, CityLayer, false);
-                    if (chunk != null && chunk.City != null)
-                    {
-                        hasCity = true;
-                        break;
-                    }
-                }
+                // var neighbors = new List<Vector2Int>()
+                // {
+                //     new Vector2Int(0, 1),
+                //     new Vector2Int(1, 0),
+                //     new Vector2Int(0, -1),
+                //     new Vector2Int(-1, 0),
+                //     new Vector2Int(1, 1),
+                //     new Vector2Int(1, -1),
+                //     new Vector2Int(-1, 1),
+                //     new Vector2Int(-1, -1)
+                // };
+                // var hasCity = false;
+                // foreach (var neighbor in neighbors)
+                // {
+                //     var chunk = Map.GetChunk(Pos + neighbor, CityLayer, false);
+                //     if (chunk != null && chunk.City != null)
+                //     {
+                //         hasCity = true;
+                //         break;
+                //     }
+                // }
 
-                if (_chunkRand.Next(0, 100) < 20 && !hasCity)
+                if (_chunkRand.Next(0, 100) < 20)
                 {
                     City = new City(CenterPos, Size, this, _chunkRand);
                     Debug.Log($"Create City at {CenterPos} in Chunk {Pos} Layer {Layer}");

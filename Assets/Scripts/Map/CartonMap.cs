@@ -24,12 +24,9 @@ namespace Map
         public Dictionary<int, Dictionary<Vector2Int, Chunk>> chunks =
             new Dictionary<int, Dictionary<Vector2Int, Chunk>>();
 
-        private System.Random _managerRand;
-
         public void Init(int seed)
         {
             this.seed = seed;
-            _managerRand = new System.Random(seed);
 
             for (int i = 0; i < LAYER_NUM; i++)
             {
@@ -37,42 +34,57 @@ namespace Map
             }
         }
 
-        public City FindNearestCity(Vector2Int pos)
+        public City FindNearestCity(Vector2Int startPos, int maxStep = 2048)
         {
-            var neighbor = new List<Vector2Int>()
-                {
-                    new Vector2Int(0, 1),
-                    new Vector2Int(1, 0),
-                    new Vector2Int(0, -1),
-                    new Vector2Int(-1, 0),
-                    new Vector2Int(1, 1),
-                    new Vector2Int(1, -1),
-                    new Vector2Int(-1, 1),
-                    new Vector2Int(-1, -1)
-                };
-
-            var chunk = GetChunk(pos, Chunk.CityLayer);
-            if (chunk.City != null)
+            // 8‑directional search offsets
+            Vector2Int[] directions = new Vector2Int[]
             {
-                return chunk.City;
+                new Vector2Int(0, 1),  new Vector2Int(1, 0),
+                new Vector2Int(0,-1),  new Vector2Int(-1,0),
+                new Vector2Int(1, 1),  new Vector2Int(1,-1),
+                new Vector2Int(-1,1),  new Vector2Int(-1,-1)
+            };
+
+            var queue   = new Queue<(Vector2Int pos, int depth)>();
+            var visited = new HashSet<Vector2Int>();
+
+            queue.Enqueue((startPos, 0));
+            visited.Add(startPos);
+
+            while (queue.Count > 0)
+            {
+                var (pos, depth) = queue.Dequeue();
+                if (depth > maxStep) break;          // safety cap
+
+                var chunk = GetChunk(pos, Chunk.CityLayer);
+                if (chunk != null && chunk.City != null)
+                    return chunk.City;
+
+                foreach (var dir in directions)
+                {
+                    var next = pos + dir;
+                    if (!visited.Contains(next))
+                    {
+                        visited.Add(next);
+                        queue.Enqueue((next, depth + 1));
+                    }
+                }
             }
 
-            var index = _managerRand.Next(0, neighbor.Count);
-
-            return FindNearestCity(pos + neighbor[index]);
+            return null; // No city found within search radius
         }
 
-        public Chunk GetChunk(Vector3 pos, int layer)
+        public Chunk GetChunk(Vector3 pos, int layer, bool calcBlacks = false)
         {
             var floatSize = (float)((int)Mathf.Pow(2, layer) * NORMAL_CHUNK_SIZE);
             var chunkPos = new Vector2Int(
                 Mathf.FloorToInt(pos.x / floatSize),
                 Mathf.FloorToInt(pos.y / floatSize)
             );
-            return GetChunk(chunkPos, layer);
+            return GetChunk(chunkPos, layer, calcBlacks);
         }
 
-        public Chunk GetChunk(Vector2Int pos, int layer)
+        public Chunk GetChunk(Vector2Int pos, int layer, bool calcBlacks = false)
         {
             if (layer < 0 || layer >= LAYER_NUM)
             {
@@ -83,45 +95,33 @@ namespace Map
             {
                 if (chunks[layer].ContainsKey(pos))
                 {
-                    return chunks[layer][pos];
+                    var chunk = chunks[layer][pos];
+                    if (layer == 0 && calcBlacks && chunk.Blocks == null)
+                    {
+                        chunk.CalcBlocks();
+                    }
+                    return chunk;
                 }
                 else
                 {
-                    return CreateChunk(pos, layer);
+                    return CreateChunk(pos, layer, calcBlacks);
                 }
             }
 
             return null;
         }
 
-        public Chunk GetChunk(Vector2Int pos, int layer, bool create)
-        {
-            if (layer < 0 || layer >= LAYER_NUM)
-            {
-                return null;
-            }
-
-            if (chunks.ContainsKey(layer))
-            {
-                if (chunks[layer].ContainsKey(pos))
-                {
-                    return chunks[layer][pos];
-                }
-                else if (create)
-                {
-                    return CreateChunk(pos, layer);
-                }
-            }
-
-            return null;
-        }
-
-        public Chunk CreateChunk(Vector2Int pos, int layer)
+        public Chunk CreateChunk(Vector2Int pos, int layer, bool calcBlacks)
         {
             Chunk chunk = new Chunk(pos, layer, this);
             chunk.CalcChunk();
-
             chunks[layer].Add(pos, chunk);
+
+            if (calcBlacks && layer == 0)
+            {
+                chunk.CalcBlocks();
+            }
+
             if (layer == Chunk.CityLayer && chunk.City != null)
             {
                 GameManager.I.CitizenManager.GenerateNPCs(chunk.City);
