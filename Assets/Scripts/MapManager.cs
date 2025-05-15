@@ -74,6 +74,7 @@ public class MapManager : MonoSingleton<MapManager>
     public List<TileBase> farmTiles;
     public List<TileBase> farmWateredTiles;
     public List<TileBase> wallTiles;
+    public List<TileBase> castleWallTiles;
     public List<TileBase> floorTiles;
     public TileBase doorTile;
     private Dictionary<Vector2Int, Chunk> _chunkActive = new Dictionary<Vector2Int, Chunk>();

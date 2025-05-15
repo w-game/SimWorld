@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviour
 
         CreatePlayer();
         ActionListElement.I.Init();
+
+        Application.targetFrameRate = 144;
     }
 
     void Start()

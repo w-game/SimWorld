@@ -525,9 +525,9 @@ namespace GameItem
                     actions.Add(ActionPool.Get<CheckInteractionAction>(this, typeof(TradeAction), "Trade"));
                 }
 
-                var farms = owner.Properties.OfType<FarmProperty>().ToList();
+                var farms = owner.Properties.OfType<FarmProperty>().Where(f => f.ForRent).ToList();
 
-                if (farms.Count > 0)
+                if (farms.Count > 1)
                 {
                     actions.Add(ActionPool.Get<CheckInteractionAction>(this, typeof(RentPropertyAction), "询问土地租赁"));
                 }

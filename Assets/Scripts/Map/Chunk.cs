@@ -211,8 +211,8 @@ namespace Map
 
                 if (_chunkRand.Next(0, 100) < 20)
                 {
-                    City = new City(CenterPos, Size, this, _chunkRand);
-                    Debug.Log($"Create City at {CenterPos} in Chunk {Pos} Layer {Layer}");
+                    City = new City(CenterPos + WorldPos, Size, this, _chunkRand);
+                    Debug.Log($"Create City at {CenterPos + WorldPos} in Chunk {Pos} Layer {Layer}");
                 }
             }
         }

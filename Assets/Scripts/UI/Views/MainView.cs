@@ -17,7 +17,7 @@ namespace UI.Views
         {
             var t = GameManager.I.GameTime.CurrentTime;
             time.text = 
-                $"{(int)(t / 3600):00}:{(int)((t % 3600) / 60):00}:{(int)(t % 60):00}";
+                $"{(int)(t / 3600):00}:{(int)(t % 3600 / 60):00}";
         }
     }
 }

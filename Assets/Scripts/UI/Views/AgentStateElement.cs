@@ -8,12 +8,12 @@ namespace UI.Views
     public class AgentStateElement : MonoBehaviour
     {
         [SerializeField] private Slider hp;
-        [SerializeField] private Image hunger;
-        [SerializeField] private Image toilet;
-        [SerializeField] private Image social;
-        [SerializeField] private Image mood;
-        [SerializeField] private Image sleep;
-        [SerializeField] private Image hygiene;
+        [SerializeField] private Slider hunger;
+        // [SerializeField] private Image toilet;
+        // [SerializeField] private Image social;
+        [SerializeField] private Slider mood;
+        [SerializeField] private Slider sleep;
+        [SerializeField] private Slider hygiene;
 
         private void OnEnable()
         {
@@ -28,12 +28,12 @@ namespace UI.Views
         private void OnAgentStateChanged(AgentState state)
         {
             if (hp != null) hp.value = state.Health.Value / 100f;
-            if (hunger != null) hunger.fillAmount = state.Hunger.Value / 100f;
-            if (toilet != null) toilet.fillAmount = state.Toilet.Value / 100f;
-            if (social != null) social.fillAmount = state.Social.Value / 100f;
-            if (mood != null) mood.fillAmount = state.Mood.Value / 100f;
-            if (sleep != null) sleep.fillAmount = state.Sleep.Value / 100f;
-            if (hygiene != null) hygiene.fillAmount = state.Hygiene.Value / 100f;
+            if (hunger != null) hunger.value = state.Hunger.Value / 100f;
+            // if (toilet != null) toilet.fillAmount = state.Toilet.Value / 100f;
+            // if (social != null) social.fillAmount = state.Social.Value / 100f;
+            if (mood != null) mood.value = state.Mood.Value / 100f;
+            if (sleep != null) sleep.value = state.Sleep.Value / 100f;
+            if (hygiene != null) hygiene.value = state.Hygiene.Value / 100f;
         }
     }
 }

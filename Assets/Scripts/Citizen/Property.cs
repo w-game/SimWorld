@@ -18,14 +18,14 @@ namespace Citizens
         public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
         public event Action<Type, JobUnit> OnJobUnitAdded;
 
-        public bool ForRent { get; set; } = true;
+        public bool ForRent { get; set; } = false;
 
         public Property(IHouse house)
         {
             House = house;
             Properties.Add(house, this);
 
-            BeBought(House.Owner.Members[0].Agent);
+            // BeBought(House.Owner.Members[0].Agent);
 
             Debug.Log($"Property: {House.HouseType} has been created.");
         }
@@ -69,10 +69,7 @@ namespace Citizens
                 {
                     var ownerJob = new Owner(member);
                     ownerJob.AddProperty(this);
-                    if (member.Job != null)
-                    {
-                        member.SetJob(ownerJob);
-                    }
+                    member.SetJob(ownerJob);
                 }
             }
         }

@@ -107,6 +107,7 @@
     <Compile Include="Assets/Scripts/UI/Elements/ProducePanelElement.cs" />
     <Compile Include="Assets/Scripts/UI/Views/MainView.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ItemSlotElement.cs" />
+    <Compile Include="Assets/TIles/CastleTile.cs" />
     <Compile Include="Assets/Scripts/ItemShadow.cs" />
     <Compile Include="Assets/Scripts/Util.cs" />
     <Compile Include="Assets/Scripts/UI/ViewBase.cs" />

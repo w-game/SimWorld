@@ -98,6 +98,14 @@ namespace GameItem
         }
     }
 
+    public class CastleWallItem : BuildingItem
+    {
+        public CastleWallItem(BuildingConfig config, Vector3 pos) : base(config, pos, null)
+        {
+            Tiles = MapManager.I.castleWallTiles;
+        }
+    }
+
     public class FloorItem : BuildingItem
     {
         public FloorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)

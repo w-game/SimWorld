@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using UI.Elements;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace Citizens
@@ -135,6 +137,13 @@ namespace Citizens
         public void AddProperty(Property property)
         {
             Properties.Add(property);
+
+            var farmProperties = Properties.OfType<FarmProperty>().ToList();
+            if (farmProperties.Count > 5)
+            {
+                farmProperties.ForEach(p => p.ForRent = true);
+                Debug.Log("Farm properties are too many, set them to rent.");
+            }
             ChangeProperty();
         }
 
@@ -149,29 +158,24 @@ namespace Citizens
 
         private void ChangeProperty()
         {
-            var property = Properties.Find(p => p.Rentant == null && p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
+            var property = Properties.Find(p => !p.ForRent && p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
             if (property != null)
             {
                 Property = property;
             }
             else
             {
-                property = Properties.Find(p => p.JobUnits.Count > 0);
+                property = Properties.Find(p => !p.ForRent && p.JobUnits.Values.Sum(v => v.Count) > 0);
                 if (property != null)
                 {
                     Property = property;
                 }
             }
-
-            if (Property == null && Properties.Count > 0)
-            {
-                Property = Properties[0];
-            }
         }
 
         public override JobUnit CheckJobUnit()
         {
-            if (Property == null || Property.JobUnits.Count == 0)
+            if (Property == null || Property.JobUnits.Values.Sum(v => v.Count) == 0)
             {
                 ChangeProperty();
                 if (Property == null) return null;
@@ -182,8 +186,6 @@ namespace Citizens
                 Property = null;
                 return null;
             }
-
-            Property.JobUnits.TryGetValue(GetType(), out var jobUnits);
 
             foreach (var kv in Property.JobUnits)
             {

@@ -14,6 +14,19 @@
             "buildSpeed": 10
         },
         {
+            "id": "BUILDING_CASTLE_WALL",
+            "name": "Castle Wall",
+            "description": "A strong castle wall.",
+            "type": "CastleWall",
+            "icon": "Textures/CastleWall",
+            "size": [1, 1],
+            "requiredResources": {
+                "stone": 10,
+                "metal": 5
+            },
+            "buildSpeed": 15
+        },
+        {
             "id": "BUILDING_DOOR",
             "name": "Door",
             "description": "A door for entering and exiting rooms.",

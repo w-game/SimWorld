@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameItem;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -24,10 +25,8 @@ namespace Map
 
         public System.Random ChunkRand { get; private set; } // 随机数生成器
 
-        // Minimum empty tiles required between houses
         private const int HOUSE_MARGIN = 1;
 
-        // Cached room configs and occupancy grids
         private List<RoomConfig> _roomConfigs;
 
         public CityPrice CityPrice { get; private set; }
@@ -38,7 +37,7 @@ namespace Map
 
         public City(Vector2Int pos, int size, Chunk originChunk, System.Random chunkRand)
         {
-            GlobalPos = pos + originChunk.WorldPos; // 转换为全局坐标
+            GlobalPos = pos;
             Size = size;
             OriginChunk = originChunk;
 
@@ -51,6 +50,41 @@ namespace Map
             CreateCity();
 
             CityPrice = GameManager.I.PriceSystem.AddCity(this);
+
+            // 生成城墙
+            CreateCastleWalls();
+        }
+
+        private void CreateCastleWalls()
+        {
+            // 在城市边界生成城墙
+            for (int x = 0; x < Size; x++)
+            {
+                var wallPos = OriginChunk.WorldPos + new Vector2Int(x, 0);
+                var wallPosUp = OriginChunk.WorldPos + new Vector2Int(x, Size);
+                GameItemManager.CreateGameItem<CastleWallItem>(
+                    ConfigReader.GetConfig<BuildingConfig>("BUILDING_CASTLE_WALL"),
+                    new Vector3(wallPos.x, wallPos.y, 0),
+                    GameItemType.Static);
+                GameItemManager.CreateGameItem<CastleWallItem>(
+                    ConfigReader.GetConfig<BuildingConfig>("BUILDING_CASTLE_WALL"),
+                    new Vector3(wallPosUp.x, wallPosUp.y, 0),
+                    GameItemType.Static);
+            }
+
+            for (int y = 0; y < Size; y++)
+            {
+                var wallPos = OriginChunk.WorldPos + new Vector2Int(0, y);
+                var wallPosRight = OriginChunk.WorldPos + new Vector2Int(Size, y);
+                GameItemManager.CreateGameItem<CastleWallItem>(
+                    ConfigReader.GetConfig<BuildingConfig>("BUILDING_CASTLE_WALL"),
+                    new Vector3(wallPos.x, wallPos.y, 0),
+                    GameItemType.Static);
+                GameItemManager.CreateGameItem<CastleWallItem>(
+                    ConfigReader.GetConfig<BuildingConfig>("BUILDING_CASTLE_WALL"),
+                    new Vector3(wallPosRight.x, wallPosRight.y, 0),
+                    GameItemType.Static);
+            }
         }
 
         private void CreateCity()
@@ -113,33 +147,38 @@ namespace Map
             // 横向主干道
             for (int x = 0; x < Size; x++)
             {
-                // var roadPosUp = new Vector2Int(OriginChunk.WorldPos.x + x, GlobalPos.y - 1);
+                var roadPosUp = new Vector2Int(OriginChunk.WorldPos.x + x, GlobalPos.y - 1);
                 var roadPos = new Vector2Int(OriginChunk.WorldPos.x + x, GlobalPos.y);
-                // var roadPosDown = new Vector2Int(OriginChunk.WorldPos.x + x, GlobalPos.y + 1);
+                var roadPosDown = new Vector2Int(OriginChunk.WorldPos.x + x, GlobalPos.y + 1);
                 horizonalMainRoad.Add(roadPos);
-                // horizonalMainRoad.Add(roadPosUp);
-                // horizonalMainRoad.Add(roadPosDown);
+                horizonalMainRoad.Add(roadPosUp);
+                horizonalMainRoad.Add(roadPosDown);
             }
 
             // 纵向主干道
             for (int y = 0; y < Size; y++)
             {
-                // var roadPosLeft = new Vector2Int(GlobalPos.x - 1, OriginChunk.WorldPos.y + y);
+                var roadPosLeft = new Vector2Int(GlobalPos.x - 1, OriginChunk.WorldPos.y + y);
                 var roadPos = new Vector2Int(GlobalPos.x, OriginChunk.WorldPos.y + y);
-                // var roadPosRight = new Vector2Int(GlobalPos.x + 1, OriginChunk.WorldPos.y + y);
+                var roadPosRight = new Vector2Int(GlobalPos.x + 1, OriginChunk.WorldPos.y + y);
                 verticalMainRoad.Add(roadPos);
-                // verticalMainRoad.Add(roadPosRight);
-                // verticalMainRoad.Add(roadPosLeft);
+                verticalMainRoad.Add(roadPosRight);
+                verticalMainRoad.Add(roadPosLeft);
             }
 
             Roads.Add(horizonalMainRoad);
             Roads.Add(verticalMainRoad);
 
             // 每个方向尝试添加1-2条次要道路
-            int roadCount = ChunkRand.Next(4, 8);
+            int roadCount = ChunkRand.Next(8, 15);
 
             // 记录已使用的偏移量，防止道路重叠
-            HashSet<int> usedHorizontalOffsets = new HashSet<int>();
+            HashSet<int> usedHorizontalOffsets = new HashSet<int>()
+            {
+                GlobalPos.y - OriginChunk.WorldPos.y,
+                GlobalPos.y - OriginChunk.WorldPos.y + 1,
+                GlobalPos.y - OriginChunk.WorldPos.y - 1
+            };
             HashSet<int> usedVerticalOffsets = new HashSet<int>();
 
             var localPos = GlobalPos - OriginChunk.WorldPos;
@@ -151,8 +190,7 @@ namespace Map
                 do
                 {
                     offset = ChunkRand.Next(0, Size);
-                } while (usedHorizontalOffsets.Contains(offset) ||
-                         Mathf.Abs(GlobalPos.y - OriginChunk.WorldPos.y - offset) < 7); // 避免与主干道重叠
+                } while (usedHorizontalOffsets.Any(r => Mathf.Abs(r - offset) < 7)); // 避免与主干道重叠
 
                 usedHorizontalOffsets.Add(offset);
 
@@ -163,7 +201,7 @@ namespace Map
                 {
                     minX = ChunkRand.Next(0, localPos.x);
                     maxX = ChunkRand.Next(localPos.x, Size - 1);
-                } while (maxX - minX < 8); // 确保道路长度大于3
+                } while (maxX - minX < Size / 2); // 确保道路长度大于3
 
 
                 List<Vector2Int> road = new List<Vector2Int>();
@@ -195,7 +233,7 @@ namespace Map
                 {
                     minY = ChunkRand.Next(0, localPos.y);
                     maxY = ChunkRand.Next(localPos.y, Size - 1);
-                } while (maxY - minY < 8); // 确保道路长度大于3
+                } while (maxY - minY < Size / 2); // 确保道路长度大于3
 
 
                 List<Vector2Int> road = new List<Vector2Int>();
@@ -259,15 +297,54 @@ namespace Map
             }
         }
 
+        private RoomConfig CalcRoomConfig(Vector2Int targetPos)
+        {
+            var houseTypeProb = ChunkRand.NextDouble();
+            if ((targetPos - GlobalPos).magnitude < Size / 2)
+            {
+                if (houseTypeProb < 0.4)
+                {
+                    var houseConfigs = _roomConfigs.Where(r => r.type == "House").ToList();
+                    return houseConfigs[ChunkRand.Next(houseConfigs.Count)];
+                }
+                else if (houseTypeProb < 0.7)
+                {
+                    var ShopConfigs = _roomConfigs.Where(r => r.type == "Shop").ToList();
+                    return ShopConfigs[ChunkRand.Next(ShopConfigs.Count)];
+                }
+                else
+                {
+                    var teahouseConfigs = _roomConfigs.Where(r => r.type == "Teahouse").ToList();
+                    return teahouseConfigs[ChunkRand.Next(teahouseConfigs.Count)];
+                }
+            }
+            else
+            {
+                var farmConfigs = _roomConfigs.Where(r => r.type == "Farm").ToList();
+                return farmConfigs[ChunkRand.Next(farmConfigs.Count)];
+                // else if (houseTypeProb < 0.6)
+                // {
+                //     var houseConfigs = _roomConfigs.Where(r => r.type == "House").ToList();
+                //     return houseConfigs[ChunkRand.Next(houseConfigs.Count)];
+                // }
+                // else if (houseTypeProb < 0.7)
+                // {
+                //     var ShopConfigs = _roomConfigs.Where(r => r.type == "Shop").ToList();
+                //     return ShopConfigs[ChunkRand.Next(ShopConfigs.Count)];
+                // }
+            }
+        }
+
         private IHouse PlaceBuilding(Vector2Int roadPoint, BlockType[,] cityMap)
         {
             // Randomly pick a room config
-            var roomConfig = _roomConfigs[ChunkRand.Next(_roomConfigs.Count)];
+            var roomConfig = CalcRoomConfig(roadPoint);
+
             int w = roomConfig.width, h = roomConfig.height;
             // Compute candidate block positions
             List<Vector2Int> buildingBlocks = new List<Vector2Int>();
-            Vector2Int minPos = roadPoint + new Vector2Int(-w/2, 1);
-            for (int dx = -w/2; dx <= w/2; dx++)
+            Vector2Int minPos = roadPoint + new Vector2Int(-w / 2, 1);
+            for (int dx = -w / 2; dx <= w / 2; dx++)
                 for (int dy = 1; dy <= h; dy++)
                     buildingBlocks.Add(roadPoint + new Vector2Int(dx, dy));
             // Boundary check
@@ -286,7 +363,7 @@ namespace Map
                     {
                         int x = local.x + ix;
                         int y = local.y + iy;
-                            
+
                         if (x >= 0 && x < Size && y >= 0 && y < Size)
                         {
                             if (ix == 0 && iy == 0)
