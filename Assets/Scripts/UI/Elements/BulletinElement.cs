@@ -1,17 +1,14 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace UI.Elements
 {
-    public class BulletinElement : MonoBehaviour, IUIPoolable
+    public class BulletinElement : MonoBehaviour, IUIPoolable, IDragHandler, IPointerDownHandler
     {
         [SerializeField] private Transform contents;
         private GameObject _titleObj;
-        private void Awake()
-        {
-            // test
-            SetAncientText("招佃示告", "今有良田五亩，水利便捷，宜耕宜种，欲觅勤劳善耕之人租佃。有意者可往城东王掌柜处洽询，面议租事，切勿错失良机。");
-        }
+        
         public void SetAncientText(string title, string content, int maxRowsPerColumn = 8)
         {
             // 分列
@@ -69,6 +66,32 @@ namespace UI.Elements
         public void OnRelease()
         {
             
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            RectTransform parentRect = transform.parent as RectTransform;
+            RectTransform selfRect = transform as RectTransform;
+
+            if (parentRect == null || selfRect == null) return;
+
+            Vector2 localPoint;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                parentRect, eventData.position, eventData.pressEventCamera, out localPoint);
+
+            // 设置统一边距限制
+            float padding = 100f;
+            Vector2 min = parentRect.rect.min + new Vector2(padding, padding) + selfRect.rect.size * 0.5f;
+            Vector2 max = parentRect.rect.max - new Vector2(padding, padding) - selfRect.rect.size * 0.5f;
+            localPoint.x = Mathf.Clamp(localPoint.x, min.x, max.x);
+            localPoint.y = Mathf.Clamp(localPoint.y, min.y, max.y);
+
+            selfRect.localPosition = localPoint;
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            transform.SetAsLastSibling();
         }
     }
 }
