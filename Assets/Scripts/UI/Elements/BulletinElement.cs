@@ -8,6 +8,7 @@ namespace UI.Elements
     {
         [SerializeField] private Transform contents;
         private GameObject _titleObj;
+        private Vector2 _dragOffset;
         
         public void SetAncientText(string title, string content, int maxRowsPerColumn = 8)
         {
@@ -72,17 +73,19 @@ namespace UI.Elements
         {
             RectTransform parentRect = transform.parent as RectTransform;
             RectTransform selfRect = transform as RectTransform;
-
+    
             if (parentRect == null || selfRect == null) return;
 
             Vector2 localPoint;
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 parentRect, eventData.position, eventData.pressEventCamera, out localPoint);
 
-            // 设置统一边距限制
             float padding = 100f;
             Vector2 min = parentRect.rect.min + new Vector2(padding, padding) + selfRect.rect.size * 0.5f;
             Vector2 max = parentRect.rect.max - new Vector2(padding, padding) - selfRect.rect.size * 0.5f;
+
+            localPoint -= _dragOffset;
+
             localPoint.x = Mathf.Clamp(localPoint.x, min.x, max.x);
             localPoint.y = Mathf.Clamp(localPoint.y, min.y, max.y);
 
@@ -92,6 +95,12 @@ namespace UI.Elements
         public void OnPointerDown(PointerEventData eventData)
         {
             transform.SetAsLastSibling();
+            RectTransform selfRect = transform as RectTransform;
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                selfRect,
+                eventData.position,
+                eventData.pressEventCamera,
+                out _dragOffset);
         }
     }
 }

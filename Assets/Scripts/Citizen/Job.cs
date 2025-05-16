@@ -175,10 +175,9 @@ namespace Citizens
 
         public override JobUnit CheckJobUnit()
         {
-            if (Property == null || Property.JobUnits.Values.Sum(v => v.Count) == 0)
+            if (Property == null || Property.JobUnits.Count == 0)
             {
-                ChangeProperty();
-                if (Property == null) return null;
+                return null;
             }
 
             if (Property.Rentant != null)
