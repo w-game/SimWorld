@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using GameItem;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -85,6 +84,11 @@ namespace Map
                     new Vector3(wallPosRight.x, wallPosRight.y, 0),
                     GameItemType.Static);
             }
+
+            GameItemManager.CreateGameItem<BulletinBoardItem>(
+                ConfigReader.GetConfig<BuildingConfig>("BUILDING_BULLETIN_BOARD"),
+                new Vector3(OriginChunk.WorldPos.x + 2, GlobalPos.y + 2, 0),
+                GameItemType.Static);
         }
 
         private void CreateCity()

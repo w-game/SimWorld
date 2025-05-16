@@ -446,4 +446,19 @@ namespace GameItem
             };
         }
     }
+
+    public class BulletinBoardItem : FurnitureItem
+    {
+        public BulletinBoardItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        {
+        }
+
+        public override List<IAction> ActionsOnClick(Agent agent)
+        {
+            return new List<IAction>()
+            {
+                // system
+            };
+        }
+    }
 }

@@ -121,6 +121,8 @@ namespace Citizens
         {
             if (Families.ContainsKey(city)) return;
 
+            return;
+
             List<IHouse> cityProperties = new List<IHouse>();
             List<Family> families = new List<Family>();
 
