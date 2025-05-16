@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 namespace UI.Elements
 {
-    public class BulletinElement : MonoBehaviour, IUIPoolable, IDragHandler, IPointerDownHandler
+    public class BulletinElement : MonoBehaviour, IUIPoolable, IDragHandler, IPointerDownHandler, IPointerClickHandler
     {
         [SerializeField] private Transform contents;
         private GameObject _titleObj;
@@ -101,6 +101,11 @@ namespace UI.Elements
                 eventData.position,
                 eventData.pressEventCamera,
                 out _dragOffset);
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+
         }
     }
 }
