@@ -3,6 +3,7 @@ using UI.Models;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
 
 public interface IUIPoolable : IPoolable
 {
@@ -12,6 +13,8 @@ public class UIManager : MonoSingleton<UIManager>
 {
     public Camera mainCamera;
     public CinemachineCamera cinemachineCamera;
+
+    public bool IsClickUI => EventSystem.current.IsPointerOverGameObject();
 
     public static event UnityAction<Vector3> OnMouseBtnClicked;
     private ObjectPool UIPool { get; } = new ObjectPool(30);

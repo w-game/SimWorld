@@ -35,10 +35,10 @@ public class ObjectPool
             return i;
         }
         var prefab = Resources.Load<GameObject>(prefabPath);
-        
-        T instance = UnityEngine.Object.Instantiate(prefab, pos, Quaternion.identity, parent).GetComponent<T>();
-        instance.OnGet();
-        return instance;
+        var instance = UnityEngine.Object.Instantiate(prefab, pos, Quaternion.identity, parent);
+        T t = instance.GetComponent<T>() ?? instance.AddComponent<T>();
+        t.OnGet();
+        return t;
     }
 
     public T Get<T>(string prefabPath, Vector3 pos = default) where T : MonoBehaviour, IPoolable

@@ -92,6 +92,7 @@
     <Compile Include="Assets/Scripts/UI/Elements/DialogOptionElement.cs" />
     <Compile Include="Assets/Scripts/Config/GameConfigs.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/JobUnitElement.cs" />
+    <Compile Include="Assets/Scripts/UI/Popups/PopBulletinBoard.cs" />
     <Compile Include="Assets/TIles/DirtTile.cs" />
     <Compile Include="Assets/TIles/MapTile.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/CommericalActions.cs" />
@@ -117,10 +118,12 @@
     <Compile Include="Assets/Scripts/Util/QuadTree.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopSeedIncubatorModel.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/NormalActions.cs" />
+    <Compile Include="Assets/Scripts/UI/Elements/BulletinElement.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItemUI.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopCountSelectorModel.cs" />
     <Compile Include="Assets/Scripts/Citizen/Agent/Dialog.cs" />
     <Compile Include="Assets/TIles/OceanTile.cs" />
+    <Compile Include="Assets/Scripts/UI/Models/PopBulletinBoardModel.cs" />
     <Compile Include="Assets/Scripts/UI/ElementBase.cs" />
     <Compile Include="Assets/Scripts/UI/Models/PopHouseDetailsModel.cs" />
     <Compile Include="Assets/Scripts/Map/MapJob.cs" />
@@ -137,6 +140,7 @@
     <Compile Include="Assets/Scripts/GameItemManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/ActionProgressElement.cs" />
     <Compile Include="Assets/Scripts/AI/Inventory.cs" />
+    <Compile Include="Assets/Scripts/GameItem/UI/BulletinBoardItemUI.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/PropItemActionPanel.cs" />
     <Compile Include="Assets/Scripts/GameItem/ProcessingItem.cs" />
     <Compile Include="Assets/Scripts/UI/Views/ActionListElement.cs" />

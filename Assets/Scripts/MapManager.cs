@@ -156,6 +156,7 @@ public class MapManager : MonoSingleton<MapManager>
                     var pos = playerChunkPos + new Vector2Int(x - SIGHT_RANGE / 2, y - SIGHT_RANGE / 2);
                     if (_chunkActive.ContainsKey(pos))
                     {
+                        yield return null;
                         continue;
                     }
 
@@ -174,10 +175,12 @@ public class MapManager : MonoSingleton<MapManager>
                     toRemove.Add(kvp.Key);
                 }
             }
+
             foreach (var key in toRemove)
             {
                 UnVisualChunk(_chunkActive[key]);
                 _chunkActive.Remove(key);
+                yield return null;
             }
         }
     }

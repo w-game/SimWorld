@@ -1,19 +1,36 @@
 using System;
+using System.Collections.Generic;
 using GameItem;
 using TMPro;
 using UnityEngine;
 
 public class GameItemUI : MonoBehaviour, IPoolable
 {
-    [SerializeField] private SpriteRenderer sr;
-    [SerializeField] private Collider2D col;
     [SerializeField] private TextMeshProUGUI itemNameText;
 
-    public Collider2D Col => col;
+    private PolygonCollider2D _col;
+    public Collider2D Col
+    {
+        get
+        {
+            if (_col == null)
+            {
+                _col = gameObject.AddComponent<PolygonCollider2D>();
+                _col.isTrigger = true;
+            }
+            return _col;
+        }
+    }
     public IGameItem GameItem { get; private set; }
 
     private IGameItem _animationTarget;
     private Action _animationCallback;
+    private SpriteRenderer _sr;
+
+    void Awake()
+    {
+        _sr = GetComponent<SpriteRenderer>();
+    }
 
     public virtual void Init(IGameItem gameItem)
     {
@@ -22,8 +39,32 @@ public class GameItemUI : MonoBehaviour, IPoolable
 
     internal void SetRenderer(string spritePath, float alpha = 1)
     {
-        sr.sprite = Resources.Load<Sprite>(spritePath);
-        sr.color = new Color(1, 1, 1, alpha);
+        _sr.sprite = Resources.Load<Sprite>(spritePath);
+        _sr.color = new Color(1, 1, 1, alpha);
+
+        if (_col == null)
+        {
+            _col = gameObject.AddComponent<PolygonCollider2D>();
+            _col.isTrigger = true;
+        }
+        else
+        {
+            ResetPolygonCollider();
+        }
+    }
+
+    void ResetPolygonCollider()
+    {
+        var sprite = _sr.sprite;
+        if (sprite == null || _col == null) return;
+
+        _col.pathCount = sprite.GetPhysicsShapeCount();
+        for (int i = 0; i < _col.pathCount; i++)
+        {
+            var shape = new List<Vector2>();
+            sprite.GetPhysicsShape(i, shape);
+            _col.SetPath(i, shape.ToArray());
+        }
     }
 
     public void SetName(string name)
@@ -35,9 +76,9 @@ public class GameItemUI : MonoBehaviour, IPoolable
 
     public virtual void OnGet()
     {
-        if (col != null)
-            col.enabled = true;
-        
+        if (_col != null)
+            _col.enabled = true;
+
     }
 
     public virtual void OnRelease()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AI;
 using UI.Models;
+using UI.Popups;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -453,12 +454,40 @@ namespace GameItem
         {
         }
 
+        public override void ShowUI()
+        {
+            if (UI == null)
+            {
+                UI = GameManager.I.GameItemManager.ItemUIPool.Get<BulletinBoardItemUI>(Config.prefab, Pos + new Vector3(0.5f, 0.5f, 0));
+                UI.Init(this);
+            }
+            
+            UI.SetRenderer(Config.icon);
+        }
+
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             return new List<IAction>()
             {
                 // system
             };
+        }
+
+        public void OnClick()
+        {
+            if ((Pos - GameManager.I.CurrentAgent.Pos).sqrMagnitude > 4)
+            {
+                GameManager.I.CurrentAgent.MoveToArroundPos(this, () =>
+                {
+                    var model = IModel.GetModel<PopBulletinBoardModel>();
+                    model.ShowUI(this);
+                });
+            }
+            else
+            {
+                var model = IModel.GetModel<PopBulletinBoardModel>();
+                model.ShowUI(this);
+            }
         }
     }
 }
