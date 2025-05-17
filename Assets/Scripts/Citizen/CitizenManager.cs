@@ -202,16 +202,13 @@ namespace Citizens
                         switch (property.House.HouseType)
                         {
                             case HouseType.Restaurant:
-                                businessProperty = new RestaurantProperty(property, city);
-                                break;
-                            case HouseType.Farm:
-                                businessProperty = new FarmProperty(property, city);
+                                businessProperty = PropertyManager.I.GetOrCreateBusinessProperty<RestaurantProperty>(property, city);
                                 break;
                             case HouseType.Teahouse:
-                                businessProperty = new TeahouseProperty(property, city);
+                                businessProperty = PropertyManager.I.GetOrCreateBusinessProperty<TeahouseProperty>(property, city);
                                 break;
                             case HouseType.Shop:
-                                businessProperty = new ShopProperty(property, city);
+                                businessProperty = PropertyManager.I.GetOrCreateBusinessProperty<ShopProperty>(property, city);
                                 break;
                         }
 
@@ -231,7 +228,7 @@ namespace Citizens
                     {
                         foreach (var farm in farms)
                         {
-                            var farmProperty = new FarmProperty(farm, city);
+                            var farmProperty = PropertyManager.I.GetOrCreateBusinessProperty<FarmProperty>(farm, city);
                             farmProperty.AddRecruitCount(WorkType.FarmHelper);
                             PropertyManager.I.AddRecruit(farmProperty, WorkType.FarmHelper);
                         }
@@ -243,10 +240,11 @@ namespace Citizens
 
                     if (totalArea < 100)
                     {
+                        var farmProperties = farms.Select(f => PropertyManager.I.GetOrCreateBusinessProperty<FarmProperty>(f, city)).ToList();
                         var adults = family.Members.Where(m => m.Age >= 18).ToList();
                         foreach (var adult in adults)
                         {
-                            var work = new Farmer(adult, farms.Select(f => new FarmProperty(f, city)).ToList());
+                            var work = new Farmer(adult, farmProperties);
                             adult.SetWork(work);
                         }
                     }
@@ -264,7 +262,7 @@ namespace Citizens
                         {
                             foreach (var farm in farms)
                             {
-                                var farmProperty = new FarmProperty(farm, city);
+                                var farmProperty = PropertyManager.I.GetOrCreateBusinessProperty<FarmProperty>(farm, city);
                                 farmProperty.AddRecruitCount(WorkType.FarmHelper);
                                 PropertyManager.I.AddRecruit(farmProperty, WorkType.FarmHelper);
                             }

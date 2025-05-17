@@ -100,16 +100,17 @@ namespace Citizens
 
     public abstract class BusinessProperty
     {
-        public Property Property { get; }
+        public Property Property { get; private set; }
         public JobBoard JobBoard { get; } = new JobBoard();
         public List<Employee> Employees { get; } = new List<Employee>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 8 * 60 * 60 };
         public Dictionary<WorkType, int> JobRecruitCount { get; } = new Dictionary<WorkType, int>();
         public City City { get; private set; }
 
-        public BusinessProperty(Property property, City city)
+        public virtual void Init(Property property, City city)
         {
             Property = property;
+            PropertyManager.I.BusinessProperties.Add(property, this);
             City = city;
         }
 
@@ -137,8 +138,9 @@ namespace Citizens
 
     public class FarmProperty : BusinessProperty
     {
-        public FarmProperty(Property property, City city) : base(property, city)
+        public override void Init(Property property, City city)
         {
+            base.Init(property, city);
             CheckFarmHoed();
         }
 
@@ -195,8 +197,10 @@ namespace Citizens
     public class RestaurantProperty : BusinessProperty
     {
         private List<StoveItem> _stoveItems = new List<StoveItem>();
-        public RestaurantProperty(Property property, City city) : base(property, city)
+
+        public override void Init(Property property, City city)
         {
+            base.Init(property, city);
             foreach (var furniture in Property.House.FurnitureItems)
             {
                 if (furniture.Value is ChairItem chairItem)
@@ -267,16 +271,12 @@ namespace Citizens
 
     public class TeahouseProperty : RestaurantProperty
     {
-        public TeahouseProperty(Property property, City city) : base(property, city)
-        {
-        }
+        
     }
 
     public class TavernProperty : RestaurantProperty
     {
-        public TavernProperty(Property property, City city) : base(property, city)
-        {
-        }
+        
     }
 
     public class ShopProperty : BusinessProperty
@@ -286,8 +286,10 @@ namespace Citizens
         private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
 
         private List<ShopShelfItem> ShopShelfItemsInRestocking = new List<ShopShelfItem>();
-        public ShopProperty(Property property, City city) : base(property, city)
+        public override void Init(Property property, City city)
         {
+            base.Init(property, city);
+
             var configs = ConfigReader.GetAllConfigs<PropConfig>(c => c.type == PropType.Seed || c.type == PropType.Crop || c.type == PropType.Ingredient);
 
             foreach (var furniture in Property.House.FurnitureItems)

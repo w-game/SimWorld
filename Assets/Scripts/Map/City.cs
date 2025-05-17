@@ -126,7 +126,11 @@ namespace Map
                 var roadPoint = road[ChunkRand.Next(road.Count)];
                 wellPos = roadPoint + new Vector2Int(0, 1);
                 local = wellPos - OriginChunk.WorldPos;
-            } while (cityMap[local.x, local.y] != BlockType.None || cityMap[local.x + 1, local.y] != BlockType.None);
+            } while (
+                local.x < 0 || local.y < 0 ||            // out of lower bounds
+                local.x + 1 >= Size || local.y >= Size ||// out of upper bounds (need 2 tiles horizontally)
+                cityMap[local.x,       local.y]       != BlockType.None ||
+                cityMap[local.x + 1,   local.y]       != BlockType.None);
 
             WellItem = GameItemManager.CreateGameItem<WellItem>(
                 ConfigReader.GetConfig<BuildingConfig>("BUILDING_WELL"),
@@ -189,23 +193,25 @@ namespace Map
 
             for (int i = 0; i < roadCount; i++)
             {
-                // 横向次要道路 - 确保不重叠
-                int offset;
-                do
-                {
-                    offset = ChunkRand.Next(0, Size);
-                } while (usedHorizontalOffsets.Any(r => Mathf.Abs(r - offset) < 7)); // 避免与主干道重叠
-
+                // 横向次要道路 - 确保不重叠（改用候选列表，避免死循环）
+                var candidateOffsets = Enumerable.Range(0, Size)
+                    .Where(o => usedHorizontalOffsets.All(r => Mathf.Abs(r - o) >= 7))
+                    .ToList();
+                if (candidateOffsets.Count == 0)
+                    break;                       // 没有可用位置，停止生成
+                int offset = candidateOffsets[ChunkRand.Next(candidateOffsets.Count)];
                 usedHorizontalOffsets.Add(offset);
 
-
                 int roadY = OriginChunk.WorldPos.y + offset;
-                int minX, maxX;
-                do
+                int minX = 0, maxX = 0, spanTry = 0;
+                while (spanTry < 20)
                 {
                     minX = ChunkRand.Next(0, localPos.x);
                     maxX = ChunkRand.Next(localPos.x, Size - 1);
-                } while (maxX - minX < Size / 2); // 确保道路长度大于3
+                    if (maxX - minX >= Size / 2) break;
+                    spanTry++;
+                }
+                if (maxX - minX < Size / 2) continue;   // 放弃本次道路，避免死循环
 
 
                 List<Vector2Int> road = new List<Vector2Int>();
@@ -221,23 +227,26 @@ namespace Map
             roadCount = ChunkRand.Next(1, 3);
             for (int i = 0; i < roadCount; i++)
             {
-                // 纵向次要道路 - 确保不重叠
-                int offset;
-                do
-                {
-                    offset = ChunkRand.Next(0, Size);
-                } while (usedVerticalOffsets.Contains(offset) ||
-                         Mathf.Abs(GlobalPos.x - OriginChunk.WorldPos.x - offset) < 7); // 避免与主干道重叠
-
+                // 纵向次要道路 - 确保不重叠（改用候选列表，避免死循环）
+                var candidateOffsets = Enumerable.Range(0, Size)
+                    .Where(o => !usedVerticalOffsets.Contains(o) &&
+                                Mathf.Abs(GlobalPos.x - OriginChunk.WorldPos.x - o) >= 7)
+                    .ToList();
+                if (candidateOffsets.Count == 0)
+                    break;                       // 没有可用位置
+                int offset = candidateOffsets[ChunkRand.Next(candidateOffsets.Count)];
                 usedVerticalOffsets.Add(offset);
 
                 int roadX = OriginChunk.WorldPos.x + offset;
-                int minY, maxY;
-                do
+                int minY = 0, maxY = 0, spanTry = 0;
+                while (spanTry < 20)
                 {
                     minY = ChunkRand.Next(0, localPos.y);
                     maxY = ChunkRand.Next(localPos.y, Size - 1);
-                } while (maxY - minY < Size / 2); // 确保道路长度大于3
+                    if (maxY - minY >= Size / 2) break;
+                    spanTry++;
+                }
+                if (maxY - minY < Size / 2) continue;   // 放弃本次道路
 
 
                 List<Vector2Int> road = new List<Vector2Int>();

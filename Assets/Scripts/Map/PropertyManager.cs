@@ -93,7 +93,7 @@ public class PropertyManager : Singleton<PropertyManager>
             {
                 PropertyRecruits[city].Remove(randomProperty.Key);
             }
-            
+
             if (PropertyRecruits[city].Count == 0)
             {
                 PropertyRecruits.Remove(city);
@@ -101,5 +101,17 @@ public class PropertyManager : Singleton<PropertyManager>
         }
 
         return work;
+    }
+    
+    public T GetOrCreateBusinessProperty<T>(Property property, City city) where T : BusinessProperty, new()
+    {
+        if (!BusinessProperties.TryGetValue(property, out var businessProperty))
+        {
+            businessProperty = new T();
+            businessProperty.Init(property, city);
+            BusinessProperties[property] = businessProperty;
+        }
+
+        return businessProperty as T;
     }
 }
