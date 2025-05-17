@@ -35,9 +35,6 @@ namespace GameItem
         public event UnityAction<IProcessingItem> OnFinish;
 
         private ProducePanelElement _panel;
-        protected ProcessingItemBase(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
 
         public virtual void OnSelected(string id, int amount = 1)
         {
@@ -183,10 +180,6 @@ namespace GameItem
 
         protected override string Speed => "millSpeed";
 
-        public MillstoneItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
         public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
@@ -203,10 +196,6 @@ namespace GameItem
         protected override string Time => "smeltTime";
         public override PropType PropType => PropType.Material;
         protected override string Speed => "smeltSpeed";
-
-        public FurnaceItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
     }
 
     public class SeedIncubatorItem : ProcessingItemBase
@@ -222,10 +211,6 @@ namespace GameItem
         private int _curTime;
 
         private ActionProgressElement _progress;
-
-        public SeedIncubatorItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
 
         protected override List<IAction> SkillAction()
         {

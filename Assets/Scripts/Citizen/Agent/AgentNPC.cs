@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using AI;
-using Citizens;
 using UnityEngine;
 
 namespace GameItem
 {
     public class AgentNPC : Agent
     {
-        public AgentNPC(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(config, pos, brain, citizen)
+        public override void Init(ConfigBase config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             var foodIds = new string[] { "PROP_FOOD_MANTOU", "PROP_FOOD_STEW" };
             var randFoodId = foodIds[Random.Range(0, foodIds.Length)];
             var randomFood = ConfigReader.GetConfig<PropConfig>(randFoodId);

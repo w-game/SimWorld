@@ -20,9 +20,5 @@ namespace GameItem
                 }
             }
         }
-        
-        public DynamicItem(ConfigBase config, Vector3 pos) : base(config, pos)
-        {
-        }
     }
 }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AI;
-using Citizens;
+using Map;
 using UI.Models;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -10,9 +10,9 @@ namespace GameItem
 {
     public class BlueprintItem : GameItemBase<BuildingConfig>
     {
-
-        public BlueprintItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Size = new Vector2Int(config.size[0], config.size[1]);
             Walkable = true;
         }
@@ -39,13 +39,14 @@ namespace GameItem
 
     public class BuildingItem : GameItemBase<BuildingConfig>
     {
-        public House House { get; private set; }
+        public IHouse House { get; private set; }
         public List<TileBase> Tiles { get; protected set; }
         private bool _isPlaced;
-        public BuildingItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos)
-        {
-            House = house;
 
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
+        {
+            base.Init(config, pos, args);
+            House = args[0] as IHouse;
             Size = new Vector2Int(config.size[0], config.size[1]);
         }
 
@@ -92,60 +93,67 @@ namespace GameItem
 
     public class WallItem : BuildingItem
     {
-        public WallItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Tiles = MapManager.I.wallTiles;
         }
     }
 
     public class CastleWallItem : BuildingItem
     {
-        public CastleWallItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args, null);
             Tiles = MapManager.I.castleWallTiles;
         }
     }
 
     public class FloorItem : BuildingItem
     {
-        public FloorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Tiles = MapManager.I.floorTiles;
         }
     }
 
     public class DoorItem : BuildingItem
     {
-        public DoorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Tiles = new List<TileBase> { MapManager.I.doorTile };
         }
     }
 
     public class FrontDoorItem : BuildingItem
     {
-        public FrontDoorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Tiles = new List<TileBase> { MapManager.I.doorTile };
         }
     }
 
     public class CommercialItem : BuildingItem
     {
-        public CommercialItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Tiles = MapManager.I.floorTiles;
         }
     }
 
     public class FarmItem : BuildingItem, ISelectItem
     {
-        public PlantItem PlantItem => GameManager.I.GameItemManager.TryGetItemAtPos<PlantItem>(Pos, out var plantItem) ? plantItem : null;
+        public PlantItem PlantItem { get; private set; }
 
         public PropType PropType => PropType.Seed;
 
-        public FarmItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Tiles = MapManager.I.farmTiles;
         }
 
@@ -192,15 +200,13 @@ namespace GameItem
         public void BePlant(string seedId)
         {
             var config = ConfigReader.GetConfig<PropConfig>(seedId);
-            PlantItem plantItem = GameItemManager.CreateGameItem<PlantItem>(
+            PlantItem = GameItemManager.CreateGameItem<PlantItem>(
                 ConfigReader.GetConfig<ResourceConfig>(config.additionals["plant"] as string),
-                Pos + new Vector3(0.5f, 0.5f, 0),
+                Pos,
                 GameItemType.Static,
                 false);
 
-            plantItem.Owner = Owner;
-
-            plantItem.ShowUI();
+            PlantItem.Owner = Owner;
         }
     }
 }

@@ -13,8 +13,9 @@ namespace GameItem
     {
         public Agent Using { get; internal set; }
 
-        public FurnitureItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Size = new Vector2Int(config.size[0], config.size[1]);
         }
 
@@ -41,17 +42,11 @@ namespace GameItem
 
     public class ToiletItem : FurnitureItem
     {
-        public ToiletItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
+
     }
 
     public class BedItem : FurnitureItem
     {
-        public BedItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             return new List<IAction>()
@@ -64,10 +59,6 @@ namespace GameItem
     public class TableItem : FurnitureItem
     {
         public List<ChairItem> Chairs { get; } = new List<ChairItem>();
-
-        public TableItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
 
         public ChairItem GetChair()
         {
@@ -85,9 +76,6 @@ namespace GameItem
     public class ChairItem : FurnitureItem
     {
         public event UnityAction<Agent> OnSit;
-        public ChairItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
@@ -106,10 +94,6 @@ namespace GameItem
 
     public class WellItem : FurnitureItem
     {
-        public WellItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
         public override List<IAction> ItemActions(IGameItem agent)
         {
             return new List<IAction>()
@@ -125,11 +109,6 @@ namespace GameItem
 
     public class StoveItem : FurnitureItem
     {
-        public StoveItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
-
         public void SetUsing(Agent agent)
         {
             Using = agent;
@@ -151,11 +130,6 @@ namespace GameItem
 
     public class WorkbenchItem : FurnitureItem
     {
-        public WorkbenchItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-
-        }
-
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             List<Vector3> availablePos = new List<Vector3>();
@@ -204,10 +178,6 @@ namespace GameItem
         public PropType PropType => PropType.None;
 
         public event UnityAction<ShopShelfItem, PropConfig> OnSoldEvent;
-        public ShopShelfItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-
-        }
 
         public override List<IAction> ActionsOnClick(Agent agent)
         {
@@ -316,9 +286,6 @@ namespace GameItem
     {
         public int WaterQuantity { get; private set; } = 0;
         public int MaxWaterQuantity { get; private set; } = 5;
-        public BucketItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
 
         public override List<IAction> ItemActions(IGameItem agent)
         {
@@ -349,8 +316,10 @@ namespace GameItem
     {
 
         public Inventory Inventory { get; private set; }
-        public ContainerItem(BuildingConfig config, Vector3 pos) : base(config, pos)
+
+        public override void Init(BuildingConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             if (int.TryParse(config.additionals["capacity"].ToString(), out var capacity))
             {
                 Inventory = new Inventory(capacity);
@@ -413,17 +382,11 @@ namespace GameItem
 
     public class CounterItem : FurnitureItem
     {
-        public CounterItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
+
     }
 
     public class HygieneItem : FurnitureItem
     {
-        public HygieneItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             return new List<IAction>()
@@ -435,10 +398,6 @@ namespace GameItem
 
     public class BasinItem : HygieneItem
     {
-        public BasinItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
         public override List<IAction> ActionsOnClick(Agent agent)
         {
             return new List<IAction>()
@@ -450,10 +409,6 @@ namespace GameItem
 
     public class BulletinBoardItem : FurnitureItem
     {
-        public BulletinBoardItem(BuildingConfig config, Vector3 pos) : base(config, pos)
-        {
-        }
-
         public override void ShowUI()
         {
             if (UI == null)

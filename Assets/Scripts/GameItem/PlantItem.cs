@@ -63,8 +63,10 @@ namespace GameItem
             UI.SetRenderer(Config.stages[Stage]);
         }
 
-        public PlantItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos)
+        public override void Init(ResourceConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
+            bool random = args.Length > 0 && (bool)args[0];
             if (random)
             {
                 Stage = Random.Range(0, config.stages.Length);
@@ -194,8 +196,10 @@ namespace GameItem
     public class TreeItem : PlantItem
     {
         protected override bool Drought => false;
-        public TreeItem(ResourceConfig config, Vector3 pos, bool random) : base(config, pos, random)
+
+        public override void Init(ResourceConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             Walkable = false;
         }
 

@@ -73,11 +73,12 @@ namespace GameItem
 
         public IGameItem ItemInHand { get; private set; }
 
-        public Agent(ConfigBase config, Vector3 pos, AIController brain, FamilyMember citizen) : base(null, pos)
+        public override void Init(ConfigBase config, Vector3 pos, params object[] args)
         {
-            Brain = brain;
+            base.Init(null, pos, args);
+            Brain = args[0] as AIController;
             Brain.SetAgent(this);
-            Citizen = citizen;
+            Citizen = args[1] as FamilyMember;
             Citizen.SetAgent(this);
             Owner = Citizen.Family;
             State = new AgentState(this);

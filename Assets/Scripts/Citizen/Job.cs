@@ -83,14 +83,14 @@ namespace Citizens
 
         public abstract List<JobUnitType> ExpectJobUnits { get; }
 
-        public Work(FamilyMember member)
+        public Work(FamilyMember member, BusinessProperty property)
         {
             Member = member;
-            Member.SetWork(this);
+            Property = property;
             AutoAssign = member.Agent == GameManager.I.CurrentAgent ? false : true;
         }
 
-        public JobUnit CheckJobUnit()
+        public virtual JobUnit CheckJobUnit()
         {
             if (Property == null || Property.JobBoard.Count == 0)
             {
@@ -149,13 +149,8 @@ namespace Citizens
     {
         public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Manage };
 
-        public CEO(FamilyMember member) : base(member)
+        public CEO(FamilyMember member, BusinessProperty property) : base(member, property)
         {
-        }
-
-        public void AddProperty(BusinessProperty property)
-        {
-            Property = property;
         }
 
         public void RemoveProperty(BusinessProperty property)
@@ -171,7 +166,7 @@ namespace Citizens
     {
         public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Manage };
 
-        public AssetAgent(FamilyMember owner, BusinessProperty property) : base(owner)
+        public AssetAgent(FamilyMember owner, BusinessProperty property) : base(owner, property)
         {
             Property = property;
         }
@@ -179,10 +174,15 @@ namespace Citizens
 
     public abstract class Employee : Work
     {
+        public static readonly float[] DefaultWorkTime = new float[2] { 0 * 60 * 60, 18 * 60 * 60 };
         public int WorkDays { get; set; } = 5;
 
-        public Employee(FamilyMember member, float[] workTime) : base(member)
+        public Employee(FamilyMember member, BusinessProperty property, float[] workTime = null) : base(member, property)
         {
+            if (workTime == null)
+            {
+                workTime = DefaultWorkTime;
+            }
             Schedule schedule = new Schedule(
                 workTime[0], workTime[1],
                 new List<int> { 1, 2, 3, 4, 5, 6, 7 },
@@ -192,11 +192,34 @@ namespace Citizens
         }
     }
 
+    public class Farmer : CEO
+    {
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Farm };
+        
+        private List<FarmProperty> _farms;
+
+        public Farmer(FamilyMember member, List<FarmProperty> farms) : base(member, farms[0])
+        {
+            _farms = farms;
+        }
+
+        public override JobUnit CheckJobUnit()
+        {
+            var jobUnit = base.CheckJobUnit();
+            if (jobUnit == null)
+            {
+                Property = _farms.Find(x => x.JobBoard.Count > 0);
+                jobUnit = base.CheckJobUnit();
+            }
+            return jobUnit;
+        }
+    }
+
     public class FarmHelper : Employee
     {
         public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Farm };
 
-        public FarmHelper(FamilyMember member, float[] workTime) : base(member, workTime)
+        public FarmHelper(FamilyMember member, BusinessProperty property, float[] workTime = null) : base(member, property, workTime)
         {
         }
     }
@@ -204,7 +227,7 @@ namespace Citizens
     public class Cooker : Employee
     {
         public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Cook };
-        public Cooker(FamilyMember member, float[] workTime) : base(member, workTime)
+        public Cooker(FamilyMember member, BusinessProperty property, float[] workTime = null) : base(member, property, workTime)
         {
         }
     }
@@ -213,7 +236,7 @@ namespace Citizens
     {
         public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Service };
 
-        public Waiter(FamilyMember member, float[] workTime) : base(member, workTime)
+        public Waiter(FamilyMember member, BusinessProperty property, float[] workTime = null) : base(member, property, workTime)
         {
         }
     }
@@ -222,7 +245,7 @@ namespace Citizens
     {
         public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Sale };
 
-        public Salesman(FamilyMember member, float[] workTime) : base(member, workTime)
+        public Salesman(FamilyMember member, BusinessProperty property, float[] workTime = null) : base(member, property, workTime)
         {
         }
     }

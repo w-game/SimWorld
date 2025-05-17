@@ -42,12 +42,9 @@ public class GameItemManager
 
     public static T CreateGameItem<T>(Type type, ConfigBase config, Vector3 pos, GameItemType itemType, params object[] otherObjs) where T : class, IGameItem
     {
-        object[] ctorArgs = new object[2 + otherObjs.Length];
-        ctorArgs[0] = config;
-        ctorArgs[1] = ItemPosToMapPosConverter.Invoke(pos).ToVector3();
-        Array.Copy(otherObjs, 0, ctorArgs, 2, otherObjs.Length);
-
-        var item = Activator.CreateInstance(type, ctorArgs) as T;
+        var targetPos = ItemPosToMapPosConverter.Invoke(pos);
+        var item = Activator.CreateInstance(type) as T;
+        item.Init(config, new Vector3(targetPos.x, targetPos.y), otherObjs);
         item.CalcSize();
         item.ItemType = itemType;
         switch (itemType)
@@ -202,7 +199,7 @@ public class GameItemManager
     {
         var agent = CreateGameItem<Agent>(
             null,
-            pos + new Vector2(0.5f, 0.5f),
+            new Vector3(pos.x, pos.y),
             GameItemType.Dynamic,
             new AIController(),
             member

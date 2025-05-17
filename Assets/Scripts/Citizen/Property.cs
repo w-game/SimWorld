@@ -98,17 +98,19 @@ namespace Citizens
         }
     }
 
-    public class BusinessProperty
+    public abstract class BusinessProperty
     {
         public Property Property { get; }
         public JobBoard JobBoard { get; } = new JobBoard();
         public List<Employee> Employees { get; } = new List<Employee>();
         private float[] _workTime = new float[2] { 8 * 60 * 60, 8 * 60 * 60 };
         public Dictionary<WorkType, int> JobRecruitCount { get; } = new Dictionary<WorkType, int>();
+        public City City { get; private set; }
 
-        public BusinessProperty(Property property)
+        public BusinessProperty(Property property, City city)
         {
             Property = property;
+            City = city;
         }
 
         public void AddRecruitCount(WorkType workType, int count = 1)
@@ -135,7 +137,7 @@ namespace Citizens
 
     public class FarmProperty : BusinessProperty
     {
-        public FarmProperty(Property property) : base(property)
+        public FarmProperty(Property property, City city) : base(property, city)
         {
             CheckFarmHoed();
         }
@@ -193,7 +195,7 @@ namespace Citizens
     public class RestaurantProperty : BusinessProperty
     {
         private List<StoveItem> _stoveItems = new List<StoveItem>();
-        public RestaurantProperty(Property property) : base(property)
+        public RestaurantProperty(Property property, City city) : base(property, city)
         {
             foreach (var furniture in Property.House.FurnitureItems)
             {
@@ -265,14 +267,14 @@ namespace Citizens
 
     public class TeahouseProperty : RestaurantProperty
     {
-        public TeahouseProperty(Property property) : base(property)
+        public TeahouseProperty(Property property, City city) : base(property, city)
         {
         }
     }
 
     public class TavernProperty : RestaurantProperty
     {
-        public TavernProperty(Property property) : base(property)
+        public TavernProperty(Property property, City city) : base(property, city)
         {
         }
     }
@@ -284,7 +286,7 @@ namespace Citizens
         private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
 
         private List<ShopShelfItem> ShopShelfItemsInRestocking = new List<ShopShelfItem>();
-        public ShopProperty(Property property) : base(property)
+        public ShopProperty(Property property, City city) : base(property, city)
         {
             var configs = ConfigReader.GetAllConfigs<PropConfig>(c => c.type == PropType.Seed || c.type == PropType.Crop || c.type == PropType.Ingredient);
 

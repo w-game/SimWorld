@@ -15,10 +15,11 @@ namespace GameItem
         protected event UnityAction<bool> OnTakedEvent;
         public PropItem PropItem { get; private set; }
 
-        public PropGameItem(PropConfig config, Vector3 pos, int count) : base(config, pos)
+        public override void Init(PropConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
+            int count = args.Length > 0 ? (int)args[0] : 1;
             PropItem = new PropItem(config, count);
-            Walkable = true;
         }
 
         public override void ShowUI()
@@ -92,10 +93,6 @@ namespace GameItem
         public float FoodValue { get; set; } = 20;
         public int FoodTimes { get; set; } = 5;
 
-        public FoodItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
-        {
-        }
-
         public override List<IAction> ItemActions(IGameItem agent)
         {
             var actions = base.ItemActions(agent);
@@ -117,25 +114,23 @@ namespace GameItem
 
     public class BookItem : PropGameItem
     {
-        public BookItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
-        {
-        }
+
     }
 
     public class PaperItem : PropGameItem
     {
-        public PaperItem(PropConfig config, Vector3 pos, int count) : base(config, pos, count)
-        {
-        }
+
     }
 
     public class SellItem : PropGameItem
     {
         private ShopShelfItem _shopShelfItem;
-        public SellItem(PropConfig config, Vector3 pos, int count, ShopShelfItem shopShelfItem) : base(config, pos, count)
+
+        public override void Init(PropConfig config, Vector3 pos, params object[] args)
         {
+            base.Init(config, pos, args);
             OnTakedEvent += OnTaked;
-            _shopShelfItem = shopShelfItem;
+            _shopShelfItem = args[0] as ShopShelfItem;
         }
 
         private void OnTaked(bool isSteal)

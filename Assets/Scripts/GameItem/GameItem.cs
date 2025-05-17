@@ -24,8 +24,9 @@ namespace GameItem
         GameItemUI UI { get; }
         Family Owner { get; set; }
         bool Walkable { get; }
-        void CalcSize();
 
+        void Init(ConfigBase config, Vector3 pos, params object[] args);
+        void CalcSize();
         void ShowUI();
         void HideUI();
         void Destroy();
@@ -63,7 +64,9 @@ namespace GameItem
         public virtual List<Vector2Int> OccupiedPositions { get; } = new List<Vector2Int>();
         public bool Active { get; set; } = true;
 
-        public GameItemBase(T config, Vector3 pos)
+        void IGameItem.Init(ConfigBase config, Vector3 pos, params object[] args) => Init((T)config, pos, args);
+
+        public virtual void Init(T config, Vector3 pos, params object[] args)
         {
             ConfigBase = config;
             _pos = pos;

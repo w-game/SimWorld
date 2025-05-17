@@ -39,7 +39,7 @@ namespace Citizens
 
             var agent = GameItemManager.CreateGameItem<AgentNPC>(
                 null,
-                randomPos + new Vector2(0.5f, 0.5f),
+                randomPos,
                 GameItemType.Dynamic,
                 new AIController(),
                 member
@@ -165,7 +165,7 @@ namespace Citizens
                 var property = InitProperty(family, propertyHouse);
             }
 
-            InitWork(families);
+            InitWork(families, city);
 
             Families.Add(city, families);
         }
@@ -176,10 +176,11 @@ namespace Citizens
             if (adults.Count == 0) return null;
 
             var property = PropertyManager.I.AddProperty(house, family);
+            family.Properties.Add(property);
             return property;
         }
 
-        private void InitWork(List<Family> families)
+        private void InitWork(List<Family> families, City city)
         {
             var familiesHaveProperty = families.Where(f => f.Properties.Count(p => p.House.HouseType != HouseType.House) > 0).ToList();
 
@@ -196,8 +197,26 @@ namespace Citizens
                         if (adults.Count == 0) continue;
                         var adult = adults[Random.Range(0, adults.Count)];
                         adults.Remove(adult);
-                        var work = new CEO(adult);
-                        work.AddProperty(new BusinessProperty(property));
+
+                        BusinessProperty businessProperty = null;
+                        switch (property.House.HouseType)
+                        {
+                            case HouseType.Restaurant:
+                                businessProperty = new RestaurantProperty(property, city);
+                                break;
+                            case HouseType.Farm:
+                                businessProperty = new FarmProperty(property, city);
+                                break;
+                            case HouseType.Teahouse:
+                                businessProperty = new TeahouseProperty(property, city);
+                                break;
+                            case HouseType.Shop:
+                                businessProperty = new ShopProperty(property, city);
+                                break;
+                        }
+
+                        var ceo = new CEO(adult, businessProperty);
+                        adult.SetWork(ceo);
                     }
 
                     var prob = Random.Range(0, 100);
@@ -212,7 +231,7 @@ namespace Citizens
                     {
                         foreach (var farm in farms)
                         {
-                            var farmProperty = new FarmProperty(farm);
+                            var farmProperty = new FarmProperty(farm, city);
                             farmProperty.AddRecruitCount(WorkType.FarmHelper);
                             PropertyManager.I.AddRecruit(farmProperty, WorkType.FarmHelper);
                         }
@@ -225,13 +244,10 @@ namespace Citizens
                     if (totalArea < 100)
                     {
                         var adults = family.Members.Where(m => m.Age >= 18).ToList();
-                        foreach (var farm in farms)
+                        foreach (var adult in adults)
                         {
-                            if (adults.Count == 0) continue;
-                            var adult = adults[Random.Range(0, adults.Count)];
-                            adults.Remove(adult);
-                            var work = new CEO(adult);
-                            work.AddProperty(new BusinessProperty(farm));
+                            var work = new Farmer(adult, farms.Select(f => new FarmProperty(f, city)).ToList());
+                            adult.SetWork(work);
                         }
                     }
                     else
@@ -248,13 +264,23 @@ namespace Citizens
                         {
                             foreach (var farm in farms)
                             {
-                                var farmProperty = new FarmProperty(farm);
+                                var farmProperty = new FarmProperty(farm, city);
                                 farmProperty.AddRecruitCount(WorkType.FarmHelper);
                                 PropertyManager.I.AddRecruit(farmProperty, WorkType.FarmHelper);
                             }
                         }
                     }
                 }
+            }
+
+            var familiesNoProperty = families.Where(f => f.Properties.All(p => p.House.HouseType == HouseType.House) && f.Properties.Count == 1).ToList();
+            foreach (var family in familiesNoProperty)
+            {
+                var adults = family.Members.Where(m => m.Age >= 18).ToList();
+                if (adults.Count == 0) continue;
+                var adult = adults[Random.Range(0, adults.Count)];
+                adults.Remove(adult);
+                PropertyManager.I.MatchRecruit(adult, city);
             }
         }
 
