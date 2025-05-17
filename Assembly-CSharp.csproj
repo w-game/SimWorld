@@ -102,6 +102,7 @@
     <Compile Include="Assets/Scripts/Map/Blueprint.cs" />
     <Compile Include="Assets/Scripts/GameItem/PropGameItem.cs" />
     <Compile Include="Assets/Scripts/Map/BuildingManager.cs" />
+    <Compile Include="Assets/Scripts/Map/PropertyManager.cs" />
     <Compile Include="Assets/Scripts/UI/Elements/InventoryContainerElement.cs" />
     <Compile Include="Assets/Scripts/Citizen/Agent/DynamicItem.cs" />
     <Compile Include="Assets/Scripts/AI/Actions/SystemActions.cs" />

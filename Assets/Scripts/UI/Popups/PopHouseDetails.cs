@@ -18,21 +18,20 @@ namespace UI.Views
 
         public override void OnShow()
         {
-            if (Model.House != null)
+            if (Model.Property != null)
             {
-                if (Model.House.HouseType == HouseType.House)
+                if (Model.Property.House.HouseType == HouseType.House)
                 {
-                    propertyName.text = Model.House.HouseType.ToString();
+                    propertyName.text = Model.Property.House.HouseType.ToString();
                     buyButton.onClick.AddListener(() =>
                     {
-                        Model.House.SetOwner(GameManager.I.CurrentAgent.Owner);
-                        GameManager.I.CurrentAgent.Citizen.Family.AddHouse(Model.House);
+                        Model.BuyProperty();
                     });
                 }
                 else
                 {
-                    var property = Property.Properties[Model.House];
-                    propertyName.text = Model.House.HouseType.ToString();
+                    var property = PropertyManager.I.BusinessProperties[Model.Property];
+                    propertyName.text = Model.Property.House.HouseType.ToString();
                     propertyDetails.text = $"Employee: {property.Employees.Count}";
                     foreach (var job in property.JobRecruitCount)
                     {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AI;
 using GameItem;
 using Map;
@@ -7,98 +8,141 @@ using UnityEngine;
 
 namespace Citizens
 {
-    public class Property
+    public sealed class JobBoard
     {
-        public static Dictionary<IHouse, Property> Properties { get; } = new Dictionary<IHouse, Property>();
-        public IHouse House { get; private set; }
-        public Family Rentant { get; private set; }
-        public List<Employee> Employees { get; } = new List<Employee>();
-        public Dictionary<Type, List<JobUnit>> JobUnits { get; } = new Dictionary<Type, List<JobUnit>>();
-        private float[] _workTime = new float[2] { 8 * 60 * 60, 8 * 60 * 60 };
-        public Dictionary<JobConfig, int> JobRecruitCount { get; } = new Dictionary<JobConfig, int>();
-        public event Action<Type, JobUnit> OnJobUnitAdded;
+        public Dictionary<JobUnitType, Queue<JobUnit>> JobUnits { get; private set; } = new Dictionary<JobUnitType, Queue<JobUnit>>();
+        public int Count => JobUnits.Values.Sum(queue => queue.Count);
 
-        public bool ForRent { get; set; } = false;
+        public Action<JobUnitType, JobUnit> OnJobUnitAdded { get; set; }
 
-        public Property(IHouse house)
+        public void Add(JobUnit jobUnit)
         {
-            House = house;
-            Properties.Add(house, this);
-
-            // BeBought(House.Owner.Members[0].Agent);
-
-            Debug.Log($"Property: {House.HouseType} has been created.");
-        }
-
-        protected void AddJobUnit<T>(JobUnit jobUnit) where T : Job
-        {
-            var type = typeof(T);
-            if (!JobUnits.ContainsKey(type))
+            if (!JobUnits.ContainsKey(jobUnit.Type))
             {
-                JobUnits[type] = new List<JobUnit>();
+                JobUnits[jobUnit.Type] = new Queue<JobUnit>();
             }
-            JobUnits[type].Add(jobUnit);
-            OnJobUnitAdded?.Invoke(type, jobUnit);
+            JobUnits[jobUnit.Type].Enqueue(jobUnit);
+            OnJobUnitAdded?.Invoke(jobUnit.Type, jobUnit);
         }
 
-        public void AddApplicant(JobConfig jobConfig, Agent agent)
+        public JobUnit RequestJob(List<JobUnitType> expectJobTypes)
         {
-            var employee = Activator.CreateInstance(Type.GetType($"Citizens.{jobConfig.type}"), agent.Citizen, _workTime) as Employee;
-            Employees.Add(employee);
-            employee.Property = this;
-            agent.Citizen.SetJob(employee);
-        }
-
-        public void BeBought(Agent agent)
-        {
-            foreach (var member in House.Owner.Members)
+            foreach (var jobType in expectJobTypes)
             {
-                if (member.IsAdult && member.Job is Owner owner)
+                if (JobUnits.TryGetValue(jobType, out var jobQueue))
                 {
-                    owner.RemoveProperty(this);
-                    if (owner.Property == null)
+                    if (jobQueue.Count > 0)
                     {
-                        member.SetJob(null);
+                        return jobQueue.Dequeue();
                     }
                 }
             }
-
-            foreach (var member in agent.Owner.Members)
-            {
-                if (member.IsAdult)
-                {
-                    var ownerJob = new Owner(member);
-                    ownerJob.AddProperty(this);
-                    member.SetJob(ownerJob);
-                }
-            }
+            return null;
         }
 
-        public void LeaseTo(Family family)
+        public void Cover(JobUnitType jobUnitType, Queue<JobUnit> newJobUnits)
         {
-            Rentant = family;
-            foreach (var member in family.Members)
+            if (JobUnits.ContainsKey(jobUnitType))
             {
-                if (member.IsAdult)
-                {
-                    var job = new Rentant(member, this);
-                    member.SetJob(job);
-                }
+                JobUnits[jobUnitType] = newJobUnits;
+            }
+            else
+            {
+                JobUnits.Add(jobUnitType, newJobUnits);
             }
         }
     }
 
-
-    public class FarmProperty : Property
+    public class Tenancy
     {
-        public FarmProperty(IHouse house) : base(house)
+        public FamilyMember Tenant { get; }
+        public Property Property { get; }
+        public DateTime StartDate { get; }
+        public DateTime EndDate { get; }
+
+        public Tenancy(FamilyMember tenant, Property property, DateTime startDate, DateTime endDate)
+        {
+            Tenant = tenant;
+            Property = property;
+            StartDate = startDate;
+            EndDate = endDate;
+        }
+    }
+
+    public class Property
+    {
+        public List<Vector2Int> Blocks { get; } = new List<Vector2Int>();
+        public IHouse House { get; private set; }
+        public Tenancy CurrentTenancy { get; protected set; }
+        public Family Owner { get; private set; }
+
+        public bool IsForSale => CurrentTenancy == null && PropertyManager.I.PropertiesForSale.Contains(this);
+        public bool IsForRent => CurrentTenancy == null && PropertyManager.I.PropertiesForRent.Contains(this);
+
+        public Property(IHouse house, Family owner)
+        {
+            House = house;
+            Owner = owner;
+            Blocks.AddRange(house.Blocks);
+        }
+
+        public void Transfer(Family family)
+        {
+            family.Properties.Add(this);
+            Owner = family;
+        }
+
+        public void LeaseTo(FamilyMember member, DateTime startDate, DateTime endDate)
+        {
+            CurrentTenancy = new Tenancy(member, this, startDate, endDate);
+        }
+    }
+
+    public class BusinessProperty
+    {
+        public Property Property { get; }
+        public JobBoard JobBoard { get; } = new JobBoard();
+        public List<Employee> Employees { get; } = new List<Employee>();
+        private float[] _workTime = new float[2] { 8 * 60 * 60, 8 * 60 * 60 };
+        public Dictionary<WorkType, int> JobRecruitCount { get; } = new Dictionary<WorkType, int>();
+
+        public BusinessProperty(Property property)
+        {
+            Property = property;
+        }
+
+        public void AddRecruitCount(WorkType workType, int count = 1)
+        {
+            if (JobRecruitCount.ContainsKey(workType))
+            {
+                JobRecruitCount[workType] += count;
+            }
+            else
+            {
+                JobRecruitCount.Add(workType, count);
+            }
+        }
+
+        public void AddApplicant(WorkType workType, Agent agent)
+        {
+            var employee = Activator.CreateInstance(Type.GetType($"Citizens.{workType}"), agent.Citizen, _workTime) as Employee;
+            Employees.Add(employee);
+            employee.Property = this;
+            agent.Citizen.SetWork(employee);
+        }
+    }
+
+
+    public class FarmProperty : BusinessProperty
+    {
+        public FarmProperty(Property property) : base(property)
         {
             CheckFarmHoed();
         }
 
         private void CheckFarmHoed()
         {
-            foreach (var pos in House.Blocks)
+            foreach (var pos in Property.Blocks)
             {
                 var block = new Vector3(pos.x, pos.y);
                 if (MapManager.I.TryGetBuildingItem(block, out var buildingItem) && buildingItem is FarmItem farmItem)
@@ -106,20 +150,18 @@ namespace Citizens
                     CheckPlantToFarm(farmItem);
                 }
             }
-
-            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_FARMER"), 1);
         }
 
         private void CheckPlantToFarm(FarmItem farmItem)
         {
             if (farmItem.PlantItem == null)
             {
-                var jobUnit = new JobUnit(ActionPool.Get<PlantAction>(farmItem, "PROP_SEED_WHEAT"), jobUnit =>
+                var jobUnit = new JobUnit(JobUnitType.Farm, ActionPool.Get<PlantAction>(farmItem, "PROP_SEED_WHEAT"), jobUnit =>
                 {
                     Debug.Log($"种植作物：{farmItem.PlantItem.Config.name}");
                     farmItem.PlantItem.OnEventInvoked += OnCropItemEventInvoked;
                 });
-                AddJobUnit<Farmer>(jobUnit);
+                JobBoard.Add(jobUnit);
             }
         }
 
@@ -129,32 +171,38 @@ namespace Citizens
             {
                 if (state == PlantState.Weeds)
                 {
-                    var jobUnit = new JobUnit(ActionPool.Get<WeedingAction>(plantItem));
-                    AddJobUnit<Farmer>(jobUnit);
+                    var jobUnit = new JobUnit(JobUnitType.Farm, ActionPool.Get<WeedingAction>(plantItem), jobUnit =>
+                    {
+                        Debug.Log($"除草：{plantItem.Config.name}");
+                    });
+                    JobBoard.Add(jobUnit);
                 }
             }
 
             if (plantItem.GrowthStage == PlantStage.Harvestable)
             {
-                var jobUnit = new JobUnit(ActionPool.Get<HarvestAction>(plantItem));
-                AddJobUnit<Farmer>(jobUnit);
+                var jobUnit = new JobUnit(JobUnitType.Farm, ActionPool.Get<HarvestAction>(plantItem), jobUnit =>
+                {
+                    Debug.Log($"收获作物：{plantItem.Config.name}");
+                });
+                JobBoard.Add(jobUnit);
             }
         }
     }
 
-    public class RestaurantProperty : Property
+    public class RestaurantProperty : BusinessProperty
     {
         private List<StoveItem> _stoveItems = new List<StoveItem>();
-        public RestaurantProperty(IHouse house) : base(house)
+        public RestaurantProperty(Property property) : base(property)
         {
-            foreach (var furniture in House.FurnitureItems)
+            foreach (var furniture in Property.House.FurnitureItems)
             {
                 if (furniture.Value is ChairItem chairItem)
                 {
                     chairItem.OnSit += (agent) =>
                     {
-                        var jobUnit = new JobUnit(ActionPool.Get<GetOrderAction>(this, agent));
-                        AddJobUnit<Waiter>(jobUnit);
+                        var jobUnit = new JobUnit(JobUnitType.Service, ActionPool.Get<GetOrderAction>(this, agent));
+                        JobBoard.Add(jobUnit);
                     };
                 }
                 else if (furniture.Value is StoveItem stoveItem)
@@ -162,16 +210,13 @@ namespace Citizens
                     _stoveItems.Add(stoveItem);
                 }
             }
-
-            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_COOKER"), 1);
-            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_WAITER"), 1);
         }
 
         public void AddOrder(PropConfig propConfig)
         {
             var stove = _stoveItems.Find(stove => stove.Using == null);
-            var jobUnit = new JobUnit(ActionPool.Get<CookAction>(stove, propConfig));
-            AddJobUnit<Cooker>(jobUnit);
+            var jobUnit = new JobUnit(JobUnitType.Cook, ActionPool.Get<CookAction>(stove, propConfig));
+            JobBoard.Add(jobUnit);
         }
 
         public List<Vector2Int> GetAvailableCommericalPos()
@@ -191,7 +236,7 @@ namespace Citizens
         public ChairItem GetAvailableSit()
         {
             // 获取可用的座位
-            foreach (var furnitureItem in House.FurnitureItems)
+            foreach (var furnitureItem in Property.House.FurnitureItems)
             {
                 if (furnitureItem.Value is ChairItem chair && chair.Using == null)
                 {
@@ -220,35 +265,35 @@ namespace Citizens
 
     public class TeahouseProperty : RestaurantProperty
     {
-        public TeahouseProperty(IHouse house) : base(house)
+        public TeahouseProperty(Property property) : base(property)
         {
         }
     }
 
     public class TavernProperty : RestaurantProperty
     {
-        public TavernProperty(IHouse house) : base(house)
+        public TavernProperty(Property property) : base(property)
         {
         }
     }
-    
-    public class ShopProperty : Property
+
+    public class ShopProperty : BusinessProperty
     {
         private float _restockRate = 0.5f;
         public List<ContainerItem> ContainerItems { get; } = new List<ContainerItem>();
         private List<ShopShelfItem> _shopShelfItems = new List<ShopShelfItem>();
 
         private List<ShopShelfItem> ShopShelfItemsInRestocking = new List<ShopShelfItem>();
-        public ShopProperty(IHouse house) : base(house)
+        public ShopProperty(Property property) : base(property)
         {
             var configs = ConfigReader.GetAllConfigs<PropConfig>(c => c.type == PropType.Seed || c.type == PropType.Crop || c.type == PropType.Ingredient);
 
-            foreach (var furniture in House.FurnitureItems)
+            foreach (var furniture in Property.House.FurnitureItems)
             {
                 if (furniture.Value is ShopShelfItem shopShelfItem)
                 {
                     shopShelfItem.OnSoldEvent += CheckRestock;
-                    shopShelfItem.Owner = house.Owner;
+                    shopShelfItem.Owner = Property.Owner;
                     _shopShelfItems.Add(shopShelfItem);
                 }
                 else if (furniture.Value is ContainerItem containerItem)
@@ -268,8 +313,6 @@ namespace Citizens
                 var propConfig = configs[UnityEngine.Random.Range(0, configs.Count)];
                 shelfItem.Restock(propConfig, propConfig.maxStackSize);
             }
-
-            JobRecruitCount.Add(ConfigReader.GetConfig<JobConfig>("JOB_SALESMAN"), 1);
         }
 
         private void CheckRestock(ShopShelfItem shelfItem, PropConfig propConfig)
@@ -291,8 +334,8 @@ namespace Citizens
                         ShopShelfItemsInRestocking.Remove(shelfItem);
                         return;
                     }
-                    var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
-                    AddJobUnit<Salesman>(jobUnit);
+                    var jobUnit = new JobUnit(JobUnitType.Sale, ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
+                    JobBoard.Add(jobUnit);
                     ShopShelfItemsInRestocking.Add(shelfItem);
                 }
             }
@@ -306,8 +349,8 @@ namespace Citizens
                 }
                 if (shelfItem.SellItem.PropItem.Quantity < shelfItem.SellItem.Config.maxStackSize * _restockRate)
                 {
-                    var jobUnit = new JobUnit(ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
-                    AddJobUnit<Salesman>(jobUnit);
+                    var jobUnit = new JobUnit(JobUnitType.Sale, ActionPool.Get<RestockAction>(this, shelfItem, propConfig, gap));
+                    JobBoard.Add(jobUnit);
                     ShopShelfItemsInRestocking.Add(shelfItem);
                 }
             }

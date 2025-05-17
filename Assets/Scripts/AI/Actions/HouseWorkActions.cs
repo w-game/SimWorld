@@ -40,8 +40,8 @@ namespace AI
                     }
                     else
                     {
-                        var house = agent.Citizen.Family.Houses[0];
-                        if (house.TryGetFurniture<BucketItem>(out var bucketItem) && bucketItem.WaterQuantity > 0)
+                        var home = agent.Citizen.Home;
+                        if (home.House.TryGetFurniture<BucketItem>(out var bucketItem) && bucketItem.WaterQuantity > 0)
                         {
                             AddPrecedingAction<DrawWaterAction>(agent, bucketItem);
                         }
@@ -111,7 +111,7 @@ namespace AI
                     if (houses.Count > 0)
                     {
                         var restaurant = houses.OrderBy(a => Vector2.Distance(new Vector2(agent.Pos.x, agent.Pos.y), new Vector2(a.MinPos.x, a.MinPos.y))).First();
-                        _restaurantProperty = Property.Properties[restaurant] as RestaurantProperty;
+                        _restaurantProperty = PropertyManager.I.BusinessProperties.FirstOrDefault(a => a.Value is RestaurantProperty).Value as RestaurantProperty;
                     }
                 }
             }

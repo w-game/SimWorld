@@ -518,16 +518,18 @@ namespace GameItem
                 ActionPool.Get<CheckInteractionAction>(this, typeof(ChatAction), "Chat")
             };
 
-            if (Citizen.Job is Owner owner)
+            if (Citizen.Work is Salesman salesman)
             {
-                if (owner.Property is ShopProperty shop)
+                if (salesman.Property is ShopProperty shop)
                 {
                     actions.Add(ActionPool.Get<CheckInteractionAction>(this, typeof(TradeAction), "Trade"));
                 }
+            }
 
-                var farms = owner.Properties.OfType<FarmProperty>().Where(f => f.ForRent).ToList();
-
-                if (farms.Count > 1)
+            if (Owner.Head == Citizen || Citizen.Work is AssetAgent)
+            {
+                var farmForRent = PropertyManager.I.GetFarmsForRent(agent.Owner);
+                if (farmForRent.Count > 0)
                 {
                     actions.Add(ActionPool.Get<CheckInteractionAction>(this, typeof(RentPropertyAction), "询问土地租赁"));
                 }

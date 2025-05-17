@@ -1,4 +1,3 @@
-using System;
 using Citizens;
 using UI.Elements;
 using UI.Models;
@@ -27,10 +26,10 @@ namespace UI.Views
             autoAssignSlider.gameObject.SetActive(Model.SelfJob.AutoAssign);
             autoAssignButton.onClick.AddListener(OnAutoAssignButtonClicked);
 
-            Model.SelfJob.Property.OnJobUnitAdded += CreateElement;
+            Model.SelfJob.Property.JobBoard.OnJobUnitAdded += CreateElement;
         }
 
-        private void CreateElement(Type type, JobUnit jobUnit)
+        private void CreateElement(JobUnitType type, JobUnit jobUnit)
         {
             var jobUnitElement = Instantiate(jobUnitPrefab, jobUnitContainer);
             jobUnitElement.Init((type, jobUnit), OnDoBtnClicked);
@@ -41,7 +40,7 @@ namespace UI.Views
             jobUnitElement.SetBtnInteractable(!Model.SelfJob.AutoAssign);
         }
 
-        private void OnDoBtnClicked((Type, JobUnit) jobUnitData, JobUnitElement jobUnitElement)
+        private void OnDoBtnClicked((JobUnitType, JobUnit) jobUnitData, JobUnitElement jobUnitElement)
         {
             if (Model.DoJobUnit(jobUnitData.Item1, jobUnitData.Item2))
             {
@@ -67,7 +66,7 @@ namespace UI.Views
         {
             base.OnHide();
             autoAssignButton.onClick.RemoveListener(OnAutoAssignButtonClicked);
-            Model.SelfJob.Property.OnJobUnitAdded -= CreateElement;
+            Model.SelfJob.Property.JobBoard.OnJobUnitAdded -= CreateElement;
         }
     }
 }

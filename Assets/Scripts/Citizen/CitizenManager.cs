@@ -126,14 +126,20 @@ namespace Citizens
             var houses = city.Houses.Where(h => h.HouseType == HouseType.House);
             var propertyHouses = city.Houses.Where(h => h.HouseType != HouseType.House);
 
+            var remainingHouses = houses.ToList();
+
             foreach (var house in houses)
             {
+                var prob = city.ChunkRand.Next(0, 100);
+                if (prob < 10) continue;
+                remainingHouses.Remove(house);
                 house.TryGetFurnitures(out List<BedItem> beds);
                 if (beds.Count == 0) continue;
                 if (city.ChunkRand.Next(0, 100) < 20) continue;
 
                 var family = new Family();
-                family.AddHouse(house);
+                var home = PropertyManager.I.AddProperty(house, family);
+                family.Properties.Add(home);
 
                 var familyTypes = _familyType.FindAll(_ => _.Length == beds.Count);
                 if (familyTypes.Count == 0) continue;
@@ -145,73 +151,109 @@ namespace Citizens
                 CreateGrandParents(familyType, family, house, city, father, mother, out grandfather, out grandmother);
                 CreateChildren(familyType, family, house, city, father, mother, grandfather, grandmother);
 
+                family.Members.ForEach(m => m.SetHome(home));
+
+                var headProb = city.ChunkRand.Next(0, 100);
+                family.SetHead(headProb < 40 ? father ?? mother ?? grandfather ?? grandmother : grandfather ?? father ?? mother ?? grandmother);
                 families.Add(family);
                 city.ChangePopulation(family.Members.Count);
             }
 
-            List<Property> properties = new List<Property>();
             foreach (var propertyHouse in propertyHouses)
             {
-                var property = InitProperty(propertyHouse);
-                if (property != null)
-                {
-                    properties.Add(property);
-                }
+                var family = families[city.ChunkRand.Next(0, families.Count)];
+                var property = InitProperty(family, propertyHouse);
             }
 
-            foreach (var property in properties)
-            {
-                var family = families[city.ChunkRand.Next(0, families.Count)];
-                AssignMembersJobs(family, property);
-            }
+            InitWork(families);
 
             Families.Add(city, families);
         }
 
-        private Property InitProperty(IHouse house)
+        private Property InitProperty(Family family, IHouse house)
         {
-            Property property = null;
-            switch (house.HouseType)
-            {
-                case HouseType.Farm:
-                    property = new FarmProperty(house);
-                    break;
-                case HouseType.Shop:
-                    property = new ShopProperty(house);
-                    break;
-                case HouseType.Teahouse:
-                    property = new TeahouseProperty(house);
-                    break;
-                default:
-                    break;
-            }
+            var adults = family.Members.Where(m => m.Age >= 18).ToList();
+            if (adults.Count == 0) return null;
 
+            var property = PropertyManager.I.AddProperty(house, family);
             return property;
         }
 
-        private void AssignMembersJobs(Family family, Property property)
+        private void InitWork(List<Family> families)
         {
-            property.House.SetOwner(family);
+            var familiesHaveProperty = families.Where(f => f.Properties.Count(p => p.House.HouseType != HouseType.House) > 0).ToList();
 
-            var adults = family.Members.Where(m => m.Age >= 18).ToList();
-            if (adults.Count == 0) return;
-
-            var ownerAmount = adults.Count > 1 ? Random.Range(1, adults.Count) : 1;
-
-            if (ownerAmount == 1)
+            foreach (var family in familiesHaveProperty)
             {
-                var randomAdult = adults[Random.Range(0, adults.Count)];
-                var owner = randomAdult.Job is Owner o ? o : new Owner(randomAdult);
-                owner.AddProperty(property);
-                randomAdult.SetJob(owner);
-            }
-            else
-            {
-                foreach (var adult in adults)
+                var properties = family.Properties.Where(p => p.House.HouseType != HouseType.House && p.House.HouseType != HouseType.Farm).ToList();
+                var farms = family.Properties.Where(p => p.House.HouseType == HouseType.Farm).ToList();
+
+                if (properties.Count > 0)
                 {
-                    var owner = adult.Job is Owner o ? o : new Owner(adult);
-                    owner.AddProperty(property);
-                    adult.SetJob(owner);
+                    var adults = family.Members.Where(m => m.Age >= 18).ToList();
+                    foreach (var property in properties)
+                    {
+                        if (adults.Count == 0) continue;
+                        var adult = adults[Random.Range(0, adults.Count)];
+                        adults.Remove(adult);
+                        var work = new CEO(adult);
+                        work.AddProperty(new BusinessProperty(property));
+                    }
+
+                    var prob = Random.Range(0, 100);
+                    if (prob < 50)
+                    {
+                        foreach (var farm in farms)
+                        {
+                            PropertyManager.I.PropertiesForRent.Add(farm);
+                        }
+                    }
+                    else
+                    {
+                        foreach (var farm in farms)
+                        {
+                            var farmProperty = new FarmProperty(farm);
+                            farmProperty.AddRecruitCount(WorkType.FarmHelper);
+                            PropertyManager.I.AddRecruit(farmProperty, WorkType.FarmHelper);
+                        }
+                    }
+                }
+                else
+                {
+                    var totalArea = farms.Sum(f => f.House.Size.x * f.House.Size.y);
+
+                    if (totalArea < 100)
+                    {
+                        var adults = family.Members.Where(m => m.Age >= 18).ToList();
+                        foreach (var farm in farms)
+                        {
+                            if (adults.Count == 0) continue;
+                            var adult = adults[Random.Range(0, adults.Count)];
+                            adults.Remove(adult);
+                            var work = new CEO(adult);
+                            work.AddProperty(new BusinessProperty(farm));
+                        }
+                    }
+                    else
+                    {
+                        var prob = Random.Range(0, 100);
+                        if (prob < 50)
+                        {
+                            foreach (var farm in farms)
+                            {
+                                PropertyManager.I.PropertiesForRent.Add(farm);
+                            }
+                        }
+                        else
+                        {
+                            foreach (var farm in farms)
+                            {
+                                var farmProperty = new FarmProperty(farm);
+                                farmProperty.AddRecruitCount(WorkType.FarmHelper);
+                                PropertyManager.I.AddRecruit(farmProperty, WorkType.FarmHelper);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -220,7 +262,6 @@ namespace Citizens
         {
             var player = new FamilyMember(true, 18);
             Family family = new Family();
-            // family.AddHouse(new House(new List<Vector2Int>(), HouseType.House));
             family.AddMember(player);
             return player;
         }

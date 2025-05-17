@@ -8,11 +8,11 @@ namespace AI
 {
     public class WorkAction : ConditionActionBase
     {
-        private Job _job;
+        private Work _job;
 
         protected override void DoExecute(Agent agent)
         {
-            if (agent.Citizen.Job == null)
+            if (agent.Citizen.Work == null)
             {
                 Done = true;
                 return;
@@ -43,7 +43,7 @@ namespace AI
 
         public override void OnGet(params object[] args)
         {
-            _job = args[0] as Job;
+            _job = args[0] as Work;
             ActionName = "Work";
 
             Condition = () => GameManager.I.GameTime.CurrentTime < _job.WorkTime[0] || GameManager.I.GameTime.CurrentTime > _job.WorkTime[1];
@@ -88,12 +88,12 @@ namespace AI
     public class WaitForOrderAction : ConditionActionBase
     {
         private Property _property;
-        private Job _self;
+        private Work _self;
 
         public override void OnGet(params object[] args)
         {
             _property = args[0] as Property;
-            _self = args[1] as Job;
+            _self = args[1] as Work;
             ActionName = "Wait For Order";
             // Condition = () => _self.JobUnits.Count > 0;
         }

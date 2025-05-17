@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using AI;
 using GameItem;
-using Map;
-using UnityEngine;
 
 namespace Citizens
 {
     public class Family
     {
-        public List<IHouse> Houses { get; } = new List<IHouse>(); // 房屋
+        public List<Property> Properties { get; } = new List<Property>(); // 房产
 
         public List<FamilyMember> Members { get; } = new List<FamilyMember>();
         public List<IAction> Actions { get; } = new List<IAction>(); // 行为
+
+        public FamilyMember Head { get; private set; } // 家庭成员
 
         public void AddMember(FamilyMember member)
         {
@@ -20,32 +20,14 @@ namespace Citizens
             member.Family = this;
         }
 
+        public void SetHead(FamilyMember head)
+        {
+            Head = head;
+        }
+
         public void RemoveMember(FamilyMember member)
         {
             Members.Remove(member);
-        }
-
-        internal void AddHouse(IHouse house)
-        {
-            Houses.Add(house);
-            house.SetOwner(this);
-        }
-
-        internal IHouse GetHouse(HouseType houseType)
-        {
-            var house = Houses.Find(h => h.HouseType == houseType);
-
-            if (house != null)
-            {
-                return house;
-            }
-            else
-            {
-                house = new House(new List<Vector2Int>(), houseType);
-                house.SetOwner(this);
-                Houses.Add(house);
-                return house;
-            }
         }
     }
 
@@ -65,6 +47,7 @@ namespace Citizens
         public List<FamilyMember> Enemies { get; } = new List<FamilyMember>(); // 敌人
         public List<FamilyMember> Colleagues { get; } = new List<FamilyMember>(); // 同事
 
+        public Property Home { get; set; } // 家庭住宅
 
         public bool IsAdult
         {
@@ -75,12 +58,17 @@ namespace Citizens
         }
 
         public Agent Agent { get; private set; } // 代理人
-        public Job Job { get; set; } // 职业
+        public Work Work { get; set; } // 职业
 
         public FamilyMember(bool sex, int age)
         {
             Sex = sex;
             Age = age;
+        }
+
+        public void SetHome(Property home)
+        {
+            Home = home;
         }
 
         public void SetAgent(Agent agent)
@@ -138,12 +126,12 @@ namespace Citizens
             enemy.Enemies.Add(this);
         }
 
-        public void SetJob(Job job)
+        public void SetWork(Work work)
         {
-            if (Job != job)
+            if (Work != work)
             {
-                Job?.Resign();
-                Job = job;
+                Work?.Resign();
+                Work = work;
             }
         }
     }

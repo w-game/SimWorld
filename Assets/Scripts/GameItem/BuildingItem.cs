@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using AI;
-using Map;
+using Citizens;
 using UI.Models;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -39,10 +39,10 @@ namespace GameItem
 
     public class BuildingItem : GameItemBase<BuildingConfig>
     {
-        public IHouse House { get; private set; }
+        public House House { get; private set; }
         public List<TileBase> Tiles { get; protected set; }
         private bool _isPlaced;
-        public BuildingItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos)
+        public BuildingItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos)
         {
             House = house;
 
@@ -92,7 +92,7 @@ namespace GameItem
 
     public class WallItem : BuildingItem
     {
-        public WallItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        public WallItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.wallTiles;
         }
@@ -100,7 +100,7 @@ namespace GameItem
 
     public class CastleWallItem : BuildingItem
     {
-        public CastleWallItem(BuildingConfig config, Vector3 pos) : base(config, pos, null)
+        public CastleWallItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.castleWallTiles;
         }
@@ -108,7 +108,7 @@ namespace GameItem
 
     public class FloorItem : BuildingItem
     {
-        public FloorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        public FloorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.floorTiles;
         }
@@ -116,7 +116,7 @@ namespace GameItem
 
     public class DoorItem : BuildingItem
     {
-        public DoorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        public DoorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = new List<TileBase> { MapManager.I.doorTile };
         }
@@ -124,7 +124,7 @@ namespace GameItem
 
     public class FrontDoorItem : BuildingItem
     {
-        public FrontDoorItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        public FrontDoorItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = new List<TileBase> { MapManager.I.doorTile };
         }
@@ -132,7 +132,7 @@ namespace GameItem
 
     public class CommercialItem : BuildingItem
     {
-        public CommercialItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        public CommercialItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.floorTiles;
         }
@@ -144,7 +144,7 @@ namespace GameItem
 
         public PropType PropType => PropType.Seed;
 
-        public FarmItem(BuildingConfig config, Vector3 pos, IHouse house) : base(config, pos, house)
+        public FarmItem(BuildingConfig config, Vector3 pos, House house) : base(config, pos, house)
         {
             Tiles = MapManager.I.farmTiles;
         }
@@ -163,29 +163,21 @@ namespace GameItem
 
         public override List<IAction> ActionsOnClick(Agent agent)
         {
+            var actions = base.ActionsOnClick(agent);
             var waterAction = ActionPool.Get<WaterPlantAction>(this);
-
-            var SystemAction = new SystemAction("View Room Details", a =>
-            {
-                var model = IModel.GetModel<PopHouseDetailsModel>();
-                model.ShowUI(House);
-            });
+            actions.Add(waterAction);
 
             if (PlantItem != null)
             {
-                return new List<IAction>() { waterAction, SystemAction };
+                return actions;
             }
 
-            return new List<IAction>()
+            actions.Add(new SystemAction("Plant Seed", a =>
             {
-                waterAction,
-                new SystemAction("Plant Seed", a =>
-                {
-                    var model = IModel.GetModel<PopSelectSeedModel>();
-                    model.ShowUI(this);
-                }),
-                SystemAction
-            };
+                var model = IModel.GetModel<PopSelectSeedModel>();
+                model.ShowUI(this);
+            }));
+            return actions;
         }
 
         public void OnSelected(string seedId, int amount = 1)

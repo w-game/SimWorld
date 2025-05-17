@@ -522,14 +522,14 @@ namespace AI
 
         public override void OnRegister(Agent agent)
         {
-            if (agent.Citizen.Family.Houses.Count == 0)
+            if (agent.Citizen.Home == null)
             {
                 Debug.LogError("没有房子，无法上厕所");
                 Done = true;
                 return;
             }
 
-            if (agent.Citizen.Family.Houses[0].TryGetFurniture<ToiletItem>(out var toiletItem))
+            if (agent.Citizen.Home.House.TryGetFurniture<ToiletItem>(out var toiletItem))
             {
                 _toiletItem = toiletItem;
                 PrecedingActions.Add(ActionPool.Get<CheckMoveToTarget>(agent, _toiletItem.Pos));
@@ -660,7 +660,7 @@ namespace AI
         {
             if (_bedItem == null)
             {
-                if (agent.Citizen.Family.Houses[0].TryGetFurnitures<BedItem>(out var bedItems))
+                if (agent.Citizen.Home.House.TryGetFurnitures<BedItem>(out var bedItems))
                 {
                     foreach (var bedItem in bedItems)
                     {

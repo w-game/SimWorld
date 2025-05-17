@@ -29,11 +29,9 @@ namespace Map
         City City { get; }
         Dictionary<Vector2Int, FurnitureItem> FurnitureItems { get; }
         Vector2Int MinPos { get; }
-        Family Owner { get; }
         List<Vector2Int> CommercialPos { get; }
         public Vector2Int DoorPos { get; }
 
-        void SetOwner(Family owner);
         bool TryGetFurniture<T>(out T furnitureItem) where T : FurnitureItem;
         bool TryGetFurnitures<T>(out List<T> furnitureItems) where T : FurnitureItem;
     }

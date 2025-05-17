@@ -183,7 +183,7 @@ namespace AI
             _agentOne.HideDialog();
             _agentTwo.HideDialog();
 
-            var shopProperty = _agentTwo.Citizen.Job.Property as ShopProperty;
+            var shopProperty = _agentTwo.Citizen.Work.Property as ShopProperty;
             foreach (var item in _soldItems)
             {
                 var containerItem = shopProperty.ContainerItems.Find(x => x.Inventory.Items.Count < x.Inventory.MaxSize);
@@ -258,17 +258,12 @@ namespace AI
             _end = true;
             _agentOne.HideDialog();
             _agentTwo.HideDialog();
-            _selectedProperty.LeaseTo(_agentOne.Citizen.Family);
+            _selectedProperty.LeaseTo(_agentOne.Citizen, DateTime.Now, DateTime.Now.AddDays(10));
         }
 
         public override void OnRegister(Agent agent)
         {
-            var role = _agentTwo.Citizen.Job as Owner;
-            if (role != null)
-            {
-                var properties = role.Properties.OfType<FarmProperty>();
-                _propertiesForRent = properties.Where(x => x.ForRent).Cast<Property>().ToList();
-            }
+            _propertiesForRent = PropertyManager.I.PropertiesForRent.Where(x => x.Owner == _agentTwo.Owner).ToList();
         }
 
         protected override void DoExecute(Agent agent)

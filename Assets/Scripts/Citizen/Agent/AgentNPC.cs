@@ -26,10 +26,10 @@ namespace GameItem
 
         public IAction CheckShopping()
         {
-            if (Owner.Houses.Count == 0)
+            if (Citizen.Home == null)
                 return null;
 
-            var house = Owner.Houses[0];
+            var house = Citizen.Home.House;
             var containers = house.FurnitureItems.Values
                 .OfType<ContainerItem>()
                 .ToList();

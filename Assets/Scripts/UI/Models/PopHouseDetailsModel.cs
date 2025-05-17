@@ -1,6 +1,5 @@
 using System;
 using Citizens;
-using Map;
 using UI.Views;
 
 namespace UI.Models
@@ -10,8 +9,8 @@ namespace UI.Models
         public override string Path => "PopHouseDetails";
         
         public override ViewType ViewType => ViewType.Popup;
-        
-        public IHouse House => Data[0] as IHouse;
+
+        public Property Property => PropertyManager.I.Properties.Find(p => p.House == Data[0]);
 
         public PopHouseDetailsModel()
         {
@@ -19,25 +18,17 @@ namespace UI.Models
 
         public void BuyProperty()
         {
-            if (House != null)
+            if (Property != null)
             {
-                var property = Property.Properties[House];
-                if (property != null)
-                {
-                    property.BeBought(GameManager.I.CurrentAgent);
-                }
+                Property.Transfer(GameManager.I.CurrentAgent.Owner);
             }
         }
 
         public void RentProperty()
         {
-            if (House != null)
+            if (Property != null)
             {
-                var property = Property.Properties[House];
-                if (property != null)
-                {
-                    property.LeaseTo(GameManager.I.CurrentAgent.Citizen.Family);
-                }
+                Property.LeaseTo(GameManager.I.CurrentAgent.Citizen, DateTime.Now, DateTime.Now.AddDays(30));
             }
         }
     }

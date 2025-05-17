@@ -224,29 +224,29 @@ namespace AI
             {
                 ChangeCurAction(ActiveActions.Dequeue());
             }
-            else if (_agent.Citizen.Job is Owner owner)
+            else if (_agent.Citizen.Work is Work work)
             {
-                if ((_agent == GameManager.I.CurrentAgent && _agent.Citizen.Job.AutoAssign) || (_agent != GameManager.I.CurrentAgent))
+                if (_agent == GameManager.I.CurrentAgent)
                 {
-                    if (owner.CurJob == null)
+                    if (work.AutoAssign)
                     {
-                        owner.Next();
-                        if (owner.CurJob == null)
-                            return;
-                        RegisterAction(owner.CurJob.Action, true);
+                        if (work.CurJob == null)
+                        {
+                            work.Next();
+                            if (work.CurJob == null)
+                                return;
+                            RegisterAction(work.CurJob.Action, true);
+                        }
                     }
                 }
-            }
-            else if (_agent.Citizen.Job is Rentant rentant)
-            {
-                if ((_agent == GameManager.I.CurrentAgent && _agent.Citizen.Job.AutoAssign) || (_agent != GameManager.I.CurrentAgent))
+                else
                 {
-                    if (rentant.CurJob == null)
+                    if (work.CurJob == null)
                     {
-                        rentant.Next();
-                        if (rentant.CurJob == null)
+                        work.Next();
+                        if (work.CurJob == null)
                             return;
-                        RegisterAction(rentant.CurJob.Action, true);
+                        RegisterAction(work.CurJob.Action, true);
                     }
                 }
             }
@@ -283,7 +283,7 @@ namespace AI
                     var prob = UnityEngine.Random.Range(0, 100);
                     if (prob < 50)
                     {
-                        
+
                         RegisterAction(ActionPool.Get<IdleAction>(), true);
                     }
                     else if (prob < 90)

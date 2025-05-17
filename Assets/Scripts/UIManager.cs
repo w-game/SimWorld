@@ -62,7 +62,7 @@ public class UIManager : MonoSingleton<UIManager>
         if (Input.GetKeyDown(KeyCode.J))
         {
             var model = IModel.GetModel<PopJobUnitsModel>();
-            model.ShowUI(GameManager.I.CurrentAgent.Citizen.Job);
+            model.ShowUI(GameManager.I.CurrentAgent.Citizen.Work);
         }
     }
 

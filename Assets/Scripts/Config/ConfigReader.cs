@@ -31,7 +31,6 @@ public class ConfigReader
         { typeof(ResourceConfig)   , "Configs/ResourceConfig"    },
         { typeof(GameItemToActions), "Configs/GameItemToActions" },
         { typeof(RoomConfig)       , "Configs/RoomConfig"        },
-        { typeof(JobConfig)        , "Configs/JobConfig"         },
         { typeof(CraftConfig)      , "Configs/CraftConfig"       },
         { typeof(BiomeConfig)      , "Configs/BiomeConfig"       }
     };

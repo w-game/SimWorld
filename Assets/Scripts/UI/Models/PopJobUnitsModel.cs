@@ -10,32 +10,28 @@ namespace UI.Models
         public override string Path => "PopJobUnits";
         public override ViewType ViewType => ViewType.Popup;
 
-        public Job SelfJob => Data[0] as Job;
-        public Dictionary<Type, List<JobUnit>> JobUnits
+        public Work SelfJob => Data[0] as Work;
+        public Dictionary<JobUnitType, List<JobUnit>> JobUnits
         {
             get
             {
-                Dictionary<Type, List<JobUnit>> jobUnits = new Dictionary<Type, List<JobUnit>>();
-                foreach (var jobUnit in SelfJob.Property.JobUnits)
+                Dictionary<JobUnitType, List<JobUnit>> jobUnits = new Dictionary<JobUnitType, List<JobUnit>>();
+                foreach (var jobUnit in SelfJob.Property.JobBoard.JobUnits)
                 {
-                    if (jobUnit.Key == SelfJob.GetType())
+                    if (SelfJob.ExpectJobUnits.Contains(jobUnit.Key))
                     {
-                        if (jobUnit.Value.Count > 0)
+                        if (!jobUnits.ContainsKey(jobUnit.Key))
                         {
-                            jobUnits.Add(jobUnit.Key, jobUnit.Value);
+                            jobUnits.Add(jobUnit.Key, new List<JobUnit>());
                         }
+                        jobUnits[jobUnit.Key].AddRange(jobUnit.Value);
                     }
-                }
-
-                if (jobUnits.Count == 0 &&( SelfJob is Owner || SelfJob is Rentant))
-                {
-                    return SelfJob.Property.JobUnits;
                 }
                 return jobUnits;
             }
         }
 
-        public bool DoJobUnit(Type type, JobUnit jobUnit)
+        public bool DoJobUnit(JobUnitType type, JobUnit jobUnit)
         {
             return SelfJob.DoJobUnit(type, jobUnit);
         }

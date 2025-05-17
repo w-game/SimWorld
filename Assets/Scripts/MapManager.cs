@@ -225,7 +225,7 @@ public class MapManager : MonoSingleton<MapManager>
     public BlockType CheckBlockType(Vector3 pos)
     {
         var blockType = CartonMap.GetBlockType(pos);
-        UnityEngine.Debug.Log($"点击的 Tile 坐标: {pos}, 类型: {blockType}");
+        Debug.Log($"点击的 Tile 坐标: {pos}, 类型: {blockType}");
 
         return blockType;
     }

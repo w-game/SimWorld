@@ -1,15 +1,33 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AI;
 using UI.Elements;
-using UnityEngine;
 using UnityEngine.Events;
 
 namespace Citizens
 {
+    public enum JobUnitType
+    {
+        Farm,
+        Service,
+        Cook,
+        Sale,
+        Manage
+    }
+
+    public enum WorkType
+    {
+        Farmer,
+        FarmHelper,
+        Waiter,
+        Cooker,
+        Salesman,
+        CEO
+    }
+
     public class JobUnit
     {
+        public JobUnitType Type { get; private set; }
         public ActionBase Action { get; private set; }
         public event UnityAction<JobUnit> OnJobUnitDone;
         private bool _isDone;
@@ -26,8 +44,9 @@ namespace Citizens
             }
         }
 
-        public JobUnit(ActionBase action, UnityAction<JobUnit> onJobUnitDone = null, UnityAction<JobUnit> onJobUnitFailed = null)
+        public JobUnit(JobUnitType unitType, ActionBase action, UnityAction<JobUnit> onJobUnitDone = null, UnityAction<JobUnit> onJobUnitFailed = null)
         {
+            Type = unitType;
             OnJobUnitDone += onJobUnitDone;
             Action = action;
             Action.OnCompleted += (action, success) =>
@@ -51,44 +70,34 @@ namespace Citizens
         }
     }
 
-    public abstract class Job
+    public abstract class Work
     {
         public FamilyMember Member { get; set; }
         public float[] WorkTime { get; set; } = new float[2] { 0 * 60 * 60, 18 * 60 * 60 };
 
-        public Property Property { get; set; }
+        public BusinessProperty Property { get; set; }
         public JobUnit CurJob { get; private set; }
         public bool AutoAssign { get; set; } = true;
 
         public event Action OnJobUnitAssigned;
 
-        public Job(FamilyMember member)
+        public abstract List<JobUnitType> ExpectJobUnits { get; }
+
+        public Work(FamilyMember member)
         {
             Member = member;
+            Member.SetWork(this);
             AutoAssign = member.Agent == GameManager.I.CurrentAgent ? false : true;
         }
 
-        public virtual JobUnit CheckJobUnit()
+        public JobUnit CheckJobUnit()
         {
-            if (Property != null && Property.JobUnits.Count == 0)
+            if (Property == null || Property.JobBoard.Count == 0)
             {
                 return null;
             }
 
-            foreach (var jobUnit in Property.JobUnits)
-            {
-                if (jobUnit.Key == GetType())
-                {
-                    if (jobUnit.Value.Count > 0)
-                    {
-                        var unit = jobUnit.Value[0];
-                        jobUnit.Value.RemoveAt(0);
-                        return unit;
-                    }
-                }
-            }
-
-            return null;
+            return Property.JobBoard.RequestJob(ExpectJobUnits);
         }
 
         private void OnJobUnitDone(JobUnit jobUnit)
@@ -107,14 +116,23 @@ namespace Citizens
             }
         }
 
-        public bool DoJobUnit(Type key, JobUnit jobUnit)
+        public bool DoJobUnit(JobUnitType key, JobUnit jobUnit)
         {
             if (CurJob != null) {
                 MessageBox.I.ShowMessage("You are already doing a job.", "Textures/Error", MessageType.Error);
                 return false;
             }
             CurJob = jobUnit;
-            Property.JobUnits[key].Remove(jobUnit);
+
+            Queue<JobUnit> newJobUnits = new Queue<JobUnit>();
+
+            while (Property.JobBoard.Count > 0)
+            {
+                var unit = Property.JobBoard.RequestJob(new List<JobUnitType> { key });
+                if (unit == jobUnit) continue;
+                newJobUnits.Enqueue(unit);
+            }
+            Property.JobBoard.Cover(key, newJobUnits);
             CurJob.OnJobUnitDone += OnJobUnitDone;
             OnJobUnitAssigned?.Invoke();
             Member.Agent.Brain.RegisterAction(CurJob.Action, true);
@@ -127,101 +145,39 @@ namespace Citizens
         }
     }
 
-    public class Owner : Job
+    public class CEO : Work
     {
-        public List<Property> Properties { get; private set; } = new List<Property>();
-        public Owner(FamilyMember member) : base(member)
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Manage };
+
+        public CEO(FamilyMember member) : base(member)
         {
         }
 
-        public void AddProperty(Property property)
-        {
-            Properties.Add(property);
-
-            var farmProperties = Properties.OfType<FarmProperty>().ToList();
-            if (farmProperties.Count > 5)
-            {
-                farmProperties.ForEach(p => p.ForRent = true);
-                Debug.Log("Farm properties are too many, set them to rent.");
-            }
-            ChangeProperty();
-        }
-
-        public void RemoveProperty(Property property)
-        {
-            Properties.Remove(property);
-            if (Property == property)
-            {
-                ChangeProperty();
-            }
-        }
-
-        private void ChangeProperty()
-        {
-            var property = Properties.Find(p => !p.ForRent && p.JobUnits.ContainsKey(GetType()) && p.JobUnits[GetType()].Count > 0);
-            if (property != null)
-            {
-                Property = property;
-            }
-            else
-            {
-                property = Properties.Find(p => !p.ForRent && p.JobUnits.Values.Sum(v => v.Count) > 0);
-                if (property != null)
-                {
-                    Property = property;
-                }
-            }
-        }
-
-        public override JobUnit CheckJobUnit()
-        {
-            if (Property == null || Property.JobUnits.Count == 0)
-            {
-                return null;
-            }
-
-            if (Property.Rentant != null)
-            {
-                Property = null;
-                return null;
-            }
-
-            foreach (var kv in Property.JobUnits)
-            {
-                if (kv.Value.Count > 0)
-                {
-                    var unit = kv.Value[0];
-                    kv.Value.RemoveAt(0);
-                    return unit;
-                }
-            }
-            return null;
-        }
-    }
-
-    public class Rentant : Job
-    {
-        public Rentant(FamilyMember member, Property property) : base(member)
+        public void AddProperty(BusinessProperty property)
         {
             Property = property;
         }
 
-        public override JobUnit CheckJobUnit()
+        public void RemoveProperty(BusinessProperty property)
         {
-            foreach (var kv in Property.JobUnits)
+            if (Property == property)
             {
-                if (kv.Value.Count > 0)
-                {
-                    var unit = kv.Value[0];
-                    kv.Value.RemoveAt(0);
-                    return unit;
-                }
+                Property = null;
             }
-            return null;
         }
     }
 
-    public class Employee : Job
+    public class AssetAgent : Work
+    {
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Manage };
+
+        public AssetAgent(FamilyMember owner, BusinessProperty property) : base(owner)
+        {
+            Property = property;
+        }
+    }
+
+    public abstract class Employee : Work
     {
         public int WorkDays { get; set; } = 5;
 
@@ -236,15 +192,18 @@ namespace Citizens
         }
     }
 
-    public class Farmer : Employee
+    public class FarmHelper : Employee
     {
-        public Farmer(FamilyMember member, float[] workTime) : base(member, workTime)
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Farm };
+
+        public FarmHelper(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
     }
 
     public class Cooker : Employee
     {
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Cook };
         public Cooker(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
@@ -252,13 +211,17 @@ namespace Citizens
 
     public class Waiter : Employee
     {
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Service };
+
         public Waiter(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }
     }
-    
+
     public class Salesman : Employee
     {
+        public override List<JobUnitType> ExpectJobUnits => new List<JobUnitType> { JobUnitType.Sale };
+
         public Salesman(FamilyMember member, float[] workTime) : base(member, workTime)
         {
         }

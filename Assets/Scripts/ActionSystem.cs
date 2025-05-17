@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Citizens;
 using Map;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -141,9 +142,9 @@ namespace AI
                 case BlockType.Plain:
                     if (GameManager.I.GameItemManager.GetItemsAtPos(pos).Count == 0)
                     {
-                        IHouse house = GameManager.I.CurrentAgent.Citizen.Family.GetHouse(HouseType.Farm);
+                        Property property = PropertyManager.I.AddProperty(null, GameManager.I.CurrentAgent.Owner);
                         var cellPos = MapManager.I.WorldPosToCellPos(pos);
-                        actions.Add(ActionPool.Get<HoeAction>(new Vector3(cellPos.x, cellPos.y, 0), house));
+                        actions.Add(ActionPool.Get<HoeAction>(new Vector3(cellPos.x, cellPos.y, 0), property.House));
                     }
                     break;
                 case BlockType.Road:
