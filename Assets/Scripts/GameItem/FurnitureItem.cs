@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AI;
+using Citizens;
 using UI.Models;
 using UI.Popups;
 using UnityEngine;
@@ -409,6 +410,19 @@ namespace GameItem
 
     public class BulletinBoardItem : FurnitureItem
     {
+        public class BulletinData
+        {
+            public string title;
+            public string content;
+            public string author;
+            public float time;
+        }
+
+        public List<BulletinData> Bulletins { get; } = new List<BulletinData>();
+
+        private const float BULLETIN_LIFETIME = 86400f; // seconds – adjust to desired in‑game duration
+        private const int   MAX_BULLETINS     = 5;
+
         public override void ShowUI()
         {
             if (UI == null)
@@ -416,7 +430,7 @@ namespace GameItem
                 UI = GameManager.I.GameItemManager.ItemUIPool.Get<BulletinBoardItemUI>(Config.prefab, Pos + new Vector3(0.5f, 0.5f, 0));
                 UI.Init(this);
             }
-            
+
             UI.SetRenderer(Config.icon);
         }
 
@@ -428,8 +442,86 @@ namespace GameItem
             };
         }
 
+        public override void Update()
+        {
+            // Implement any specific update logic for bulletin board items here
+        }
+
+        private void CheckCreateBulletin()
+        {
+            // 1. Remove expired bulletins
+            Bulletins.RemoveAll(b => Time.time - b.time > BULLETIN_LIFETIME);
+
+            // 2. Only continue if we still have room for new entries
+            if (Bulletins.Count >= MAX_BULLETINS) return;
+
+            if (!PropertyManager.I.PropertyRecruits.TryGetValue(MapManager.I.GetCityByPos(Pos), out var workInfos))
+                return;
+
+            // 3. Collect candidate (BusinessProperty, WorkType) pairs without repetition
+            List<(BusinessProperty, WorkType)> workList = new List<(BusinessProperty, WorkType)>();
+            while (workList.Count < MAX_BULLETINS && workList.Count < workInfos.Count)
+            {
+                var randomProperty = workInfos.ElementAt(UnityEngine.Random.Range(0, workInfos.Count));
+                var pair = (randomProperty.Key, randomProperty.Value[UnityEngine.Random.Range(0, randomProperty.Value.Count)]);
+                if (!workList.Contains(pair))
+                {
+                    workList.Add(pair);
+                }
+            }
+
+            // 4. Create bulletins until the board is full
+            foreach (var (property, workType) in workList)
+            {
+                if (Bulletins.Count >= MAX_BULLETINS) break;
+
+                // Skip if a similar bulletin already exists
+                // if (Bulletins.Any(b => b.title.Contains(property.name) && b.content.Contains(workType.ToString())))
+                //     continue;
+                var data = new BulletinData
+                {
+                    // author = property.Owner?.Name ?? "佚名",
+                    time   = Time.time
+                };
+
+                switch (workType)
+                {
+                    case WorkType.Cooker:
+                        data.title   = "招厨榜";
+                        data.content = $"本店新张，炉灶方兴，诚聘膳夫一名，精擅百味烹调，供食宿，月俸面议。有意者请至新宇当面洽谈。";
+                        break;
+
+                    case WorkType.FarmHelper:
+                        data.title   = "招佃示告";
+                        data.content = $"本庄坐拥良田五亩，水利便捷，宜耕宜种，今觅勤恳善耕之人租佃。请至城西王员外面议佃租，切勿失良机。";
+                        break;
+
+                    case WorkType.Salesman:
+                        data.title   = "招伙计启事";
+                        data.content = $"本店货源充盈，急招伙计一名，需口齿伶俐，能写会算。月钱优厚，供膳宿，欲者速来。";
+                        break;
+
+                    case WorkType.Waiter:
+                        data.title   = "招堂倌启事";
+                        data.content = $"本店酒客盈门，现募堂倌数名，须手脚利落，待客周到。食宿全包，月银面议。欲试者速至。";
+                        break;
+
+                    default:
+                        continue; // Skip unsupported work types
+                }
+
+                // 防止空标题或重复内容
+                // if (string.IsNullOrWhiteSpace(data.title) ||
+                //     Bulletins.Any(b => b.title == data.title && b.content == data.content))
+                //     continue;
+
+                Bulletins.Add(data);
+            }
+        }
+
         public void OnClick()
         {
+            CheckCreateBulletin();
             if ((Pos - GameManager.I.CurrentAgent.Pos).sqrMagnitude > 4)
             {
                 GameManager.I.CurrentAgent.MoveToArroundPos(this, () =>

@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Citizens;
+using GameItem;
 using UI.Elements;
 using UI.Models;
 using UnityEngine;
@@ -10,6 +12,8 @@ namespace UI.Popups
     {
         public override string Path => "PopBulletinBoard";
         public override ViewType ViewType => ViewType.Popup;
+
+        public BulletinBoardItem BulletinBoardItem => Data[0] as BulletinBoardItem;
     }
 
     public class PopBulletinBoard : ViewBase<PopBulletinBoardModel>
@@ -56,7 +60,7 @@ namespace UI.Popups
                 if (candidate.x >= parentRect.rect.min.x + halfSize.x &&
                     candidate.x <= parentRect.rect.max.x - halfSize.x &&
                     candidate.y >= parentRect.rect.min.y + halfSize.y &&
-                    candidate.y <= parentRect.rect.max.y - halfSize.y)
+                    candidate.y <= parentRect.rect.max.y - halfSize.y && !IsOverlapping(candidate))
                 {
                     return candidate;
                 }
@@ -77,9 +81,14 @@ namespace UI.Popups
 
         public override void OnShow()
         {
-            CreateBulletin("招佃示告", "今有良田五亩，水利便捷，宜耕宜种，欲觅勤劳善耕之人租佃。有意者可往城东王掌柜处洽询，面议租事，切勿错失良机。");
-            CreateBulletin("缉拿令", "张三，男，三十岁，身高一丈二尺，体重一百四十斤，黑发黑瞳。该犯盗窃财物，恶意伤人，罪行重大，已畏罪潜逃。今府衙发榜通缉，凡民有知其踪迹者，或能缉拿归案者，赏银五百两，官府重谢。若有藏匿包庇之辈，悉以同罪论处。");
-            CreateBulletin("警示榜", "近有宵小为患，潜入民宅，行窃财物，乡民损失颇巨。凡四邻八舍，当加强防范，夜闭门户，切勿疏忽。若察觉可疑之人影行迹，速告官府，以保安宁。");
+            // CreateBulletin("招佃示告", "今有良田五亩，水利便捷，宜耕宜种，欲觅勤劳善耕之人租佃。有意者可往城东王掌柜处洽询，面议租事，切勿错失良机。");
+            // CreateBulletin("缉拿令", "张三，男，三十岁，身高一丈二尺，体重一百四十斤，黑发黑瞳。该犯盗窃财物，恶意伤人，罪行重大，已畏罪潜逃。今府衙发榜通缉，凡民有知其踪迹者，或能缉拿归案者，赏银五百两，官府重谢。若有藏匿包庇之辈，悉以同罪论处。");
+            // CreateBulletin("警示榜", "近有宵小为患，潜入民宅，行窃财物，乡民损失颇巨。凡四邻八舍，当加强防范，夜闭门户，切勿疏忽。若察觉可疑之人影行迹，速告官府，以保安宁。");
+
+            foreach (var bulletin in Model.BulletinBoardItem.Bulletins)
+            {
+                CreateBulletin(bulletin.title, bulletin.content);
+            }
         }
 
         public override void OnHide()

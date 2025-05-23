@@ -100,6 +100,7 @@ namespace Citizens
 
     public abstract class BusinessProperty
     {
+        public string Name { get; private set; }
         public Property Property { get; private set; }
         public JobBoard JobBoard { get; } = new JobBoard();
         public List<Employee> Employees { get; } = new List<Employee>();

@@ -8,7 +8,7 @@ namespace Map
 {
     public class Chunk
     {
-        public const int CityLayer = 3;
+        public const int CityLayer = 4;
         public CartonMap Map { get; private set; }
 
         public Vector2Int Pos { get; private set; }
